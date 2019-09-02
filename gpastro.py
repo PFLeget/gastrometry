@@ -1,6 +1,7 @@
 import numpy as np
 import copy
 import treecorr
+import treegp
 from astroeb import vcorr, xiB
 from sklearn.model_selection import train_test_split
 import pylab as plt
@@ -10,16 +11,42 @@ class gpastro(object):
     def __init__(self, u, v, du, dv, du_err, dv_err, 
                  mas=3600.*1e3, arcsec=3600., 
                  exp_id="", visit_id=""):
-        
+
         self.exp_id = exp_id
         self.visit_id = visit_id
 
         self.u = u * arcsec
         self.v = v * arcsec
+        self.coords = np.array([self.u, self.v]).T
         self.du = du * mas
         self.dv = dv * mas
         self.du_err = du_err * mas
         self.dv_err = dv_err * mas
+
+        # split training/validation
+        indice = np.linspace(0, len(self.u)-1, len(self.u)).astype(int)
+        indice_train, indice_test = train_test_split(indice, test_size=0.2, random_state=42)
+
+        self.u_train = self.u[indice_train]
+        self.u_test = self.u[indice_test]
+
+        self.v_train = self.v[indice_train]
+        self.v_test = self.v[indice_test]
+
+        self.coords_train = self.coords[indice_train]
+        self.coords_test = self.coords[indice_test]
+
+        self.du_train = self.du[indice_train]
+        self.du_test = self.du[indice_test]
+        
+        self.dv_train = self.dv[indice_train]
+        self.dv_test = self.dv[indice_test]
+
+        self.du_err_train = self.du_err[indice_train]
+        self.du_err_test = self.du_err[indice_test]
+        
+        self.dv_err_train = self.dv_err[indice_train]
+        self.dv_err_test = self.dv_err[indice_test]
 
         self.logr = None
         self.xie = None
@@ -71,6 +98,24 @@ class gpastro(object):
         #print "finish pcf fit"
         #self.stars_interp_validation = self.interp.interpolateList(self.stars_validation)
         #print "finish interp"
+
+        kernel = "20. * AnisotropicVonKarman(invLam=np.array([[1./1000**2,0],[0,1./1000**2]])) + 5."
+        gpu = treegp.GPInterpolation(kernel=kernel, optimize=True,
+                                     optimizer='two-pcf', anisotropic=True,
+                                     normalize=True, nbins=25, min_sep=0.,
+                                     max_sep=20.*60.)
+        gpu.initialize(self.coords_train, self.du_train, y_err=self.du_train)
+        gpu.solve()
+        self.du_test_predict = gpu.predict(self.coords_test, return_cov=False)
+
+        kernel = "20. * AnisotropicVonKarman(invLam=np.array([[1./1000**2,0],[0,1./1000**2]])) + 5."
+        gpv = treegp.GPInterpolation(kernel=kernel, optimize=True,
+                                     optimizer='two-pcf', anisotropic=True,
+                                     normalize=True, nbins=25, min_sep=0.,
+                                     max_sep=20.*60.)
+        gpv.initialize(self.coords_train, self.dv_train, y_err=self.dv_train)
+        gpv.solve()
+        self.dv_test_predict = gpv.predict(self.coords_test, return_cov=False)
         
     def plot_fields(self):
 
