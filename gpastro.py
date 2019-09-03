@@ -79,6 +79,167 @@ def plot_correlation_function(interp, save=False, rep='',
     if save:
         namefig = os.path.join(rep, '2PCF_anisotropic_'+NAME+'_'+specific_name_kernel+'.pdf')
         plt.savefig(namefig,transparent=True)
+
+
+def plot_gp_output(X_valid, Y_valid, Y_valid_interp, Y_err):
+
+    plt.figure(figsize=(16,7))
+    plt.subplots_adjust(wspace=0.2, left=0.07, right=0.98)
+    plt.subplot(1,2,1)
+    plt.scatter(X_valid[:,0], X_valid[:,1], c=Y_valid[:,0], 
+                s=80, cmap=plt.cm.seismic, vmin=-10, vmax=10)
+    cb = plt.colorbar()
+    cb.set_label('du (mas)', fontsize=20)
+    plt.xlabel('u (arcsec)', fontsize=20)
+    plt.ylabel('v (arcsec)', fontsize=20)
+    plt.title("%i | validation data"%int(exp), fontsize=20)
+    plt.subplot(1,2,2)
+    plt.scatter(X_valid[:,0], X_valid[:,1], c=Y_valid_interp[:,0], 
+                s=80, cmap=plt.cm.seismic, vmin=-10, vmax=10)
+    cb = plt.colorbar()
+    cb.set_label('du (mas)', fontsize=20)
+    plt.xlabel('u (arcsec)', fontsize=20)
+    plt.ylabel('v (arcsec)', fontsize=20)
+    plt.title("%i | gp prediction"%int(exp), fontsize=20)
+    plt.savefig('%i_du_validation_gp.pdf'%(exp))
+
+    
+    plt.figure(figsize=(16,7))
+    plt.subplots_adjust(wspace=0.2, left=0.07, right=0.98)
+    plt.subplot(1,2,1)
+    plt.scatter(X_valid[:,0], X_valid[:,1], c=Y_valid[:,1], 
+                s=80, cmap=plt.cm.seismic, vmin=-10, vmax=10)
+    cb = plt.colorbar()
+    cb.set_label('dv (mas)', fontsize=20)
+    plt.xlabel('u (arcsec)', fontsize=20)
+    plt.ylabel('v (arcsec)', fontsize=20)
+    plt.title("%i | validation data"%int(exp), fontsize=20)
+
+    plt.subplot(1,2,2)
+    plt.scatter(X_valid[:,0], X_valid[:,1], c=Y_valid_interp[:,1], 
+                s=80, cmap=plt.cm.seismic, vmin=-10, vmax=10)
+    cb = plt.colorbar()
+    cb.set_label('dv (mas) / gp prediction', fontsize=20)
+    plt.xlabel('u (arcsec)', fontsize=20)
+    plt.ylabel('v (arcsec)', fontsize=20)
+    plt.title("%i | gp prediction"%int(exp), fontsize=20)
+    plt.savefig('%i_dv_validation_gp.pdf'%(exp))
+
+    
+
+    fig = plt.figure(figsize=(13, 7))
+    plt.subplots_adjust(wspace=0.2, left=0.07, right=0.98)
+    quiver_dict = dict(alpha=1,
+                       angles='uv',
+                       headlength=1.e-10,  # Using zero emits divide-by-zero warnings.                                                              
+                       headwidth=0,
+                       headaxislength=0,
+                       minlength=0,
+                       pivot='middle',
+                       scale_units='xy',
+                       width=0.003,
+                       color='blue',
+                       scale=0.05)
+    ax1 = plt.subplot(1,2,1)
+    ax1.quiver(X_valid[:,0], X_valid[:,1], 
+               Y_valid[:,0], Y_valid[:,1], **quiver_dict)
+    ax1.quiver([1900],[2500],[10],[0], **quiver_dict)
+    ax1.text(2200,2500,"(10 mas)",fontsize=12)
+    ax1.set_title("%i"%int(exp)+ ' | validation data', fontsize=20)
+    ax1.set_xlabel('u (arcsec)', fontsize=20)
+    ax1.set_ylabel('v (arcsec)', fontsize=20)
+
+    ax2 = plt.subplot(1,2,2)
+    ax2.quiver(X_valid[:,0], X_valid[:,1], 
+               Y_valid_interp[:,0], Y_valid_interp[:,1], **quiver_dict)
+    ax2.set_title("%i"%int(exp)+ ' | gp prediction', fontsize=20)
+    ax2.set_xlabel('u (arcsec)', fontsize=20)
+    ax2.quiver([1900],[2500],[10],[0], **quiver_dict)
+    ax2.text(2200,2500,"(10 mas)",fontsize=12)
+    plt.savefig('%i_quiver_validation_gp.pdf'%(exp))
+
+    plt.figure(figsize=(13,6))
+    plt.subplots_adjust(wspace=0.3, left=0.05, right=0.95)
+    plt.subplot(1,2,1)
+    hist_result = plt.hist(Y_valid[:,0], bins = np.linspace(-20,20,20), 
+                           histtype='step', color='b', lw=3, label="data")
+    hist_result = plt.hist(Y_valid_interp[:,0], bins = np.linspace(-20,20,20), 
+                           histtype='step', color='r', lw=3, label="gp predict")
+    plt.title("data (Mean = %.2f ; STD = %.2f) \n gp predict (Mean = %.2f ; STD = %.2f)"%((np.mean(Y_valid[:,0]), np.std(Y_valid[:,0]),
+                                                                                           np.mean(Y_valid_interp[:,0]), np.std(Y_valid_interp[:,0]))), fontsize=18)
+    plt.xlabel('du (mas)', fontsize=16)
+    plt.legend(fontsize=14)
+
+    plt.subplot(1,2,2)
+    hist_result = plt.hist(Y_valid[:,1], bins = np.linspace(-20,20,20), 
+                           histtype='step', color='b', lw=3, label="data")
+    hist_result = plt.hist(Y_valid_interp[:,1], bins = np.linspace(-20,20,20), 
+                           histtype='step', color='r', lw=3, label="gp predict")
+    plt.title("data (Mean = %.2f ; STD = %.2f) \n gp predict (Mean = %.2f ; STD = %.2f)"%((np.mean(Y_valid[:,1]), np.std(Y_valid[:,1]),
+                                                                                           np.mean(Y_valid_interp[:,1]), np.std(Y_valid_interp[:,1]))), fontsize=18)
+    plt.xlabel('dv (mas)', fontsize=16)
+    plt.legend(fontsize=14)
+    plt.savefig('%i_distribution_param_validation_gp.pdf'%(exp))
+
+#############################################
+
+    plt.figure(figsize=(13,6))
+    plt.subplots_adjust(wspace=0.3, left=0.05, right=0.95)
+    plt.subplot(1,2,1)
+    residuals = Y_valid[:,0] - Y_valid_interp[:,0]
+    hist_result = plt.hist(residuals, bins = np.linspace(-20,20,20), 
+                           histtype='step', color='b', lw=3, label="residuals")
+    plt.title("residuals (Mean = %.2f ; STD = %.2f)"%((np.mean(residuals), np.std(residuals))), fontsize=18)
+    plt.xlabel('residuals du (mas)', fontsize=16)
+    plt.legend(fontsize=14)
+
+    plt.subplot(1,2,2)
+    residuals = Y_valid[:,1] - Y_valid_interp[:,1]
+    hist_result = plt.hist(residuals, bins = np.linspace(-20,20,20), 
+                           histtype='step', color='b', lw=3, label="residuals")
+    plt.title("residuals (Mean = %.2f ; STD = %.2f)"%((np.mean(residuals), np.std(residuals))), fontsize=18)
+    plt.xlabel('residuals dv (mas)', fontsize=16)
+    plt.legend(fontsize=14)
+
+    plt.savefig('%i_distribution_residuals_validation_gp.pdf'%(exp))
+
+    plt.figure(figsize=(13,6))
+    plt.subplots_adjust(wspace=0.3, left=0.05, right=0.95)
+    plt.subplot(1,2,1)
+    pull = (Y_valid[:,0] - Y_valid_interp[:,0]) / Y_err[:,0]
+    hist_result = plt.hist(pull, bins = np.linspace(-6,6,30), histtype='step', color='b', lw=3)
+    plt.title("Mean = %.2f ; STD = %.2f"%((np.mean(pull), np.std(pull))), fontsize=18)
+    plt.xlabel('pull du', fontsize=16) 
+
+    plt.subplot(1,2,2)
+    pull = (Y_valid[:,1] - Y_valid_interp[:,1]) / Y_err[:,1]
+    hist_result = plt.hist(pull, bins = np.linspace(-6,6,30), histtype='step', color='b', lw=3)
+    plt.title("Mean = %.2f ; STD = %.2f"%((np.mean(pull), np.std(pull))), fontsize=18)
+    plt.xlabel('pull dv', fontsize=16)
+
+    plt.savefig('%i_distribution_pull_residuals_gp.pdf'%(exp))
+
+
+    plt.figure(figsize=(16,7))
+    plt.subplots_adjust(wspace=0.2, left=0.07, right=0.98)
+    plt.subplot(1,2,1)
+    plt.scatter(X_valid[:,0], X_valid[:,1], c=Y_valid[:,0]-Y_valid_interp[:,0], 
+                s=80, cmap=plt.cm.seismic, vmin=-10, vmax=10)
+    cb = plt.colorbar()
+    cb.set_label('residuals du (mas)', fontsize=20)
+    plt.xlabel('u (arcsec)', fontsize=20)
+    plt.ylabel('v (arcsec)', fontsize=20)
+    plt.title(int(exp), fontsize=20)
+
+    plt.subplot(1,2,2)
+    plt.scatter(X_valid[:,0], X_valid[:,1], c=Y_valid[:,1]-Y_valid_interp[:,1], 
+                s=80, cmap=plt.cm.seismic, vmin=-10, vmax=10)
+    cb = plt.colorbar()
+    cb.set_label('residuals dv (mas)', fontsize=20)
+    plt.xlabel('u (arcsec)', fontsize=20)
+    plt.ylabel('v (arcsec)', fontsize=20)
+    plt.title(int(exp), fontsize=20)
+    plt.savefig('%i_distribution_residuals_fov_gp.pdf'%(exp))
             
 
 
@@ -186,9 +347,13 @@ class gpastro(object):
         self.dv_test_predict = gpv.predict(self.coords_test, return_cov=False)
         self.gpv = gpv
     
-    def plot_2pcf_fit(self):
+    def plot_gaussian_process(self):
         plot_correlation_function(self.gpu._optimizer, NAME='du')
         plot_correlation_function(self.gpv._optimizer, NAME='dv')
+        Y_valid = np.array([self.du_test, self.dv_test]).T
+        Y_valid_interp = np.array([self.du_test_predict, self.dv_test_predict]).T
+        Y_valid_err =  np.array([self.du_err_test,  self.dv_err_test]).T
+        plot_gp_output(self.coords_test, Y_valid, Y_valid_interp, Y_valid_err)
 
     def plot_fields(self):
 
@@ -310,6 +475,9 @@ if __name__ == "__main__":
     Filtre &= (A[:,21] == exp)
 
     print "gastro start"
+    #(self, u, v, du, dv, du_err, dv_err,
+    # mas=3600.*1e3, arcsec=3600.,
+    # exp_id="", visit_id="")
     gp = gpastro(A[:,8][Filtre], A[:,9][Filtre], 
                  A[:,10][Filtre], A[:,11][Filtre], 
                  A[:,12][Filtre], A[:,13][Filtre],
@@ -323,4 +491,4 @@ if __name__ == "__main__":
     gp.plot_fields()
     gp.plot_eb_mode()
     gp.plot_2pcf()
-    gp.plot_2pcf_fit()
+    gp.plot_gaussian_process()
