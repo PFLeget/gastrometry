@@ -17,12 +17,24 @@ class comp_mean(object):
                                      statistics=self.statistics)
         self.mean_v = treegp.meanify(bin_spacing=self.bin_spacing, 
                                      statistics=self.statistics)
+        self.nstars = 0
+        self.nvisits = 0
 
     def load(self):
         for night in self.nights:
-            print night
             A = np.loadtxt(night)
             Filtre = (A[:,4]<-6)
+
+            exp_id = {}
+            for exp in A[:,21]:
+                if exp not in exp_id:
+                    exp_id.update({exp:None})
+            self.nvisits += len(exp_id.keys())
+            self.nstars += np.sum(Filtre)
+            print night
+            print "total visit: ", self.nvisits
+            print "total object: ", self.nstars
+            print ""
 
             coords = np.array([A[:,8][Filtre] * self.arcsec, A[:,9][Filtre] * self.arcsec]).T
             du = A[:,10][Filtre] * self.mas
@@ -55,14 +67,17 @@ class comp_mean(object):
 
 if __name__ == "__main__":
 
-    nights = ['../../Downloads/residuals4pfl/57402-z/res-meas.list',
-              '../../Downloads/residuals4pfl/57755-z/res-meas.list',
-              '../../Downloads/residuals4pfl/58131-z/res-meas.list']
+    #nights = ['../../Downloads/residuals4pfl/57402-z/res-meas.list',
+    #          '../../Downloads/residuals4pfl/57755-z/res-meas.list',
+    #          '../../Downloads/residuals4pfl/58131-z/res-meas.list']
+
+    import glob
+    nights = glob.glob('/sps/snls13/HSC/prod.2019-04/dbimage_35UN7JY/fitastrom_ULHBNSI/data/*z/res-meas.list')
 
     cm = comp_mean(nights, mas=3600.*1e3, arcsec=3600.,
-                   bin_spacing=30., statistics='mean')
+                   bin_spacing=10., statistics='mean')
     cm.load()
     cm.comp_mean()
     cm.plot(cmap=None)
-    cm.save_mean(directory='', name_outputs=['mean_gp_du.fits',
-                                             'mean_gp_dv.fits'])
+    cm.save_mean(directory='', name_outputs=['mean_gp_du_z.fits',
+                                             'mean_gp_dv_z.fits'])
