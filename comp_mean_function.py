@@ -1,6 +1,7 @@
 import numpy as np
 import treegp
 import pylab as plt
+import fitsio
 
 class comp_mean(object):
 
@@ -65,19 +66,39 @@ class comp_mean(object):
         self.mean_u.save_results(directory=directory, name_output=name_outputs[0])
         self.mean_v.save_results(directory=directory, name_output=name_outputs[1])
 
+def plot_mean(fits_file, cmap=None, MAX=2):
+
+    mean = fitsio.read(fits_file)
+    y0 = mean['PARAMS0'][0]
+    coord0 = mean['COORDS0'][0]
+
+    plt.figure(figsize=(12,10))
+    plt.scatter(coord0[:,0], coord0[:,1],
+                c=y0, cmap = cmap, vmin=-MAX,vmax=MAX,
+                lw=0, s=8)
+    plt.colorbar()
+
+    plt.figure()
+    plt.hist(y0, bins=np.linspace(-6, 6, 200))
+    plt.title("mean=%f, std=%f"%((np.mean(y0), np.std(y0))))
+    print len(y0)
+
 if __name__ == "__main__":
 
     #nights = ['../../Downloads/residuals4pfl/57402-z/res-meas.list',
     #          '../../Downloads/residuals4pfl/57755-z/res-meas.list',
     #          '../../Downloads/residuals4pfl/58131-z/res-meas.list']
 
-    import glob
-    nights = glob.glob('/sps/snls13/HSC/prod.2019-04/dbimage_35UN7JY/fitastrom_ULHBNSI/data/*z/res-meas.list')
+    ##import glob
+    ##nights = glob.glob('/sps/snls13/HSC/prod.2019-04/dbimage_35UN7JY/fitastrom_ULHBNSI/data/*z/res-meas.list')
 
-    cm = comp_mean(nights, mas=3600.*1e3, arcsec=3600.,
-                   bin_spacing=10., statistics='mean')
-    cm.load()
-    cm.comp_mean()
-    cm.plot(cmap=None)
-    cm.save_mean(directory='', name_outputs=['mean_gp_du_z.fits',
-                                             'mean_gp_dv_z.fits'])
+    ##cm = comp_mean(nights, mas=3600.*1e3, arcsec=3600.,
+    ##               bin_spacing=10., statistics='mean')
+    ##cm.load()
+    ##cm.comp_mean()
+    ##cm.plot(cmap=None)
+    ##cm.save_mean(directory='', name_outputs=['mean_gp_du_z.fits',
+    ##                                         'mean_gp_dv_z.fits'])
+
+    plot_mean('mean_gp_du_z_new.fits', cmap=None, MAX=1)
+    plot_mean('mean_gp_dv_z_new.fits', cmap=None, MAX=1)

@@ -346,6 +346,22 @@ class gpastro(object):
         gpv.solve()
         self.dv_test_predict = gpv.predict(self.coords_test, return_cov=False)
         self.gpv = gpv
+
+        X_valid = self.coords_test
+        Y_valid = np.array([self.du_test, self.dv_test]).T
+        Y_valid_interp = np.array([self.du_test_predict, self.dv_test_predict]).T
+
+        self.logr_residuals, self.xiplus_residuals, self.ximinus_residuals, self.xicross_residuals, xiz2 = vcorr(X_valid[:,0]/3600., X_valid[:,1]/3600., 
+                                                                                                                 Y_valid[:,0]-Y_valid_interp[:,0], 
+                                                                                                                 Y_valid[:,1]-Y_valid_interp[:,1])
+        self.xib_residuals = xiB(self.logr_residuals, self.xiplus_residuals, self.ximinus_residuals)
+        self.xie_residuals = self.xiplus_residuals - self.xib_residuals
+
+        self.logr_test, self.xiplus_test, self.ximinus_test, self.xicross_test, xiz2 = vcorr(X_valid[:,0]/3600., X_valid[:,1]/3600., 
+                                                                                             Y_valid[:,0], Y_valid[:,1])
+        self.xib_test = xiB(self.logr_test, self.xiplus_test, self.ximinus_test)
+        self.xie_test = self.xiplus_test - self.xib_test
+
     
     def plot_gaussian_process(self):
         plot_correlation_function(self.gpu._optimizer, NAME='du')
@@ -354,6 +370,39 @@ class gpastro(object):
         Y_valid_interp = np.array([self.du_test_predict, self.dv_test_predict]).T
         Y_valid_err =  np.array([self.du_err_test,  self.dv_err_test]).T
         plot_gp_output(self.coords_test, Y_valid, Y_valid_interp, Y_valid_err)
+        self.eb_after_gp()
+
+    def eb_after_gp(self):
+
+        plt.figure(figsize=(12,8))
+        plt.scatter(np.exp(self.logr_test), self.xie_test, c='b', label='E-mode of data (validation)')
+        plt.scatter(np.exp(self.logr_test), self.xib_test, c='r', label='B-mode of data (validation)')
+        plt.plot(np.exp(self.logr_test), np.zeros_like(self.logr_test), 'k--', zorder=0)
+        plt.ylim(-40,60)
+        plt.xlim(0.005, 1.5)
+        plt.xscale('log')
+        plt.xticks(size=16)
+        plt.yticks(size=16)
+        plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
+        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
+        plt.title(int(self.exp_id), fontsize=20)
+        plt.legend(loc=1, fontsize=16)
+        plt.savefig('%s_eb_mode_validation.pdf'%(self.exp_id))
+
+        plt.figure(figsize=(12,8))
+        plt.scatter(np.exp(self.logr_residuals), self.xie_residuals, c='b', label='E-mode of residuals (data)')
+        plt.scatter(np.exp(self.logr_residuals), self.xib_residuals, c='r', label='B-mode of residuals (data)')
+        plt.plot(np.exp(self.logr_residuals), np.zeros_like(self.logr_residuals), 'k--', zorder=0)
+        plt.ylim(-40,60)
+        plt.xlim(0.005, 1.5)
+        plt.xscale('log')
+        plt.xticks(size=16)
+        plt.yticks(size=16)
+        plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
+        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
+        plt.title(int(self.exp_id), fontsize=20)
+        plt.legend(loc=1, fontsize=16)
+        plt.savefig('%s_eb_mode_validation_residuals.pdf'%(self.exp_id))
 
     def plot_fields(self):
 
