@@ -6,6 +6,82 @@ from astroeb import vcorr, xiB
 from sklearn.model_selection import train_test_split
 import pylab as plt
 
+def return_var_map(weight, xi):
+    N = int(np.sqrt(len(xi)))
+    var = np.diag(np.linalg.inv(weight))
+    VAR = np.zeros(N*N)
+    I = 0
+    for i in range(N*N):
+        if xi[i] !=0:
+            VAR[i] = var[I]
+            I+=1
+        if I == len(var):
+            break
+    VAR = VAR.reshape(N,N) + np.flipud(np.fliplr(VAR.reshape(N,N)))
+    if N%2 == 1:
+        VAR[N/2, N/2] /= 2. 
+    return VAR
+
+def plot_correlation_function(interp, save=False, rep='', 
+                              specific_name_kernel='VK', NAME='du'):
+
+    EXT = [np.min(interp._2pcf_dist[:,0]/60.), np.max(interp._2pcf_dist[:,0]/60.), 
+           np.min(interp._2pcf_dist[:,1]/60.), np.max(interp._2pcf_dist[:,1]/60.)]
+    CM = plt.cm.seismic
+
+    MAX = np.max(interp._2pcf)
+    N = int(np.sqrt(len(interp._2pcf)))
+    plt.figure(figsize=(14,5) ,frameon=False)
+    plt.gca().patch.set_alpha(0)
+    plt.subplots_adjust(wspace=0.5,left=0.07,right=0.95, bottom=0.15,top=0.85)
+    plt.suptitle(NAME+' anisotropy 2-PCF', fontsize=16)
+    plt.subplot(1,3,1)
+    plt.imshow(interp._2pcf.reshape(N,N), extent=EXT, interpolation='nearest', origin='lower', 
+               vmin=-MAX, vmax=MAX, cmap=CM)
+    cbar = plt.colorbar()
+    cbar.formatter.set_powerlimits((0, 0))
+    cbar.update_ticks()
+    cbar.set_label('$\\xi$',fontsize=20)
+    plt.xlabel('$\\theta_X$ (arcmin)',fontsize=20)
+    plt.ylabel('$\\theta_Y$ (arcmin)',fontsize=20)
+    plt.title('Measured 2-PCF',fontsize=16)
+    
+    plt.subplot(1,3,2)
+    plt.imshow(interp._2pcf_fit.reshape(N,N), extent=EXT, interpolation='nearest', 
+               origin='lower',vmin=-MAX,vmax=MAX, cmap=CM)
+    cbar = plt.colorbar()
+    cbar.formatter.set_powerlimits((0, 0))
+    cbar.update_ticks()
+    cbar.set_label('$\\xi\'$',fontsize=20)
+    plt.xlabel('$\\theta_X$ (arcmin)',fontsize=20)
+    plt.ylabel('$\\theta_Y$ (arcmin)',fontsize=20)
+    
+    var = return_var_map(interp._2pcf_weight, interp._2pcf)
+    cm_residual = plt.matplotlib.cm.get_cmap('RdBu',10)
+    Res = interp._2pcf[interp._2pcf_mask] - interp._2pcf_fit[interp._2pcf_mask]
+    chi2 = Res.dot(interp._2pcf_weight).dot(Res)
+    dof = np.sum(interp._2pcf_mask) - 4.
+    
+    pull = (interp._2pcf.reshape(N,N) - interp._2pcf_fit.reshape(N,N)) / np.sqrt(var)
+    
+    plt.title('Fitted 2-PCF'%(chi2/dof),fontsize=16)
+
+    plt.subplot(1,3,3)
+    
+    plt.imshow(pull, extent=EXT, interpolation='nearest', origin='lower', vmin=-5., vmax=+5., cmap=cm_residual)
+    cbar = plt.colorbar()
+    cbar.formatter.set_powerlimits((0, 0))
+    cbar.update_ticks()
+    cbar.set_label('$\\frac{\\xi-\\xi\'}{\sigma_{\\xi}}$',fontsize=20)
+    plt.xlabel('$\\theta_X$ (arcmin)',fontsize=20)
+    plt.ylabel('$\\theta_Y$ (arcmin)',fontsize=20)
+    plt.title('Pull',fontsize=16)
+    if save:
+        namefig = os.path.join(rep, '2PCF_anisotropic_'+NAME+'_'+specific_name_kernel+'.pdf')
+        plt.savefig(namefig,transparent=True)
+            
+
+
 class gpastro(object):
 
     def __init__(self, u, v, du, dv, du_err, dv_err, 
@@ -88,39 +164,36 @@ class gpastro(object):
 
     def gp_interp(self):
 
-        #self.build_stars()
-        #kernel = "20. * AnisotropicVonKarman(invLam=np.array([[1./1000**2,0],[0,1./1000**2]])) + 5."
-        #self.interp = piff.GPInterp2pcf(kernel=kernel, optimize=True, anisotropic=True, 
-        #                                npca=0, nbins=25, min_sep=0., max_sep=20.*60., white_noise=0.)
-        #self.interp.initialize(self.stars_training)
-        #print "finish loading"
-        #self.interp.solve(self.stars_training)
-        #print "finish pcf fit"
-        #self.stars_interp_validation = self.interp.interpolateList(self.stars_validation)
-        #print "finish interp"
-
+        print "start gp interp"
         kernel = "20. * AnisotropicVonKarman(invLam=np.array([[1./1000**2,0],[0,1./1000**2]])) + 5."
         gpu = treegp.GPInterpolation(kernel=kernel, optimize=True,
                                      optimizer='two-pcf', anisotropic=True,
                                      normalize=True, nbins=25, min_sep=0.,
                                      max_sep=20.*60.)
-        gpu.initialize(self.coords_train, self.du_train, y_err=self.du_train)
+        gpu.initialize(self.coords_train, self.du_train, y_err=self.du_err_train)
         gpu.solve()
         self.du_test_predict = gpu.predict(self.coords_test, return_cov=False)
-
+        self.gpu = gpu
+        
+        print "I did half"
         kernel = "20. * AnisotropicVonKarman(invLam=np.array([[1./1000**2,0],[0,1./1000**2]])) + 5."
         gpv = treegp.GPInterpolation(kernel=kernel, optimize=True,
                                      optimizer='two-pcf', anisotropic=True,
                                      normalize=True, nbins=25, min_sep=0.,
                                      max_sep=20.*60.)
-        gpv.initialize(self.coords_train, self.dv_train, y_err=self.dv_train)
+        gpv.initialize(self.coords_train, self.dv_train, y_err=self.dv_err_train)
         gpv.solve()
         self.dv_test_predict = gpv.predict(self.coords_test, return_cov=False)
-        
+        self.gpv = gpv
+    
+    def plot_2pcf_fit(self):
+        plot_correlation_function(self.gpu._optimizer, NAME='du')
+        plot_correlation_function(self.gpv._optimizer, NAME='dv')
+
     def plot_fields(self):
 
         MAX = 3.*np.std(self.du)
-        plt.figure(figsize=(10,10))
+        plt.figure(figsize=(12,10))
         plt.subplots_adjust(left=0.14, right=0.94)
         plt.scatter(self.u, self.v, c=self.du, 
                     s=40, cmap=plt.cm.seismic, 
@@ -134,7 +207,7 @@ class gpastro(object):
         plt.yticks(size=16)
         plt.title(int(exp), fontsize=20)
     
-        plt.figure(figsize=(10,10))
+        plt.figure(figsize=(12,10))
         plt.subplots_adjust(left=0.14, right=0.94, top=0.95)
         plt.scatter(self.u, self.v, c=self.dv, 
                     s=40, cmap=plt.cm.seismic, 
@@ -148,7 +221,7 @@ class gpastro(object):
         plt.yticks(size=16)
         plt.title(int(exp), fontsize=20)
 
-        fig = plt.figure(figsize=(8,10))
+        fig = plt.figure(figsize=(12,10))
         plt.subplots_adjust(left=0.16, right=0.96, top=0.98)
         ax = plt.gca()
         quiver_dict = dict(alpha=1,
@@ -225,7 +298,7 @@ class gpastro(object):
 
 if __name__ == "__main__":
 
-    A = np.loadtxt('data/58131-z/res-meas.list')
+    A = np.loadtxt('../../Downloads/residuals4pfl/58131-z/res-meas.list')
     exp_id = {}
     for exp in A[:,21]:
         if exp not in exp_id:
@@ -244,9 +317,10 @@ if __name__ == "__main__":
                  exp_id="137108", visit_id="58131-z")
     gp.comp_eb()
     gp.comp_xi()
+    print "start gp"
     gp.gp_interp()
     print "do plot"
     gp.plot_fields()
     gp.plot_eb_mode()
     gp.plot_2pcf()
-    
+    gp.plot_2pcf_fit()
