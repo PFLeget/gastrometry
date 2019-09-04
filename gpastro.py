@@ -386,7 +386,9 @@ class gpastro(object):
                                              'gpu.2pcf_fit':gpu._optimizer._2pcf_fit,
                                              'gpu.2pcf_mask':gpu._optimizer._2pcf_mask,
                                              'gpu.kernel':gpu._optimizer._kernel,
-                                             'gpv.du_test_predict':self.du_test_predict})
+                                             'gpu.du_test_predict':self.du_test_predict,
+                                             'gpu.du_test':self.du_test,
+                                             'gpu.coords_test':self.coords_test})
         
         print "I did half"
         kernel = "20. * AnisotropicVonKarman(invLam=np.array([[1./1000**2,0],[0,1./1000**2]])) + 5."
@@ -405,7 +407,9 @@ class gpastro(object):
                                              'gpv.2pcf_fit':gpv._optimizer._2pcf_fit,
                                              'gpv.2pcf_mask':gpv._optimizer._2pcf_mask,
                                              'gpv.kernel':gpv._optimizer._kernel,
-                                             'gpv.dv_test_predict':self.dv_test_predict})
+                                             'gpv.dv_test_predict':self.dv_test_predict,
+                                             'gpu.dv_test':self.dv_test,
+                                             'gpu.coords_test':self.coords_test})
 
         X_valid = self.coords_test
         Y_valid = np.array([self.du_test, self.dv_test]).T
