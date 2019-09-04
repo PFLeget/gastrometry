@@ -5,6 +5,7 @@ import treegp
 from astroeb import vcorr, xiB
 from sklearn.model_selection import train_test_split
 import pylab as plt
+import os
 
 def return_var_map(weight, xi):
     N = int(np.sqrt(len(xi)))
@@ -23,7 +24,7 @@ def return_var_map(weight, xi):
     return VAR
 
 def plot_correlation_function(interp, save=False, rep='', 
-                              specific_name_kernel='VK', NAME='du'):
+                              specific_name_kernel='VK', NAME='du', exp='0'):
 
     EXT = [np.min(interp._2pcf_dist[:,0]/60.), np.max(interp._2pcf_dist[:,0]/60.), 
            np.min(interp._2pcf_dist[:,1]/60.), np.max(interp._2pcf_dist[:,1]/60.)]
@@ -77,11 +78,10 @@ def plot_correlation_function(interp, save=False, rep='',
     plt.ylabel('$\\theta_Y$ (arcmin)',fontsize=20)
     plt.title('Pull',fontsize=16)
     if save:
-        namefig = os.path.join(rep, '2PCF_anisotropic_'+NAME+'_'+specific_name_kernel+'.pdf')
+        namefig = os.path.join(rep, '2PCF_anisotropic_'+NAME+'_'+specific_name_kernel+'_%i.pdf'%(int(exp)))
         plt.savefig(namefig,transparent=True)
 
-
-def plot_gp_output(X_valid, Y_valid, Y_valid_interp, Y_err):
+def plot_gp_output(X_valid, Y_valid, Y_valid_interp, Y_err, rep='', save=False, exp='0'):
 
     plt.figure(figsize=(16,7))
     plt.subplots_adjust(wspace=0.2, left=0.07, right=0.98)
@@ -101,8 +101,9 @@ def plot_gp_output(X_valid, Y_valid, Y_valid_interp, Y_err):
     plt.xlabel('u (arcsec)', fontsize=20)
     plt.ylabel('v (arcsec)', fontsize=20)
     plt.title("%i | gp prediction"%int(exp), fontsize=20)
-    plt.savefig('%i_du_validation_gp.pdf'%(exp))
-
+    if save:
+        namefig = os.path.join(rep, 'scalar_du_test_validation_%i.pdf'%int(exp))
+        plt.savefig(namefig,transparent=True)
     
     plt.figure(figsize=(16,7))
     plt.subplots_adjust(wspace=0.2, left=0.07, right=0.98)
@@ -123,8 +124,9 @@ def plot_gp_output(X_valid, Y_valid, Y_valid_interp, Y_err):
     plt.xlabel('u (arcsec)', fontsize=20)
     plt.ylabel('v (arcsec)', fontsize=20)
     plt.title("%i | gp prediction"%int(exp), fontsize=20)
-    plt.savefig('%i_dv_validation_gp.pdf'%(exp))
-
+    if save:
+        namefig = os.path.join(rep, 'scalar_dv_test_validation_%i.pdf'%int(exp))
+        plt.savefig(namefig,transparent=True)
     
 
     fig = plt.figure(figsize=(13, 7))
@@ -156,7 +158,9 @@ def plot_gp_output(X_valid, Y_valid, Y_valid_interp, Y_err):
     ax2.set_xlabel('u (arcsec)', fontsize=20)
     ax2.quiver([1900],[2500],[10],[0], **quiver_dict)
     ax2.text(2200,2500,"(10 mas)",fontsize=12)
-    plt.savefig('%i_quiver_validation_gp.pdf'%(exp))
+    if save:
+        namefig = os.path.join(rep, 'quiver_dudv_test_validation_%i.pdf'%int(exp))
+        plt.savefig(namefig,transparent=True)
 
     plt.figure(figsize=(13,6))
     plt.subplots_adjust(wspace=0.3, left=0.05, right=0.95)
@@ -179,9 +183,9 @@ def plot_gp_output(X_valid, Y_valid, Y_valid_interp, Y_err):
                                                                                            np.mean(Y_valid_interp[:,1]), np.std(Y_valid_interp[:,1]))), fontsize=18)
     plt.xlabel('dv (mas)', fontsize=16)
     plt.legend(fontsize=14)
-    plt.savefig('%i_distribution_param_validation_gp.pdf'%(exp))
-
-#############################################
+    if save:
+        namefig = os.path.join(rep, 'distribution_param_validation_gp_%i.pdf'%int(exp))
+        plt.savefig(namefig,transparent=True)
 
     plt.figure(figsize=(13,6))
     plt.subplots_adjust(wspace=0.3, left=0.05, right=0.95)
@@ -200,8 +204,9 @@ def plot_gp_output(X_valid, Y_valid, Y_valid_interp, Y_err):
     plt.title("residuals (Mean = %.2f ; STD = %.2f)"%((np.mean(residuals), np.std(residuals))), fontsize=18)
     plt.xlabel('residuals dv (mas)', fontsize=16)
     plt.legend(fontsize=14)
-
-    plt.savefig('%i_distribution_residuals_validation_gp.pdf'%(exp))
+    if save:
+        namefig = os.path.join(rep, 'distribution_residuals_validation_gp_%i.pdf'%int(exp))
+        plt.savefig(namefig,transparent=True)
 
     plt.figure(figsize=(13,6))
     plt.subplots_adjust(wspace=0.3, left=0.05, right=0.95)
@@ -216,9 +221,9 @@ def plot_gp_output(X_valid, Y_valid, Y_valid_interp, Y_err):
     hist_result = plt.hist(pull, bins = np.linspace(-6,6,30), histtype='step', color='b', lw=3)
     plt.title("Mean = %.2f ; STD = %.2f"%((np.mean(pull), np.std(pull))), fontsize=18)
     plt.xlabel('pull dv', fontsize=16)
-
-    plt.savefig('%i_distribution_pull_residuals_gp.pdf'%(exp))
-
+    if save:
+        namefig = os.path.join(rep, 'distribution_pull_validation_gp_%i.pdf'%int(exp))
+        plt.savefig(namefig,transparent=True)
 
     plt.figure(figsize=(16,7))
     plt.subplots_adjust(wspace=0.2, left=0.07, right=0.98)
@@ -239,18 +244,20 @@ def plot_gp_output(X_valid, Y_valid, Y_valid_interp, Y_err):
     plt.xlabel('u (arcsec)', fontsize=20)
     plt.ylabel('v (arcsec)', fontsize=20)
     plt.title(int(exp), fontsize=20)
-    plt.savefig('%i_distribution_residuals_fov_gp.pdf'%(exp))
-            
-
+    if save:
+        namefig = os.path.join(rep, 'distribution_residuals_validation_fov_gp_%i.pdf'%int(exp))
+        plt.savefig(namefig, transparent=True)
 
 class gpastro(object):
 
     def __init__(self, u, v, du, dv, du_err, dv_err, 
                  mas=3600.*1e3, arcsec=3600., 
-                 exp_id="", visit_id=""):
+                 exp_id="", visit_id="", rep="", save=False):
 
         self.exp_id = exp_id
         self.visit_id = visit_id
+        self.rep = rep
+        self.save = save
 
         self.u = u * arcsec
         self.v = v * arcsec
@@ -295,14 +302,14 @@ class gpastro(object):
         self.xi_dudv = None
 
     def comp_eb(self):
-        
+
         self.logr, xiplus, ximinus, xicross, xiz2 = vcorr(self.u/3600., self.v/3600., 
                                                           self.du, self.dv)
         self.xib = xiB(self.logr, xiplus, ximinus)
         self.xie = xiplus - self.xib
 
     def comp_xi(self):
-        
+
         cat_du = treecorr.Catalog(x=self.u, y=self.v, 
                                   k=(self.du-np.mean(self.du)), w=1./self.du_err**2)
         cat_dv = treecorr.Catalog(x=self.u, y=self.v, 
@@ -362,17 +369,7 @@ class gpastro(object):
         self.xib_test = xiB(self.logr_test, self.xiplus_test, self.ximinus_test)
         self.xie_test = self.xiplus_test - self.xib_test
 
-    
-    def plot_gaussian_process(self):
-        plot_correlation_function(self.gpu._optimizer, NAME='du')
-        plot_correlation_function(self.gpv._optimizer, NAME='dv')
-        Y_valid = np.array([self.du_test, self.dv_test]).T
-        Y_valid_interp = np.array([self.du_test_predict, self.dv_test_predict]).T
-        Y_valid_err =  np.array([self.du_err_test,  self.dv_err_test]).T
-        plot_gp_output(self.coords_test, Y_valid, Y_valid_interp, Y_valid_err)
-        self.eb_after_gp()
-
-    def eb_after_gp(self):
+    def eb_after_gp(self, rep='', save=False, exp="0"):
 
         plt.figure(figsize=(12,8))
         plt.scatter(np.exp(self.logr_test), self.xie_test, c='b', label='E-mode of data (validation)')
@@ -387,7 +384,9 @@ class gpastro(object):
         plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
         plt.title(int(self.exp_id), fontsize=20)
         plt.legend(loc=1, fontsize=16)
-        plt.savefig('%s_eb_mode_validation.pdf'%(self.exp_id))
+        if save:
+            namefig = os.path.join(rep, 'eb_mode_validation_%i.pdf'%int(exp))
+            plt.savefig(namefig, transparent=True)
 
         plt.figure(figsize=(12,8))
         plt.scatter(np.exp(self.logr_residuals), self.xie_residuals, c='b', label='E-mode of residuals (data)')
@@ -402,9 +401,11 @@ class gpastro(object):
         plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
         plt.title(int(self.exp_id), fontsize=20)
         plt.legend(loc=1, fontsize=16)
-        plt.savefig('%s_eb_mode_validation_residuals.pdf'%(self.exp_id))
+        if save:
+            namefig = os.path.join(rep, 'eb_mode_validation_residuals_%i.pdf'%int(exp))
+            plt.savefig(namefig, transparent=True)
 
-    def plot_fields(self):
+    def plot_fields(self, rep='', save=False, exp="0"):
 
         MAX = 3.*np.std(self.du)
         plt.figure(figsize=(12,10))
@@ -420,6 +421,9 @@ class gpastro(object):
         plt.xticks(size=16)
         plt.yticks(size=16)
         plt.title(int(exp), fontsize=20)
+        if save:
+            namefig = os.path.join(rep, 'du_fov_%i.pdf'%int(exp))
+            plt.savefig(namefig, transparent=True)
     
         plt.figure(figsize=(12,10))
         plt.subplots_adjust(left=0.14, right=0.94, top=0.95)
@@ -434,6 +438,9 @@ class gpastro(object):
         plt.xticks(size=16)
         plt.yticks(size=16)
         plt.title(int(exp), fontsize=20)
+        if save:
+            namefig = os.path.join(rep, 'dv_fov_%i.pdf'%int(exp))
+            plt.savefig(namefig, transparent=True)
 
         fig = plt.figure(figsize=(12,10))
         plt.subplots_adjust(left=0.16, right=0.96, top=0.98)
@@ -456,8 +463,11 @@ class gpastro(object):
         plt.ylabel('v (arcsec)', fontsize=20)
         plt.xticks(size=16)
         plt.yticks(size=16)
+        if save:
+            namefig = os.path.join(rep, 'quiver_dudv_fov_%i.pdf'%int(exp))
+            plt.savefig(namefig, transparent=True)
 
-    def plot_eb_mode(self):
+    def plot_eb_mode(self, rep='', save=False, exp="0"):
 
         plt.figure(figsize=(10,6))
         plt.subplots_adjust(bottom=0.12, top=0.95, right=0.99)
@@ -478,8 +488,11 @@ class gpastro(object):
         plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
         plt.title('%s %s'%((self.visit_id, self.exp_id)), fontsize=20)
         plt.legend(loc=1, fontsize=16)
+        if save:
+            namefig = os.path.join(rep, 'eb_mode_%i.pdf'%int(exp))
+            plt.savefig(namefig, transparent=True)
 
-    def plot_2pcf(self):
+    def plot_2pcf(self, rep='', save=False, exp="0"):
 
         cb_label = ['$\\xi_{du,du}$ (mas$^2$)', 
                     '$\\xi_{dv,dv}$ (mas$^2$)', 
@@ -488,7 +501,6 @@ class gpastro(object):
 
         I = 1
         plt.figure(figsize=(14,5))
-        #plt.subplots_adjust(wspace=0.5, left=0.1, right=0.95, top=0.99, bottom=0.12)
         plt.subplots_adjust(wspace=0.4,left=0.07,right=0.95, bottom=0.15,top=0.85)
         for xi in XI:
             MAX = np.max([abs(np.min(xi)), np.max(xi)])
@@ -500,15 +512,32 @@ class gpastro(object):
             cb = plt.colorbar()
             cb.ax.tick_params(labelsize=16)
             cb.set_label(cb_label[I-1], fontsize=18)
-            #plt.axis("equal")
             plt.xticks(size=16)
             plt.yticks(size=16)
             plt.xlabel('$\Delta u$ (arcmin)', fontsize=18)
             if I == 1:
                 plt.ylabel('$\Delta v$ (arcmin)', fontsize=18)
             I += 1
-        #plt.suptitle(int(exp), fontsize=26)
+        if save:
+            namefig = os.path.join(rep, '2pcf_dudu_dvdv_dudv_%i.pdf'%int(exp))
+            plt.savefig(namefig, transparent=True)
 
+    def plot_gaussian_process(self):
+        self.plot_fields(rep=self.rep, save=self.save, exp=self.exp_id)
+        self.plot_eb_mode(rep=self.rep, save=self.save, exp=self.exp_id)
+        self.plot_2pcf(rep=self.rep, save=self.save, exp=self.exp_id)
+        plot_correlation_function(self.gpu._optimizer, NAME='du', 
+                                  rep=self.rep, save=self.save, exp=self.exp_id)
+        plot_correlation_function(self.gpv._optimizer, NAME='dv', 
+                                  rep=self.rep, save=self.save, exp=self.exp_id)
+
+        Y_valid = np.array([self.du_test, self.dv_test]).T
+        Y_valid_interp = np.array([self.du_test_predict, self.dv_test_predict]).T
+        Y_valid_err =  np.array([self.du_err_test,  self.dv_err_test]).T
+
+        plot_gp_output(self.coords_test, Y_valid, Y_valid_interp, Y_valid_err, 
+                       rep=self.rep, save=self.save, exp=self.exp_id)
+        self.eb_after_gp(rep=self.rep, save=self.save, exp=self.exp_id)
 
 if __name__ == "__main__":
 
@@ -531,13 +560,11 @@ if __name__ == "__main__":
                  A[:,10][Filtre], A[:,11][Filtre], 
                  A[:,12][Filtre], A[:,13][Filtre],
                  mas=3600.*1e3, arcsec=3600.,
-                 exp_id="137108", visit_id="58131-z")
+                 exp_id="137108", visit_id="58131-z",
+                 rep='plot_output', save=True)
     gp.comp_eb()
     gp.comp_xi()
     print "start gp"
     gp.gp_interp()
     print "do plot"
-    gp.plot_fields()
-    gp.plot_eb_mode()
-    gp.plot_2pcf()
     gp.plot_gaussian_process()
