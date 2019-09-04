@@ -612,26 +612,32 @@ class gpastro(object):
 
 if __name__ == "__main__":
 
-    A = np.loadtxt('../../Downloads/residuals4pfl/58131-z/res-meas.list')
-    exp_id = {}
-    for exp in A[:,21]:
-        if exp not in exp_id:
-            print exp
-            exp_id.update({exp:None})
+    ## A = np.loadtxt('../../Downloads/residuals4pfl/58131-z/res-meas.list')
+    ## exp_id = {}
+    ## for exp in A[:,21]:
+    ##    if exp not in exp_id:
+    ##        print exp
+    ##        exp_id.update({exp:None})
 
-    exp = 137108.0
-    Filtre = (A[:,4]<-6)
-    Filtre &= (A[:,21] == exp)
+    ## exp = 137108.0
+    ## Filtre = (A[:,4]<-6)
+    ## Filtre &= (A[:,21] == exp)
+    ##gp = gpastro(A[:,8][Filtre], A[:,9][Filtre], 
+    ##             A[:,10][Filtre], A[:,11][Filtre], 
+    ##             A[:,12][Filtre], A[:,13][Filtre],
+    ##             mas=3600.*1e3, arcsec=3600.,
+    ##             exp_id="137108", visit_id="58131-z",
+    ##             rep='plot_output', save=True)
 
-    print "gastro start"
-    #(self, u, v, du, dv, du_err, dv_err,
-    # mas=3600.*1e3, arcsec=3600.,
-    # exp_id="", visit_id="")
-    gp = gpastro(A[:,8][Filtre], A[:,9][Filtre], 
-                 A[:,10][Filtre], A[:,11][Filtre], 
-                 A[:,12][Filtre], A[:,13][Filtre],
+
+    INPUT = "/pbs/home/l/leget/sps_lsst/HSC/gp_output/137108_z/input.pkl"
+    dic = cPickle.load(open(INPUT))
+    print "gp_astro start"
+    gp = gpastro(dic['u'], dic['v'], 
+                 dic['du'], dic['dv'], 
+                 dic['du_err'], dic['dv_err'],
                  mas=3600.*1e3, arcsec=3600.,
-                 exp_id="137108", visit_id="58131-z",
+                 exp_id="137108", visit_id="",
                  rep='plot_output', save=True)
     gp.comp_eb()
     gp.comp_xi()
