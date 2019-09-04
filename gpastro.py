@@ -6,6 +6,7 @@ from astroeb import vcorr, xiB
 from sklearn.model_selection import train_test_split
 import pylab as plt
 import os
+import cPickle
 
 def return_var_map(weight, xi):
     N = int(np.sqrt(len(xi)))
@@ -301,12 +302,43 @@ class gpastro(object):
         self.xi_dvdv = None
         self.xi_dudv = None
 
+        self.u = u * arcsec
+        self.v = v * arcsec
+        self.coords = np.array([self.u, self.v]).T
+        self.du = du * mas
+        self.dv = dv * mas
+        self.du_err = du_err * mas
+        self.dv_err = dv_err * mas
+
+        # split training/validation                                                                                                                             
+        indice_train, indice_test
+
+        self.dic_output = {'exp_id':self.exp_id, 
+                           'input_data':{'u':self.u,
+                           'v':self.v,
+                           'du':self.du,
+                           'dv':self.dv,
+                           'du_err':self.du_err,
+                           'dv_err':self.dv_err,
+                           'indice_train':indice_train,
+                           'indice_test':indice_test},
+                           '2pcf_stat':{},
+                           'gp_output':{}}
+        
+
     def comp_eb(self):
 
         self.logr, xiplus, ximinus, xicross, xiz2 = vcorr(self.u/3600., self.v/3600., 
                                                           self.du, self.dv)
         self.xib = xiB(self.logr, xiplus, ximinus)
         self.xie = xiplus - self.xib
+
+        self.dic_output['2pcf_stat'].update({'xib':self.xib,
+                                             'xie':self.xie,
+                                             'logr':self.logr,
+                                             'xiplus':xiplus,
+                                             'ximinus':ximinus,
+                                             'xicross':xicross})
 
     def comp_xi(self):
 
@@ -330,6 +362,11 @@ class gpastro(object):
         self.xi_sep = np.array([kk.dx.reshape(npixels), 
                                 kk.dy.reshape(npixels)]).T
 
+        self.dic_output['2pcf_stat'].update({'xi_dudu':self.xi_dudu,
+                                             'xi_dudv':self.xi_dudv,
+                                             'xi_dvdv':self.xi_dvdv,
+                                             'xi_sep':self.xi_sep})
+
     def gp_interp(self):
 
         print "start gp interp"
@@ -342,6 +379,14 @@ class gpastro(object):
         gpu.solve()
         self.du_test_predict = gpu.predict(self.coords_test, return_cov=False)
         self.gpu = gpu
+
+        self.dic_output['gp_output'].update({'gpu.2pcf':gpu._optimizer._2pcf,
+                                             'gpu.2pcf_weight':gpu._optimizer._2pcf_weight,
+                                             'gpu.2pcf_dist':gpu._optimizer._2pcf_dist,
+                                             'gpu.2pcf_fit':gpu._optimizer._2pcf_fit,
+                                             'gpu.2pcf_mask':gpu._optimizer._2pcf_mask,
+                                             'gpu.kernel':gpu._optimizer._kernel,
+                                             'gpv.du_test_predict':self.du_test_predict})
         
         print "I did half"
         kernel = "20. * AnisotropicVonKarman(invLam=np.array([[1./1000**2,0],[0,1./1000**2]])) + 5."
@@ -353,6 +398,14 @@ class gpastro(object):
         gpv.solve()
         self.dv_test_predict = gpv.predict(self.coords_test, return_cov=False)
         self.gpv = gpv
+
+        self.dic_output['gp_output'].update({'gpv.2pcf':gpv._optimizer._2pcf,
+                                             'gpv.2pcf_weight':gpv._optimizer._2pcf_weight,
+                                             'gpv.2pcf_dist':gpv._optimizer._2pcf_dist,
+                                             'gpv.2pcf_fit':gpv._optimizer._2pcf_fit,
+                                             'gpv.2pcf_mask':gpv._optimizer._2pcf_mask,
+                                             'gpv.kernel':gpv._optimizer._kernel,
+                                             'gpv.dv_test_predict':self.dv_test_predict})
 
         X_valid = self.coords_test
         Y_valid = np.array([self.du_test, self.dv_test]).T
@@ -368,6 +421,13 @@ class gpastro(object):
                                                                                              Y_valid[:,0], Y_valid[:,1])
         self.xib_test = xiB(self.logr_test, self.xiplus_test, self.ximinus_test)
         self.xie_test = self.xiplus_test - self.xib_test
+
+        self.dic_output['2pcf_stat'].update({'xib_test':self.xib_test,
+                                             'xie_test':self.xie_test,
+                                             'logr_test':self.logr,
+                                             'xib_residuals':self.xib_residuals,
+                                             'xie_residuals':self.xie_residuals,
+                                             'logr_residuals':self.logr_residuals})
 
     def eb_after_gp(self, rep='', save=False, exp="0"):
 
@@ -539,6 +599,13 @@ class gpastro(object):
                        rep=self.rep, save=self.save, exp=self.exp_id)
         self.eb_after_gp(rep=self.rep, save=self.save, exp=self.exp_id)
 
+    def save_output(self):
+
+        pkl_name = os.path.join(self.rep, 'gp_output_%i.pkl'%(int(self.exp_id)))
+        pkl_file = open(pkl_name, 'w')
+        cPickle.dump(self.dic_output, pkl_file)
+        pkl_file.close()
+
 if __name__ == "__main__":
 
     A = np.loadtxt('../../Downloads/residuals4pfl/58131-z/res-meas.list')
@@ -568,3 +635,4 @@ if __name__ == "__main__":
     gp.gp_interp()
     print "do plot"
     gp.plot_gaussian_process()
+    gp.save_output()
