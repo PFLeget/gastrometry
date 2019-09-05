@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import numpy as np
 import copy
 import treecorr
@@ -7,6 +9,19 @@ from sklearn.model_selection import train_test_split
 import pylab as plt
 import os
 import cPickle
+import parser, optparse
+
+
+def read_option():
+
+    usage = "launch gp_job"
+    parser = optparse.OptionParser(usage=usage)
+
+    parser.add_option("--rep","-r",dest="rep",help="dir input/output", default=100)
+
+    option,args = parser.parse_args()
+
+    return option
 
 def return_var_map(weight, xi):
     N = int(np.sqrt(len(xi)))
@@ -374,7 +389,7 @@ class gpastro(object):
         gpu = treegp.GPInterpolation(kernel=kernel, optimize=True,
                                      optimizer='two-pcf', anisotropic=True,
                                      normalize=True, nbins=25, min_sep=0.,
-                                     max_sep=20.*60.)
+                                     max_sep=15.*60.)
         gpu.initialize(self.coords_train, self.du_train, y_err=self.du_err_train)
         gpu.solve()
         self.du_test_predict = gpu.predict(self.coords_test, return_cov=False)
@@ -395,7 +410,7 @@ class gpastro(object):
         gpv = treegp.GPInterpolation(kernel=kernel, optimize=True,
                                      optimizer='two-pcf', anisotropic=True,
                                      normalize=True, nbins=25, min_sep=0.,
-                                     max_sep=20.*60.)
+                                     max_sep=15.*60.)
         gpv.initialize(self.coords_train, self.dv_train, y_err=self.dv_err_train)
         gpv.solve()
         self.dv_test_predict = gpv.predict(self.coords_test, return_cov=False)
@@ -629,16 +644,19 @@ if __name__ == "__main__":
     ##             exp_id="137108", visit_id="58131-z",
     ##             rep='plot_output', save=True)
 
+    #INPUT = "/pbs/home/l/leget/sps_lsst/HSC/gp_output/137108_z/input.pkl"
 
-    INPUT = "/pbs/home/l/leget/sps_lsst/HSC/gp_output/137108_z/input.pkl"
+    option = read_option()
+    INPUT = os.path.join(option.rep, 'input.pkl')
+
     dic = cPickle.load(open(INPUT))
     print "gp_astro start"
     gp = gpastro(dic['u'], dic['v'], 
                  dic['du'], dic['dv'], 
                  dic['du_err'], dic['dv_err'],
                  mas=3600.*1e3, arcsec=3600.,
-                 exp_id="137108", visit_id="",
-                 rep='plot_output', save=True)
+                 exp_id=dic['exp_id'], visit_id="",
+                 rep=option.rep, save=True)
     gp.comp_eb()
     gp.comp_xi()
     print "start gp"

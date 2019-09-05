@@ -25,7 +25,8 @@ for night in nights:
 
         pkl_name = os.path.join(rep, 'input.pkl')
         pkl_file = open(pkl_name, 'w')
-        dic = {'u':A[:,8][Filtre], 
+        dic = {'exp_id':'%i'%(exp),
+               'u':A[:,8][Filtre], 
                'v':A[:,9][Filtre],
                'du':A[:,10][Filtre],
                'dv':A[:,11][Filtre],
