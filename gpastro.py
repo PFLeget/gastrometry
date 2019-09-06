@@ -149,7 +149,7 @@ def plot_gp_output(X_valid, Y_valid, Y_valid_interp, Y_err, rep='', save=False, 
     plt.subplots_adjust(wspace=0.2, left=0.07, right=0.98)
     quiver_dict = dict(alpha=1,
                        angles='uv',
-                       headlength=1.e-10,  # Using zero emits divide-by-zero warnings.                                                              
+                       headlength=1.e-10,
                        headwidth=0,
                        headaxislength=0,
                        minlength=0,
@@ -385,10 +385,11 @@ class gpastro(object):
     def gp_interp(self):
 
         print "start gp interp"
-        kernel = "20. * AnisotropicVonKarman(invLam=np.array([[1./1000**2,0],[0,1./1000**2]])) + 5."
+        L_start = 3000.
+        kernel = "%f * AnisotropicVonKarman(invLam=np.array([[1./%f**2,0],[0,1./%f**2]]))"%((np.var(self.du_train), L_start, L_start))
         gpu = treegp.GPInterpolation(kernel=kernel, optimize=True,
                                      optimizer='two-pcf', anisotropic=True,
-                                     normalize=True, nbins=21, min_sep=0.,
+                                     normalize=True, nbins=15, min_sep=0.,
                                      max_sep=20.*60.)
         gpu.initialize(self.coords_train, self.du_train, y_err=self.du_err_train)
         gpu.solve()
@@ -406,10 +407,11 @@ class gpastro(object):
                                              'gpu.coords_test':self.coords_test})
         
         print "I did half"
-        kernel = "20. * AnisotropicVonKarman(invLam=np.array([[1./1000**2,0],[0,1./1000**2]])) + 5."
+        L_start = 3000.
+        kernel = "%f * AnisotropicVonKarman(invLam=np.array([[1./%f**2,0],[0,1./%f**2]]))"%((np.var(self.dv_train), L_start, L_start))
         gpv = treegp.GPInterpolation(kernel=kernel, optimize=True,
                                      optimizer='two-pcf', anisotropic=True,
-                                     normalize=True, nbins=21, min_sep=0.,
+                                     normalize=True, nbins=15, min_sep=0.,
                                      max_sep=20.*60.)
         gpv.initialize(self.coords_train, self.dv_train, y_err=self.dv_err_train)
         gpv.solve()
