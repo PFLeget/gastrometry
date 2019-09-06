@@ -30,5 +30,5 @@ for i in range(len(visits)):
     os.system('qsub -P P_lsst -q long -o %s -e %s -l s_fsize=4G -l s_vmem=16G -l sps=1,ct=20:00:00 machine_gun_jobs_%i.sh'%((o_log, e_log, i)))
     os.system('rm machine_gun_jobs_%i.sh*'%(i))
 
-    if i > 10:
-        break
+    #if i > 10:
+    #    break

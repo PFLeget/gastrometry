@@ -89,16 +89,20 @@ if __name__ == "__main__":
     #          '../../Downloads/residuals4pfl/57755-z/res-meas.list',
     #          '../../Downloads/residuals4pfl/58131-z/res-meas.list']
 
-    ##import glob
+    import glob
     ##nights = glob.glob('/sps/snls13/HSC/prod.2019-04/dbimage_35UN7JY/fitastrom_ULHBNSI/data/*z/res-meas.list')
+    nights = glob.glob('/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJY/fitastrom_ZNLFUYQ/data/*z/res-meas.list')
 
-    ##cm = comp_mean(nights, mas=3600.*1e3, arcsec=3600.,
-    ##               bin_spacing=10., statistics='mean')
-    ##cm.load()
-    ##cm.comp_mean()
-    ##cm.plot(cmap=None)
-    ##cm.save_mean(directory='', name_outputs=['mean_gp_du_z.fits',
-    ##                                         'mean_gp_dv_z.fits'])
+    #cm = comp_mean(nights, mas=3600.*1e3, arcsec=3600.,
+    #               bin_spacing=30., statistics='mean')
+    #cm.load()
+    #cm.comp_mean()
+    #cm.plot(cmap=None)
+    #cm.save_mean(directory='', name_outputs=['mean_gp_du_z_gaia_dr2.fits',
+    #                                         'mean_gp_dv_z_gaia_dr2.fits'])
+
+    plot_mean('mean_gp_du_z_gaia_dr2.fits', cmap=None, MAX=1)
+    plot_mean('mean_gp_dv_z_gaia_dr2.fits', cmap=None, MAX=1)
 
     plot_mean('mean_gp_du_z_new.fits', cmap=None, MAX=1)
     plot_mean('mean_gp_dv_z_new.fits', cmap=None, MAX=1)
