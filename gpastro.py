@@ -386,11 +386,15 @@ class gpastro(object):
 
         print "start gp interp"
         L_start = 3000.
+        NBIN = 21
+        MAX = 17.*60.
+        P0 = [3000., 0., 0.]
         kernel = "%f * AnisotropicVonKarman(invLam=np.array([[1./%f**2,0],[0,1./%f**2]]))"%((np.var(self.du_train), L_start, L_start))
         gpu = treegp.GPInterpolation(kernel=kernel, optimize=True,
                                      optimizer='two-pcf', anisotropic=True,
-                                     normalize=True, nbins=15, min_sep=0.,
-                                     max_sep=20.*60.)
+                                     normalize=True, nbins=NBIN, min_sep=0.,
+                                     max_sep=MAX, robust_fit=True, 
+                                     p0=P0)
         gpu.initialize(self.coords_train, self.du_train, y_err=self.du_err_train)
         gpu.solve()
         self.du_test_predict = gpu.predict(self.coords_test, return_cov=False)
@@ -411,8 +415,9 @@ class gpastro(object):
         kernel = "%f * AnisotropicVonKarman(invLam=np.array([[1./%f**2,0],[0,1./%f**2]]))"%((np.var(self.dv_train), L_start, L_start))
         gpv = treegp.GPInterpolation(kernel=kernel, optimize=True,
                                      optimizer='two-pcf', anisotropic=True,
-                                     normalize=True, nbins=15, min_sep=0.,
-                                     max_sep=20.*60.)
+                                     normalize=True, nbins=NBIN, min_sep=0.,
+                                     max_sep=MAX, robust_fit=True,
+                                     p0=P0)
         gpv.initialize(self.coords_train, self.dv_train, y_err=self.dv_err_train)
         gpv.solve()
         self.dv_test_predict = gpv.predict(self.coords_test, return_cov=False)
