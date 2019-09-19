@@ -430,8 +430,8 @@ class gpastro(object):
                                              'gpv.2pcf_mask':gpv._optimizer._2pcf_mask,
                                              'gpv.kernel':gpv._optimizer._kernel,
                                              'gpv.dv_test_predict':self.dv_test_predict,
-                                             'gpu.dv_test':self.dv_test,
-                                             'gpu.coords_test':self.coords_test})
+                                             'gpv.dv_test':self.dv_test,
+                                             'gpv.coords_test':self.coords_test})
 
         X_valid = self.coords_test
         Y_valid = np.array([self.du_test, self.dv_test]).T
