@@ -27,7 +27,8 @@ for i in range(len(visits)):
     fichier.close()
     o_log = os.path.join(visits[i], "output_o.log")
     e_log = os.path.join(visits[i], "output_e.log")
-    os.system('qsub -P P_lsst -q long -o %s -e %s -l s_fsize=4G -l s_vmem=16G -l sps=1,ct=20:00:00 machine_gun_jobs_%i.sh'%((o_log, e_log, i)))
+    #os.system('qsub -P P_lsst -q long -o %s -e %s -l s_fsize=4G -l s_vmem=16G -l sps=1,ct=20:00:00 machine_gun_jobs_%i.sh'%((o_log, e_log, i)))
+    os.system('qsub -P P_lsst -pe multicores 8 -q mc_long -o %s -e %s -l sps=1 machine_gun_jobs_%i.sh'%((o_log, e_log, i)))
     os.system('rm machine_gun_jobs_%i.sh*'%(i))
 
     #if i > 10:

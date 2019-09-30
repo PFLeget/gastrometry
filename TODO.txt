@@ -1,4 +1,4 @@
-- write the code to excute gp on a single exposure.
-- write the code to compute/plot the mean function.
-- write scripts to launch the code at ccin2p3.
-- write final plots over full visits.
+- write the code to excute gp on a single exposure. (DONE)
+- write the code to compute/plot the mean function. (DONE)
+- write scripts to launch the code at ccin2p3. (DONE)
+- write final plots over full visits. (STARTED)

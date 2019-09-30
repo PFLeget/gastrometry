@@ -5,7 +5,8 @@ import cPickle
 
 output = "/pbs/home/l/leget/sps_lsst/HSC/gp_output"
 
-nights = glob.glob('/sps/snls13/HSC/prod.2019-04/dbimage_35UN7JY/fitastrom_ULHBNSI/data/*z/res-meas.list') 
+#nights = glob.glob('/sps/snls13/HSC/prod.2019-04/dbimage_35UN7JY/fitastrom_ULHBNSI/data/*z/res-meas.list') 
+nights = glob.glob('/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJY/fitastrom_FUINMJY/data/*z/res-meas.list')
 
 N = 1
 for night in nights:
