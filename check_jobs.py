@@ -2,7 +2,7 @@ import numpy as np
 import glob
 import os
 
-outputs = glob.glob('/pbs/home/l/leget/sps_lsst/HSC/gp_output/*z')
+outputs = glob.glob('/pbs/home/l/leget/sps_lsst/HSC/gp_output/*')
 
 ndone = 0
 not_done = []

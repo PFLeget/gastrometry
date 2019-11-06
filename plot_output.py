@@ -3,8 +3,9 @@ import pylab as plt
 import copy
 import cPickle
 import glob
-import corner
-import seaborn as sns
+import os
+#import corner
+#import seaborn as sns
 import treegp
 from sklearn.neighbors import KNeighborsRegressor
 from astroeb import vcorr, xiB
@@ -61,13 +62,11 @@ def return_median(x):
             median[i] = biweight_M(x[:,i][Filtre])
     return median
 
-
-
 class load_output(object):
 
-    def __init__(self, pkls):
+    def __init__(self, rep_output):
 
-        self.pkls = pkls
+        self.rep_output = rep_output
 
         self.exp_id = []
 
@@ -90,12 +89,21 @@ class load_output(object):
         self.du_predict = []
         self.dv_predict = []
 
+        self.x_test = []
+        self.y_test = []
+
     def load_data(self):
-        
+
         I = 1
-        for pkl in self.pkls:
-            print "%i/%i"%((I,len(self.pkls)))
-            dic = cPickle.load(open(pkl))
+        for rep in self.rep_output:
+            print "%i/%i"%((I,len(self.rep_output)))
+            try:
+                pkl = glob.glob(os.path.join(rep,'gp_output*.pkl'))[0]
+                dic = cPickle.load(open(pkl))
+                dic_input = cPickle.load(open(os.path.join(rep,'input.pkl')))
+            except:
+                print 'file do not exist'
+                continue
 
             self.exp_id.append(dic['exp_id'])
             
@@ -117,6 +125,9 @@ class load_output(object):
             self.du_predict.append(dic['gp_output']['gpu.du_test_predict'])
             self.dv_predict.append(dic['gp_output']['gpv.dv_test_predict'])
 
+            self.x_test.append(dic_input['x'][dic['input_data']['indice_test']])
+            self.y_test.append(dic_input['y'][dic['input_data']['indice_test']])
+
             I += 1
 
     def save_output(self, pkl_name):
@@ -137,7 +148,9 @@ class load_output(object):
                'du_test': np.array(self.du_test),
                'dv_test': np.array(self.dv_test),
                'du_predict': np.array(self.du_predict),
-               'dv_predict': np.array(self.dv_predict)}
+               'dv_predict': np.array(self.dv_predict),
+               'x_test': np.array(self.x_test),
+               'y_test': np.array(self.y_test)}
 
         pkl = open(pkl_name, 'w')
         cPickle.dump(dic, pkl)
@@ -177,9 +190,12 @@ class plot_output(object):
         self.dv_test = dic['dv_test'][Filtre]
         self.du_predict = dic['du_predict'][Filtre] 
         self.dv_predict = dic['dv_predict'][Filtre]
+        self.x_test = dic['x_test'][Filtre]
+        self.y_test = dic['y_test'][Filtre]
 
 
     def plot_residuals(self):
+
         STD_u = np.zeros(len(self.exp_id))
         STD_v = np.zeros(len(self.exp_id))
 
@@ -253,11 +269,6 @@ class plot_output(object):
         plt.hist(STD_v_corr, bins=np.linspace(0, 30, 31), histtype='step', color='b')
 
     def meanify(self, CMAP = None, MAX = 1.):
-        #self.coord_test
-        #self.du_test 
-        #self.dv_test 
-        #self.du_predict
-        #self.dv_predict
 
         self.mean_u = treegp.meanify(bin_spacing=30.,
                                      statistics='median')
@@ -323,6 +334,32 @@ class plot_output(object):
         plt.legend(fontsize=22)
         plt.savefig('../../Desktop/4_eb_meanify.png')
 
+
+    def meanify_ccd(self, CMAP = None, MAX = 1., bin_spacing=5., sm = 8, stat_used='mean'):
+        
+        self.mean_u = treegp.meanify(bin_spacing=bin_spacing,
+                                     statistics=stat_used)
+
+        self.mean_v = treegp.meanify(bin_spacing=bin_spacing,
+                                     statistics=stat_used)
+        for i in range(len(self.exp_id)):
+            coord = np.array([self.x_test[i], self.y_test[i]]).T
+            self.mean_u.add_field(coord, self.du_test[i]-self.du_predict[i])
+            self.mean_v.add_field(coord, self.dv_test[i]-self.dv_predict[i])
+        self.mean_u.meanify()
+        self.mean_v.meanify()
+
+        plt.figure(figsize=(12,10))
+        plt.scatter(self.mean_u.coords0[:,0], self.mean_u.coords0[:,1],
+                    c=self.mean_u.params0, cmap = CMAP, vmin=-MAX, vmax=MAX,
+                    lw=0, s=sm)
+        plt.colorbar()
+
+        plt.figure(figsize=(12,10))
+        plt.scatter(self.mean_v.coords0[:,0], self.mean_v.coords0[:,1],
+                    c=self.mean_v.params0, cmap = CMAP, vmin=-MAX,vmax=MAX,
+                    lw=0, s=sm)
+        plt.colorbar()
 
             
     def plot_eb_mode(self):
@@ -480,12 +517,12 @@ class plot_output(object):
 if __name__ == '__main__':
 
     #pkls = glob.glob('../../sps_lsst/HSC/gp_output/*_z/gp_output*.pkl')
+    ##rep = glob.glob('../../sps_lsst/HSC/gp_output/*')
+    ##lo = load_output(rep)
+    ##lo.load_data()
+    ##lo.save_output('final_gp_outputs.pkl')
 
-    #lo = load_output(pkls)
-    #lo.load_data()
-    #lo.save_output('final_z_gp_output.pkl')
-
-    po = plot_output('tests/final_z_gp_output.pkl')
+    po = plot_output('final_gp_outputs.pkl')
     ##po.plot_eb_mode()
     ##plt.savefig('../../Desktop/1_eb_glob.png')
     ##po.plot_eb_mode_test()
@@ -493,5 +530,6 @@ if __name__ == '__main__':
     ##po.plot_eb_mode_test_residuals()
     ##plt.savefig('../../Desktop/3_eb_glob_test_afterGP.png')
     ##po.plot_residuals()
-    po.meanify()
+    ##po.meanify()
     #po.plot_2pcf()
+    po.meanify_ccd(CMAP = None, MAX = 1.)
