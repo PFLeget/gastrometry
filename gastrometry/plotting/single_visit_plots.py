@@ -2,6 +2,7 @@ import numpy as np
 import pylab as plt
 import cPickle
 from sklearn.model_selection import train_test_split
+from gastrometry import biweight_median, biweight_mad
 
 
 def plot_single_exposure(input_pkl, CMAP=plt.cm.seismic, MAX=14, 
@@ -58,46 +59,60 @@ def plot_single_exposure(input_pkl, CMAP=plt.cm.seismic, MAX=14,
     cb1.set_label('du (mas)', fontsize='16',labelpad=-50)
     cb2.set_label('dv (mas)', fontsize='16',labelpad=-52)
        
-def plot_single_exposure_hist(input_pkl, mas=3600.*1e3, arcsec=3600.):
+def plot_single_exposure_hist(input_pkl, MAX=30., NBIN=30, mas=3600.*1e3, arcsec=3600.):
 
     dic = cPickle.load(open(input_pkl))
 
     plt.figure(figsize=(8,8))
-    plt.subplots_adjust(wspace=0, hspace=0)
+    plt.subplots_adjust(wspace=0, hspace=0, top=0.99, right=0.99)
     plt.subplot(2,2,3)
 
-    plt.scatter(dic['du']*mas, dic['dv']*mas, s=15, alpha=0.1, c='b')
+    plt.scatter(dic['du']*mas, dic['dv']*mas, 
+                s=25, lw=0, alpha=0.1, c='b')
 
-    #STD_u[i] = biweight_S(self.du_test[i])
-    #STD_v[i] = biweight_S(self.dv_test[i])
+    median_u = biweight_median(dic['du']*mas)
+    mad_u = biweight_mad(dic['du']*mas)
 
-    plt.xlim(-30, 30)
-    plt.ylim(-30, 30)
+    median_v = biweight_median(dic['dv']*mas)
+    mad_v = biweight_mad(dic['dv']*mas)
+
+    plt.xlim(-MAX, MAX)
+    plt.ylim(-MAX, MAX)
     plt.xticks(size=14)
     plt.yticks(size=14)
     plt.xlabel('du (mas)', fontsize=18)
     plt.ylabel('dv (mas)', fontsize=18)
 
     plt.subplot(2,2,1)
-    plt.hist(dic['du']*mas, bins=np.linspace(-30, 30, 30), histtype='step', color='b')
-    plt.xlim(-30,30)
+    plt.hist(dic['du']*mas, bins=np.linspace(-MAX, MAX, NBIN), 
+             histtype='step', color='b', lw=2,
+             label = 'Median = %.2f mas\n MAD = %.2f mas'%((median_u, mad_u)))
+    plt.xlim(-MAX, MAX)
+    ylim = plt.ylim()
+    plt.ylim(ylim[0], ylim[1] + ylim[1]*.2)
+    plt.legend()
     plt.xticks([],[])
     plt.yticks([],[])
 
 
     plt.subplot(2,2,4)
-    plt.hist(dic['dv']*mas, bins=np.linspace(-30, 30, 30),
-             histtype='step', color='b', orientation='horizontal')
-    plt.ylim(-30,30)
+    plt.hist(dic['dv']*mas, bins=np.linspace(-MAX, MAX, NBIN),
+             histtype='step', color='b', lw=2, orientation='horizontal',
+             label = 'Median = %.2f mas\n MAD = %.2f mas'%((median_v, mad_v)))
+    plt.ylim(-MAX, MAX)
+    xlim = plt.xlim()
+    plt.xlim(xlim[0], xlim[1] + xlim[1]*.2)
+    plt.legend()
     plt.xticks([],[])
     plt.yticks([],[])
 
 
 if __name__ == '__main__':
 
-    #plot_single_exposure('../tests/before_spline/137108_z/input.pkl')
-    #plt.savefig('../../../Dropbox/hsc_astro/figures/137108_z.pdf')
-    plot_single_exposure_hist('../tests/before_spline/137108_z/input.pkl')
+    #plot_single_exposure('../../tests/before_spline/137108_z/input.pkl')
+    #plt.savefig('../../../../Dropbox/hsc_astro/figures/137108_z.pdf')
+    plot_single_exposure_hist('../../tests/before_spline/137108_z/input.pkl')
+    plt.savefig('../../../../Dropbox/hsc_astro/figures/137108_z_hist.pdf')
     plt.show()
 
     
