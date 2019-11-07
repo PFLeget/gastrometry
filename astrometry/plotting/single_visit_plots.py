@@ -30,9 +30,6 @@ def plot_single_exposure(input_pkl, CMAP=plt.cm.seismic, MAX=14,
     ax3 = plt.subplot(1,3,3)
     quiver_dict = dict(alpha=1,
                        angles='uv',
-                       #headlength=1.e-10,
-                       #headwidth=0,
-                       #headaxislength=0,
                        headlength=5,
                        headwidth=5,
                        headaxislength=3,
@@ -51,8 +48,6 @@ def plot_single_exposure(input_pkl, CMAP=plt.cm.seismic, MAX=14,
     ax3.text(2050,2450,"(40 mas)",fontsize=11)
     ax3.set_xticks(np.linspace(-2000, 2000, 5))
     ax3.set_title('astrometric residuals', fontsize=16)
-    #ax3.set_ylim(-lim,lim)
-    #ax3.set_xlim(-lim,lim)
 
     ax_cbar1 = fig.add_axes([0.08, 0.9, 0.29, 0.025])
     ax_cbar2 = fig.add_axes([0.385, 0.9, 0.29, 0.025])
@@ -62,15 +57,47 @@ def plot_single_exposure(input_pkl, CMAP=plt.cm.seismic, MAX=14,
 
     cb1.set_label('du (mas)', fontsize='16',labelpad=-50)
     cb2.set_label('dv (mas)', fontsize='16',labelpad=-52)
-
-    #cb1.formatter.set_powerlimits((0, 0))
-    #cb1.update_ticks()
-    #cb2.formatter.set_powerlimits((0, 0))
-    #cb2.update_ticks()
        
+def plot_single_exposure_hist(input_pkl, mas=3600.*1e3, arcsec=3600.):
+
+    dic = cPickle.load(open(input_pkl))
+
+    plt.figure(figsize=(8,8))
+    plt.subplots_adjust(wspace=0, hspace=0)
+    plt.subplot(2,2,3)
+
+    plt.scatter(dic['du']*mas, dic['dv']*mas, s=15, alpha=0.1, c='b')
+
+    #STD_u[i] = biweight_S(self.du_test[i])
+    #STD_v[i] = biweight_S(self.dv_test[i])
+
+    plt.xlim(-30, 30)
+    plt.ylim(-30, 30)
+    plt.xticks(size=14)
+    plt.yticks(size=14)
+    plt.xlabel('du (mas)', fontsize=18)
+    plt.ylabel('dv (mas)', fontsize=18)
+
+    plt.subplot(2,2,1)
+    plt.hist(dic['du']*mas, bins=np.linspace(-30, 30, 30), histtype='step', color='b')
+    plt.xlim(-30,30)
+    plt.xticks([],[])
+    plt.yticks([],[])
+
+
+    plt.subplot(2,2,4)
+    plt.hist(dic['dv']*mas, bins=np.linspace(-30, 30, 30),
+             histtype='step', color='b', orientation='horizontal')
+    plt.ylim(-30,30)
+    plt.xticks([],[])
+    plt.yticks([],[])
+
 
 if __name__ == '__main__':
 
-    plot_single_exposure('../tests/before_spline/137108_z/input.pkl')
-    plt.savefig('../../../Dropbox/hsc_astro/figures/137108_z.pdf')
+    #plot_single_exposure('../tests/before_spline/137108_z/input.pkl')
+    #plt.savefig('../../../Dropbox/hsc_astro/figures/137108_z.pdf')
+    plot_single_exposure_hist('../tests/before_spline/137108_z/input.pkl')
     plt.show()
+
+    
