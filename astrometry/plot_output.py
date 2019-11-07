@@ -4,62 +4,24 @@ import copy
 import cPickle
 import glob
 import os
-#import corner
-#import seaborn as sns
 import treegp
 from sklearn.neighbors import KNeighborsRegressor
 from astroeb import vcorr, xiB
-from astropy.stats import median_absolute_deviation as mad_astropy
 
-def biweight_M(sample,CSTD=6.):
+def median_check_finite(x):
     """
-    average using biweight (beers 90)
+    Median using biweight_median, but remove the nan.
+
+    :param sample: 1d numpy array. The sample where you want
+                   to compute the median with outlier rejection.
     """
-    M = np.median(sample)
-    iterate = [copy.deepcopy(M)]
-    mu = (sample-M)/(CSTD*mad_astropy(sample))
-    Filtre = (abs(mu)<1)
-    up = (sample-M)*((1.-mu**2)**2)
-    down = (1.-mu**2)**2
-    M = M + np.sum(up[Filtre])/np.sum(down[Filtre])
-
-    iterate.append(copy.deepcopy(M))
-    i=1
-    while abs((iterate[i-1]-iterate[i])/iterate[i])<0.001:
-
-        mu = (sample-M)/(CSTD*mad_astropy(sample))
-        Filtre = (abs(mu)<1)
-        up=(sample-M)*((1.-mu**2)**2)
-        down = (1.-mu**2)**2
-        M = M + np.sum(up[Filtre])/np.sum(down[Filtre])
-        iterate.append(copy.deepcopy(M))
-        i+=1
-        if i == 100 :
-            print('voila voila ')
-            break
-    return M
-
-def biweight_S(sample,CSTD=9.):
-    """
-    std from biweight
-    """
-    M = biweight_M(sample)
-    mu = (sample-M)/(CSTD*mad_astropy(sample))
-    Filtre = (abs(mu)<1)
-    up = ((sample-M)**2)*((1.-mu**2)**4)
-    down = (1.-mu**2)*(1.-5.*mu**2)
-    std = np.sqrt(len(sample))*(np.sqrt(np.sum(up[Filtre]))/abs(np.sum(down[Filtre])))
-    return std
-
-def return_median(x):
-    
     median = np.zeros_like(x[0])
     for i in range(len(median)):
         Filtre = np.isfinite(x[:,i])
         if np.sum(Filtre) == 0:
             median[i] = np.nan
         else:
-            median[i] = biweight_M(x[:,i][Filtre])
+            median[i] = biweight_median(x[:,i][Filtre])
     return median
 
 class load_output(object):
