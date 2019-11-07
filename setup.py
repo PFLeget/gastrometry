@@ -6,7 +6,7 @@ import glob
 from setuptools import setup, find_packages
 
 # Package name
-name = 'astrometry'
+name = 'gastrometry'
 
 # Packages (subdirectories in clusters/)
 packages = find_packages()
@@ -17,7 +17,7 @@ scripts = glob.glob("scripts/*.py")
 package_data = {}
 
 setup(name=name,
-      description=("astrometry"),
+      description=("gastrometry"),
       classifiers=["Topic :: Scientific :: Astronomy",
                    "Intended Audience :: Science/Research"],
       author="PFLeget",
