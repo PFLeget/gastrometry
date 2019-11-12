@@ -4,6 +4,49 @@ import cPickle
 import glob
 import os
 
+class gather_input(object):
+
+    def __init__(self, rep_output):
+
+        self.rep_output = rep_output
+
+        self.exp_id = []
+
+        self.u = []
+        self.v = []
+        self.du = []
+        self.dv = []
+
+    def load_data(self):
+
+        I = 1
+        for rep in self.rep_output:
+            print "%i/%i"%((I,len(self.rep_output)))
+            try:
+                dic_input = cPickle.load(open(os.path.join(rep,'input.pkl')))
+            except:
+                print 'file do not exist'
+                continue
+            self.exp_id.append(dic_input['exp_id'])
+            self.u.append(dic_input['u'])
+            self.v.append(dic_input['v'])
+            self.du.append(dic_input['du'])
+            self.dv.append(dic_input['dv'])
+            I += 1
+
+    def save_output(self, pkl_name):
+
+        dic = {'exp_id': np.array(self.exp_id),
+               'u': np.array(self.u),
+               'v': np.array(self.v),
+               'du': np.array(self.du),
+               'dv': np.array(self.dv)}
+
+        pkl = open(pkl_name, 'w')
+        cPickle.dump(dic, pkl)
+        pkl.close()
+
+
 class load_output(object):
 
     def __init__(self, rep_output):
@@ -98,6 +141,22 @@ class load_output(object):
         cPickle.dump(dic, pkl)
         pkl.close()
 
+def gather_input_all(rep_out, rep_save=''):
+
+    filters = ['g', 'r', 'i', 'z', 'y']
+
+    rep_all = glob.glob(os.path.join(rep_out, '*'))
+    lo = gather_input(rep_all)
+    lo.load_data()
+    lo.save_output(os.path.join(rep_save, 'inputs_all.pkl'))
+
+    for f in filters:
+        print f
+        rep_filters = glob.glob(os.path.join(rep_out, '*_%s*'%(f)))
+        lo = load_output(rep_filters)
+        lo.load_data()
+        lo.save_output(os.path.join(rep_save, 'inputs_%s.pkl'%(f)))
+
 def write_output(rep_out, rep_save=''):
 
     filters = ['g', 'r', 'i', 'z', 'y']
@@ -116,5 +175,5 @@ def write_output(rep_out, rep_save=''):
 
 if __name__ == '__main__':
 
-    write_output('../../../sps_lsst/HSC/gp_output/', rep_save='')
-
+    #write_output('../../../sps_lsst/HSC/gp_output/', rep_save='')
+    gather_input_all('../../../sps_lsst/HSC/gp_output/', rep_save='')
