@@ -41,7 +41,8 @@ def plot_distribution_residuals(path='../data/', stat = None,
         cPickle.dump(stat, stat_file)
         stat_file.close()
 
-    plt.figure(figsize=(8, 8))
+    plt.figure(figsize=(5, 5))
+    plt.subplots_adjust(top=0.99, right=0.99, left=0.14)
     I = 0
     #for f in filters:
     #    Filtre = (np.array(stat['du']['filters']) == f)
@@ -51,18 +52,23 @@ def plot_distribution_residuals(path='../data/', stat = None,
     #    I += 1
     plt.hist(np.array(stat['du']['mad']), 
              bins = np.linspace(0, 40, 41), #density=True, 
-             histtype='step', color= 'b')
+             histtype='step', color= 'b', lw=2, label='du MAD')
     plt.hist(np.array(stat['dv']['mad']), 
              bins = np.linspace(0, 40, 41), #density=True, 
-             histtype='step', color= 'r')
+             histtype='step', color= 'r', lw=2, label='dv MAD')
     plt.hist(np.array(stat['D']['median']),
              bins = np.linspace(0, 40, 41), #density=True,
-             histtype='step', color= 'grey')
+             histtype='step', color= 'k', lw=2, label='$\left<\sqrt{du^2+dv^2}\\right>$')
     #plt.hist(np.array(stat['D']['mad']),
     #         bins = np.linspace(0, 40, 41), density=True,
     #         histtype='step', color= 'k')
+    plt.xlim(0, 42)
+    plt.xlabel('mas', fontsize=14)
+    plt.ylabel('# of visits', fontsize=14)
+    plt.legend(fontsize=12)
     return stat
 
 if __name__ == "__main__":
 
     stat = plot_distribution_residuals(path='../data/', stat = 'stat.pkl', mas=3600.*1e3)
+    plt.savefig('../../../../Dropbox/hsc_astro/figures/histo_stds_full_survey_no_corrections.pdf')
