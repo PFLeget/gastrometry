@@ -1,5 +1,9 @@
 import matplotlib
 matplotlib.use('Agg')
+import pylab as plt
+import os
+import numpy as np
+from gastrometry import return_var_map
 
 
 def plot_correlation_function(interp, save=False, rep='', 
@@ -228,172 +232,173 @@ def plot_gp_output(X_valid, Y_valid, Y_valid_interp, Y_err, rep='', save=False, 
         plt.savefig(namefig, transparent=True)
 
 
-    def eb_after_gp(self, rep='', save=False, exp="0"):
+def eb_after_gp(gp_class, rep='', save=False, exp="0"):
 
-        plt.figure(figsize=(12,8))
-        plt.scatter(np.exp(self.logr_test), self.xie_test, c='b', label='E-mode of data (validation)')
-        plt.scatter(np.exp(self.logr_test), self.xib_test, c='r', label='B-mode of data (validation)')
-        plt.plot(np.exp(self.logr_test), np.zeros_like(self.logr_test), 'k--', zorder=0)
-        plt.ylim(-40,60)
-        plt.xlim(0.005, 1.5)
-        plt.xscale('log')
-        plt.xticks(size=16)
-        plt.yticks(size=16)
-        plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
-        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
-        plt.title(int(self.exp_id), fontsize=20)
-        plt.legend(loc=1, fontsize=16)
-        if save:
-            namefig = os.path.join(rep, 'eb_mode_validation_%i.pdf'%int(exp))
-            plt.savefig(namefig, transparent=True)
+    plt.figure(figsize=(12,8))
+    plt.scatter(np.exp(gp_class.logr_test), gp_class.xie_test, c='b', label='E-mode of data (validation)')
+    plt.scatter(np.exp(gp_class.logr_test), gp_class.xib_test, c='r', label='B-mode of data (validation)')
+    plt.plot(np.exp(gp_class.logr_test), np.zeros_like(gp_class.logr_test), 'k--', zorder=0)
+    plt.ylim(-40,60)
+    plt.xlim(0.005, 1.5)
+    plt.xscale('log')
+    plt.xticks(size=16)
+    plt.yticks(size=16)
+    plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
+    plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
+    plt.title(int(gp_class.exp_id), fontsize=20)
+    plt.legend(loc=1, fontsize=16)
+    if save:
+        namefig = os.path.join(rep, 'eb_mode_validation_%i.pdf'%int(exp))
+        plt.savefig(namefig, transparent=True)
 
-        plt.figure(figsize=(12,8))
-        plt.scatter(np.exp(self.logr_residuals), self.xie_residuals, c='b', label='E-mode of residuals (data)')
-        plt.scatter(np.exp(self.logr_residuals), self.xib_residuals, c='r', label='B-mode of residuals (data)')
-        plt.plot(np.exp(self.logr_residuals), np.zeros_like(self.logr_residuals), 'k--', zorder=0)
-        plt.ylim(-40,60)
-        plt.xlim(0.005, 1.5)
-        plt.xscale('log')
-        plt.xticks(size=16)
-        plt.yticks(size=16)
-        plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
-        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
-        plt.title(int(self.exp_id), fontsize=20)
-        plt.legend(loc=1, fontsize=16)
-        if save:
-            namefig = os.path.join(rep, 'eb_mode_validation_residuals_%i.pdf'%int(exp))
-            plt.savefig(namefig, transparent=True)
+    plt.figure(figsize=(12,8))
+    plt.scatter(np.exp(gp_class.logr_residuals), gp_class.xie_residuals, c='b', label='E-mode of residuals (data)')
+    plt.scatter(np.exp(gp_class.logr_residuals), gp_class.xib_residuals, c='r', label='B-mode of residuals (data)')
+    plt.plot(np.exp(gp_class.logr_residuals), np.zeros_like(gp_class.logr_residuals), 'k--', zorder=0)
+    plt.ylim(-40,60)
+    plt.xlim(0.005, 1.5)
+    plt.xscale('log')
+    plt.xticks(size=16)
+    plt.yticks(size=16)
+    plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
+    plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
+    plt.title(int(gp_class.exp_id), fontsize=20)
+    plt.legend(loc=1, fontsize=16)
+    if save:
+        namefig = os.path.join(rep, 'eb_mode_validation_residuals_%i.pdf'%int(exp))
+        plt.savefig(namefig, transparent=True)
 
-    def plot_fields(self, rep='', save=False, exp="0"):
+def plot_fields(gp_class, rep='', save=False, exp="0"):
 
-        MAX = 3.*np.std(self.du)
-        plt.figure(figsize=(12,10))
-        plt.subplots_adjust(left=0.14, right=0.94)
-        plt.scatter(self.u, self.v, c=self.du, 
-                    s=40, cmap=plt.cm.seismic, 
-                    vmin=-MAX, vmax=MAX)
-        cb = plt.colorbar()
-        cb.ax.tick_params(labelsize=20)
-        cb.set_label('du (mas)', fontsize=20)
-        plt.xlabel('u (arcsec)', fontsize=20)
-        plt.ylabel('v (arcsec)', fontsize=20)
-        plt.xticks(size=16)
-        plt.yticks(size=16)
-        plt.title(int(exp), fontsize=20)
-        if save:
-            namefig = os.path.join(rep, 'du_fov_%i.pdf'%int(exp))
-            plt.savefig(namefig, transparent=True)
+    MAX = 3.*np.std(gp_class.du)
+    plt.figure(figsize=(12,10))
+    plt.subplots_adjust(left=0.14, right=0.94)
+    plt.scatter(gp_class.u, gp_class.v, c=gp_class.du, 
+                s=40, cmap=plt.cm.seismic, 
+                vmin=-MAX, vmax=MAX)
+    cb = plt.colorbar()
+    cb.ax.tick_params(labelsize=20)
+    cb.set_label('du (mas)', fontsize=20)
+    plt.xlabel('u (arcsec)', fontsize=20)
+    plt.ylabel('v (arcsec)', fontsize=20)
+    plt.xticks(size=16)
+    plt.yticks(size=16)
+    plt.title(int(exp), fontsize=20)
+    if save:
+        namefig = os.path.join(rep, 'du_fov_%i.pdf'%int(exp))
+        plt.savefig(namefig, transparent=True)
     
-        plt.figure(figsize=(12,10))
-        plt.subplots_adjust(left=0.14, right=0.94, top=0.95)
-        plt.scatter(self.u, self.v, c=self.dv, 
-                    s=40, cmap=plt.cm.seismic, 
-                    vmin=-MAX, vmax=MAX)
-        cb.ax.tick_params(labelsize=20)
+    plt.figure(figsize=(12,10))
+    plt.subplots_adjust(left=0.14, right=0.94, top=0.95)
+    plt.scatter(gp_class.u, gp_class.v, c=gp_class.dv, 
+                s=40, cmap=plt.cm.seismic, 
+                vmin=-MAX, vmax=MAX)
+    cb.ax.tick_params(labelsize=20)
+    cb = plt.colorbar()
+    cb.set_label('dv (mas)', fontsize=20)
+    plt.xlabel('u (arcsec)', fontsize=20)
+    plt.ylabel('v (arcsec)', fontsize=20)
+    plt.xticks(size=16)
+    plt.yticks(size=16)
+    plt.title(int(exp), fontsize=20)
+    if save:
+        namefig = os.path.join(rep, 'dv_fov_%i.pdf'%int(exp))
+        plt.savefig(namefig, transparent=True)
+        
+    fig = plt.figure(figsize=(12,10))
+    plt.subplots_adjust(left=0.16, right=0.96, top=0.98)
+    ax = plt.gca()
+    quiver_dict = dict(alpha=1,
+                       angles='uv',
+                       headlength=1.e-10,
+                       headwidth=0,
+                       headaxislength=0,
+                       minlength=0,
+                       pivot='middle',
+                       scale_units='xy',
+                       width=0.003,
+                       color='blue',
+                       scale=0.3)
+
+    ax.quiver(gp_class.u, gp_class.v, 
+              gp_class.du, gp_class.dv, **quiver_dict)
+    plt.xlabel('u (arcsec)', fontsize=20)
+    plt.ylabel('v (arcsec)', fontsize=20)
+    plt.xticks(size=16)
+    plt.yticks(size=16)
+    if save:
+        namefig = os.path.join(rep, 'quiver_dudv_fov_%i.pdf'%int(exp))
+        plt.savefig(namefig, transparent=True)
+
+def plot_eb_mode(gp_class, rep='', save=False, exp="0"):
+    
+    plt.figure(figsize=(10,6))
+    plt.subplots_adjust(bottom=0.12, top=0.95, right=0.99)
+    plt.scatter(np.exp(gp_class.logr), gp_class.xie, s=20, 
+                alpha=1, c='b', label='E-mode')
+    plt.scatter(np.exp(gp_class.logr), gp_class.xib, s=20,
+                alpha=1, c='r', label='B-mode')
+    plt.plot(np.exp(gp_class.logr), np.zeros_like(gp_class.logr), 
+             'k--', alpha=0.5, zorder=0)
+    MIN = np.min([np.min(gp_class.xie), np.min(gp_class.xib)])
+    MAX = np.max([np.max(gp_class.xie), np.max(gp_class.xib)])
+    plt.ylim(-40,60)
+    plt.xlim(0.005, 1.5)
+    plt.xscale('log')
+    plt.xticks(size=16)
+    plt.yticks(size=16)
+    plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
+    plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
+    plt.title('%s %s'%((gp_class.visit_id, gp_class.exp_id)), fontsize=20)
+    plt.legend(loc=1, fontsize=16)
+    if save:
+        namefig = os.path.join(rep, 'eb_mode_%i.pdf'%int(exp))
+        plt.savefig(namefig, transparent=True)
+
+def plot_2pcf(gp_class, rep='', save=False, exp="0"):
+    
+    cb_label = ['$\\xi_{du,du}$ (mas$^2$)', 
+                '$\\xi_{dv,dv}$ (mas$^2$)', 
+                '$\\xi_{du,dv}$ (mas$^2$)']
+    XI = [gp_class.xi_dudu, gp_class.xi_dvdv, gp_class.xi_dudv]
+    
+    I = 1
+    plt.figure(figsize=(14,5))
+    plt.subplots_adjust(wspace=0.4,left=0.07,right=0.95, bottom=0.15,top=0.85)
+    for xi in XI:
+        MAX = np.max([abs(np.min(xi)), np.max(xi)])
+        plt.subplot(1,3,I)
+        plt.imshow(xi, cmap=plt.cm.seismic,
+                   vmin=-MAX, vmax=MAX, origin="lower", 
+                   extent=[np.min(gp_class.xi_sep[:,0])/60., np.max(gp_class.xi_sep[:,1]/60.), 
+                           np.min(gp_class.xi_sep[:,1])/60., np.max(gp_class.xi_sep[:,1])/60.])
         cb = plt.colorbar()
-        cb.set_label('dv (mas)', fontsize=20)
-        plt.xlabel('u (arcsec)', fontsize=20)
-        plt.ylabel('v (arcsec)', fontsize=20)
+        cb.ax.tick_params(labelsize=16)
+        cb.set_label(cb_label[I-1], fontsize=18)
         plt.xticks(size=16)
         plt.yticks(size=16)
-        plt.title(int(exp), fontsize=20)
-        if save:
-            namefig = os.path.join(rep, 'dv_fov_%i.pdf'%int(exp))
-            plt.savefig(namefig, transparent=True)
+        plt.xlabel('$\Delta u$ (arcmin)', fontsize=18)
+        if I == 1:
+            plt.ylabel('$\Delta v$ (arcmin)', fontsize=18)
+        I += 1
+    if save:
+        namefig = os.path.join(rep, '2pcf_dudu_dvdv_dudv_%i.pdf'%int(exp))
+        plt.savefig(namefig, transparent=True)
 
-        fig = plt.figure(figsize=(12,10))
-        plt.subplots_adjust(left=0.16, right=0.96, top=0.98)
-        ax = plt.gca()
-        quiver_dict = dict(alpha=1,
-                           angles='uv',
-                           headlength=1.e-10,
-                           headwidth=0,
-                           headaxislength=0,
-                           minlength=0,
-                           pivot='middle',
-                           scale_units='xy',
-                           width=0.003,
-                           color='blue',
-                           scale=0.3)
+def plot_gaussian_process(gp_class):
 
-        ax.quiver(self.u, self.v, 
-                  self.du, self.dv, **quiver_dict)
-        plt.xlabel('u (arcsec)', fontsize=20)
-        plt.ylabel('v (arcsec)', fontsize=20)
-        plt.xticks(size=16)
-        plt.yticks(size=16)
-        if save:
-            namefig = os.path.join(rep, 'quiver_dudv_fov_%i.pdf'%int(exp))
-            plt.savefig(namefig, transparent=True)
+    plot_fields(gp_class, rep=gp_class.rep, save=gp_class.save, exp=gp_class.exp_id)
+    plot_eb_mode(gp_class, rep=gp_class.rep, save=gp_class.save, exp=gp_class.exp_id)
+    plot_2pcf(gp_class, rep=gp_class.rep, save=gp_class.save, exp=gp_class.exp_id)
+    plot_correlation_function(gp_class.gpu._optimizer, NAME='du', 
+                              rep=gp_class.rep, save=gp_class.save, exp=gp_class.exp_id)
+    plot_correlation_function(gp_class.gpv._optimizer, NAME='dv', 
+                              rep=gp_class.rep, save=gp_class.save, exp=gp_class.exp_id)
 
-    def plot_eb_mode(self, rep='', save=False, exp="0"):
+    Y_valid = np.array([gp_class.du_test, gp_class.dv_test]).T
+    Y_valid_interp = np.array([gp_class.du_test_predict, gp_class.dv_test_predict]).T
+    Y_valid_err =  np.array([gp_class.du_err_test,  gp_class.dv_err_test]).T
 
-        plt.figure(figsize=(10,6))
-        plt.subplots_adjust(bottom=0.12, top=0.95, right=0.99)
-        plt.scatter(np.exp(self.logr), self.xie, s=20, 
-                    alpha=1, c='b', label='E-mode')
-        plt.scatter(np.exp(self.logr), self.xib, s=20,
-                    alpha=1, c='r', label='B-mode')
-        plt.plot(np.exp(self.logr), np.zeros_like(self.logr), 
-                 'k--', alpha=0.5, zorder=0)
-        MIN = np.min([np.min(self.xie), np.min(self.xib)])
-        MAX = np.max([np.max(self.xie), np.max(self.xib)])
-        plt.ylim(-40,60)
-        plt.xlim(0.005, 1.5)
-        plt.xscale('log')
-        plt.xticks(size=16)
-        plt.yticks(size=16)
-        plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
-        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
-        plt.title('%s %s'%((self.visit_id, self.exp_id)), fontsize=20)
-        plt.legend(loc=1, fontsize=16)
-        if save:
-            namefig = os.path.join(rep, 'eb_mode_%i.pdf'%int(exp))
-            plt.savefig(namefig, transparent=True)
-
-    def plot_2pcf(self, rep='', save=False, exp="0"):
-
-        cb_label = ['$\\xi_{du,du}$ (mas$^2$)', 
-                    '$\\xi_{dv,dv}$ (mas$^2$)', 
-                    '$\\xi_{du,dv}$ (mas$^2$)']
-        XI = [self.xi_dudu, self.xi_dvdv, self.xi_dudv]
-
-        I = 1
-        plt.figure(figsize=(14,5))
-        plt.subplots_adjust(wspace=0.4,left=0.07,right=0.95, bottom=0.15,top=0.85)
-        for xi in XI:
-            MAX = np.max([abs(np.min(xi)), np.max(xi)])
-            plt.subplot(1,3,I)
-            plt.imshow(xi, cmap=plt.cm.seismic,
-                       vmin=-MAX, vmax=MAX, origin="lower", 
-                       extent=[np.min(self.xi_sep[:,0])/60., np.max(self.xi_sep[:,1]/60.), 
-                               np.min(self.xi_sep[:,1])/60., np.max(self.xi_sep[:,1])/60.])
-            cb = plt.colorbar()
-            cb.ax.tick_params(labelsize=16)
-            cb.set_label(cb_label[I-1], fontsize=18)
-            plt.xticks(size=16)
-            plt.yticks(size=16)
-            plt.xlabel('$\Delta u$ (arcmin)', fontsize=18)
-            if I == 1:
-                plt.ylabel('$\Delta v$ (arcmin)', fontsize=18)
-            I += 1
-        if save:
-            namefig = os.path.join(rep, '2pcf_dudu_dvdv_dudv_%i.pdf'%int(exp))
-            plt.savefig(namefig, transparent=True)
-
-    def plot_gaussian_process(self):
-        self.plot_fields(rep=self.rep, save=self.save, exp=self.exp_id)
-        self.plot_eb_mode(rep=self.rep, save=self.save, exp=self.exp_id)
-        self.plot_2pcf(rep=self.rep, save=self.save, exp=self.exp_id)
-        plot_correlation_function(self.gpu._optimizer, NAME='du', 
-                                  rep=self.rep, save=self.save, exp=self.exp_id)
-        plot_correlation_function(self.gpv._optimizer, NAME='dv', 
-                                  rep=self.rep, save=self.save, exp=self.exp_id)
-
-        Y_valid = np.array([self.du_test, self.dv_test]).T
-        Y_valid_interp = np.array([self.du_test_predict, self.dv_test_predict]).T
-        Y_valid_err =  np.array([self.du_err_test,  self.dv_err_test]).T
-
-        plot_gp_output(self.coords_test, Y_valid, Y_valid_interp, Y_valid_err, 
-                       rep=self.rep, save=self.save, exp=self.exp_id)
-        self.eb_after_gp(rep=self.rep, save=self.save, exp=self.exp_id)
+    plot_gp_output(gp_class.coords_test, Y_valid, Y_valid_interp, Y_valid_err, 
+                   rep=gp_class.rep, save=gp_class.save, exp=gp_class.exp_id)
+    eb_after_gp(gp_class, rep=gp_class.rep, save=gp_class.save, exp=gp_class.exp_id)

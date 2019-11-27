@@ -2,9 +2,8 @@ import numpy as np
 import copy
 import treecorr
 import treegp
-from astroeb import vcorr, xiB
+from gastrometry import vcorr, xiB, plotting
 from sklearn.model_selection import train_test_split
-import pylab as plt
 import os
 import cPickle
 import parser, optparse
@@ -22,14 +21,23 @@ def read_option():
 
 class gpastro(object):
 
-    def __init__(self, u, v, du, dv, du_err, dv_err, 
-                 mas=3600.*1e3, arcsec=3600., 
-                 exp_id="", visit_id="", rep="", save=False):
+    def __init__(self, u, v, du, dv, du_err, dv_err,
+                 NBIN=21, MAX = 17.*60.,
+                 P0=[3000., 0., 0.],
+                 kernel = "15**2 * AnisotropicVonKarman(invLam=np.array([[1./3000.**2,0],[0,1./3000.**2]]))",
+                 mas=3600.*1e3, arcsec=3600.,
+                 exp_id="", visit_id="", rep="", 
+                 save=False):
 
         self.exp_id = exp_id
         self.visit_id = visit_id
         self.rep = rep
         self.save = save
+
+        self.NBIN = NBIN
+        self.MAX = MAX
+        self.P0 = P0
+        self.kernel = kernel
 
         self.u = u * arcsec
         self.v = v * arcsec
@@ -141,21 +149,15 @@ class gpastro(object):
     def gp_interp(self):
 
         print "start gp interp"
-        L_start = 3000.
-        NBIN = 21
-        MAX = 17.*60.
-        P0 = [3000., 0., 0.]
-        kernel = "%f * AnisotropicVonKarman(invLam=np.array([[1./%f**2,0],[0,1./%f**2]]))"%((np.var(self.du_train), L_start, L_start))
-        gpu = treegp.GPInterpolation(kernel=kernel, optimize=True,
+        gpu = treegp.GPInterpolation(kernel=self.kernel, optimize=True,
                                      optimizer='two-pcf', anisotropic=True,
-                                     normalize=True, nbins=NBIN, min_sep=0.,
-                                     max_sep=MAX, robust_fit=True, 
-                                     p0=P0)
+                                     normalize=True, nbins=self.NBIN, min_sep=0.,
+                                     max_sep=self.MAX, robust_fit=True, 
+                                     p0=self.P0)
         gpu.initialize(self.coords_train, self.du_train, y_err=self.du_err_train)
         gpu.solve()
         self.du_test_predict = gpu.predict(self.coords_test, return_cov=False)
         self.gpu = gpu
-
         self.dic_output['gp_output'].update({'gpu.2pcf':gpu._optimizer._2pcf,
                                              'gpu.2pcf_weight':gpu._optimizer._2pcf_weight,
                                              'gpu.2pcf_dist':gpu._optimizer._2pcf_dist,
@@ -167,13 +169,11 @@ class gpastro(object):
                                              'gpu.coords_test':self.coords_test})
         
         print "I did half"
-        L_start = 3000.
-        kernel = "%f * AnisotropicVonKarman(invLam=np.array([[1./%f**2,0],[0,1./%f**2]]))"%((np.var(self.dv_train), L_start, L_start))
-        gpv = treegp.GPInterpolation(kernel=kernel, optimize=True,
+        gpv = treegp.GPInterpolation(kernel=self.kernel, optimize=True,
                                      optimizer='two-pcf', anisotropic=True,
-                                     normalize=True, nbins=NBIN, min_sep=0.,
-                                     max_sep=MAX, robust_fit=True,
-                                     p0=P0)
+                                     normalize=True, nbins=self.NBIN, min_sep=0.,
+                                     max_sep=self.MAX, robust_fit=True,
+                                     p0=self.P0)
         gpv.initialize(self.coords_train, self.dv_train, y_err=self.dv_err_train)
         gpv.solve()
         self.dv_test_predict = gpv.predict(self.coords_test, return_cov=False)
@@ -210,8 +210,9 @@ class gpastro(object):
                                              'xib_residuals':self.xib_residuals,
                                              'xie_residuals':self.xie_residuals,
                                              'logr_residuals':self.logr_residuals})
+    def plot_gaussian_process(self):
 
-
+        plotting.plot_gaussian_process(self)
 
     def save_output(self):
 
