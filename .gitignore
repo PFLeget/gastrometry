@@ -1,2 +1,9 @@
 *.pyc
 *.py~
+.gitignore~
+
+.DS_Store
+gastrometry.egg-info/
+gastrometry/plotting/.DS_Store
+gastrometry/.DS_Store
+gastrometry/plotting/*.pkl

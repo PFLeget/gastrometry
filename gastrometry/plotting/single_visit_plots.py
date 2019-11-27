@@ -3,6 +3,7 @@ import pylab as plt
 import cPickle
 from sklearn.model_selection import train_test_split
 from gastrometry import biweight_median, biweight_mad
+from gastrometry import vcorr, xiB
 
 
 def plot_single_exposure(input_pkl, CMAP=plt.cm.seismic, MAX=14, 
@@ -21,7 +22,7 @@ def plot_single_exposure(input_pkl, CMAP=plt.cm.seismic, MAX=14,
     ax1.set_xticks(np.linspace(-2000, 2000, 5))
 
     ax2 = plt.subplot(1,3,2)
-    s2 = ax2.scatter(dic['u']*arcsec, dic['v']*arcsec, 
+    s2 = ax2.scatter(dic['u']*arcsec, dic['v']*arcsec,
                      c=dic['dv']*mas, lw=0, s=SIZE,
                      cmap=CMAP, vmin=-MAX, vmax=MAX)
     ax2.set_yticks([],[])
@@ -106,13 +107,41 @@ def plot_single_exposure_hist(input_pkl, MAX=30., NBIN=30, mas=3600.*1e3, arcsec
     plt.xticks([],[])
     plt.yticks([],[])
 
+def plot_eb_mode_single_visit(input_pkl,mas=3600.*1e3, arcsec=3600.):
+
+    dic = cPickle.load(open(input_pkl))
+
+    logr, xiplus, ximinus, xicross, xiz2 = vcorr(dic['u'], dic['v'],
+                                                 dic['du']*mas, dic['dv']*mas)
+    xib = xiB(logr, xiplus, ximinus)
+    xie = xiplus - xib
+
+    plt.figure(figsize=(10,6))
+    plt.subplots_adjust(bottom=0.12, top=0.98,right=0.99)
+    plt.scatter(np.exp(logr), xie, c='b', label='E-mode')
+    plt.scatter(np.exp(logr), xib, c='r', label='B-mode')
+    plt.plot(np.exp(logr), np.zeros_like(logr), 'k--', zorder=0)
+    plt.ylim(-40,60)
+    plt.xlim(0.005, 1.5)
+    plt.xscale('log')
+    plt.xticks(size=16)
+    plt.yticks(size=16)
+    plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
+    plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
+    #plt.title(int(self.exp_id), fontsize=20)
+    plt.legend(loc=1, fontsize=16)
+
 
 if __name__ == '__main__':
 
     #plot_single_exposure('../../tests/before_spline/137108_z/input.pkl')
     #plt.savefig('../../../../Dropbox/hsc_astro/figures/137108_z.pdf')
-    plot_single_exposure_hist('../../tests/before_spline/137108_z/input.pkl')
-    plt.savefig('../../../../Dropbox/hsc_astro/figures/137108_z_hist.pdf')
-    plt.show()
+    #plot_single_exposure_hist('../../tests/before_spline/137108_z/input.pkl')
+    #plt.savefig('../../../../Dropbox/hsc_astro/figures/137108_z_hist.pdf')
+    #plt.show()
 
+    plot_eb_mode_single_visit('../../tests/before_spline/137108_z/input.pkl', 
+                              mas=3600.*1e3, arcsec=3600.)
+    plt.savefig('../../../../Dropbox/hsc_astro/figures/137108_z_eb_mode.pdf')
+    plt.show()
     
