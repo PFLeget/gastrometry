@@ -8,12 +8,10 @@ def read_input(input_astrometry='/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJ
                filt_telescop=['g', 'r', 'r2', 'i', 'i2', 'z', 'y']):
 
     for f in filt_telescop:
-        folders = os.path.join(input_astrometry, '%s/res-meas.list'%(f))
+        folders = os.path.join(input_astrometry, '*%s/res-meas.list'%(f))
         nights = glob.glob(folders)
-
         N = 1
         for night in nights:
-
             A = np.loadtxt(night)
             exp_id = {}
             for exp in A[:,21]:
@@ -25,6 +23,7 @@ def read_input(input_astrometry='/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJ
                 Filtre = (A[:,4]<-6)
                 Filtre &= (A[:,21] == exp)
                 rep  = os.path.join(output, "%i_%s"%((int(exp), f)))
+                os.system('mkdir %s'%(rep))
 
                 pkl_name = os.path.join(rep, 'input.pkl')
                 pkl_file = open(pkl_name, 'w')
@@ -42,3 +41,8 @@ def read_input(input_astrometry='/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJ
                 pkl_file.close()
                 E += 1
             N += 1
+
+
+if __name__ == '__main__':
+
+    read_input(output='/pbs/home/l/leget/sps_lsst/HSC/gastrometry_test/')

@@ -6,12 +6,12 @@ def gastrogp(config, read_input_only=False,
     """
     import glob
     import numpy as np
-    from .input import read_input
+    from gastrometry import read_input
 
-    if not read_input_only & not interp_only:
+    if not read_input_only and not interp_only:
         raise ValueError("At least one option should be set to True.")
 
-    if read_input_only & interp_only:
+    if read_input_only and interp_only:
         raise ValueError("Just one option should be set to True.")
 
     if 'output' not in config:
@@ -23,11 +23,9 @@ def gastrogp(config, read_input_only=False,
         for key in ['directory', 'filt_telescop']:
             if key not in config['input']:
                 raise ValueError("%s field is required in config dict"%key) 
-
         read_input(input_astrometry=config['input']['directory'],
                    output=config['output']['directory'],
                    filt_telescop=config['input']['filt_telescop'])
-    
     #for key in ['output', 'hyper']:
     #    if key not in config:
     #        raise ValueError("%s field is required in config dict"%key)
@@ -86,11 +84,11 @@ def gastrogp(config, read_input_only=False,
     #    logger.debug('npsfs = %d',npsfs)
     #    config['output']['file_name'] = psf_list
 
-if __name__ = '__main__':
+if __name__ == '__main__':
 
     config = {'input':{'directory':'/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJY/fitastrom_FUINMJY/data/',
-                       'filt_telescop'=['g', 'r', 'r2', 'i', 'i2', 'z', 'y']},
-              'output':{'directory':'/pbs/home/l/leget/sps_lsst/HSC/gp_output'}}
+                       'filt_telescop':['g', 'r', 'r2', 'i', 'i2', 'z', 'y']},
+              'output':{'directory':'/pbs/home/l/leget/sps_lsst/HSC/gastrometry_test'}}
 
     gastrogp(config, read_input_only=True,
              interp_only=False, write_output=False)
