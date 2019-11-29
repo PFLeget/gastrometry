@@ -17,6 +17,7 @@ def gastrogp(config, read_input_only=False,
     import glob
     import numpy as np
     from gastrometry import read_input
+    from gastrometry import launch_jobs_ccin2p3
 
     if not read_input_only and not interp_only:
         raise ValueError("At least one option should be set to True.")
@@ -39,8 +40,9 @@ def gastrogp(config, read_input_only=False,
     if interp_only:
         if 'interp' not in config:
             raise ValueError("interp field is required in config dict")
-        for key in ['NBIN', 'MAX', 'P0', 'kernel']:
-            raise ValueError("%s field is required in config dict"%key)
+        for key in ['NBIN', 'MAX', 'P0', 'kernel', 'filt_telescop']:
+            if key not in config['interp']:
+                raise ValueError("%s field is required in config dict"%key)
         launch_jobs_ccin2p3(rep_inout=config['output']['directory'],
                             filt_telescop = config['interp']['filt_telescop'],
                             NBIN=config['interp']['NBIN'],

@@ -9,8 +9,10 @@ def launch_jobs_ccin2p3(rep_inout='/pbs/home/l/leget/sps_lsst/HSC/gp_output/',
                         P0=[3000., 0., 0.],
                         kernel = "15**2 * AnisotropicVonKarman(invLam=np.array([[1./3000.**2,0],[0,1./3000.**2]]))"):
     J = 0
-    for f in filt_hsc:
-        visits = glob.glob(rep_inout+'*%s'%f)
+    stop = False
+    for f in filt_telescop:
+        visits = os.path.join(rep_inout, '*%s'%f) 
+        visits = glob.glob(visits)
         for i in range(len(visits)):
             print visits[i]
 
@@ -42,5 +44,8 @@ def launch_jobs_ccin2p3(rep_inout='/pbs/home/l/leget/sps_lsst/HSC/gp_output/',
             os.system('rm machine_gun_jobs_%i.sh*'%(J))
             J += 1
             if i > 10:
+                stop = True
                 break
+        if stop:
+            break
 
