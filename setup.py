@@ -8,11 +8,10 @@ from setuptools import setup, find_packages
 # Package name
 name = 'gastrometry'
 
-# Packages (subdirectories in clusters/)
 packages = find_packages()
 
 # Scripts (in scripts/)
-scripts = glob.glob("scripts/*.py")
+scripts = ["scripts/gastrogp", "scripts/gastrify"]
 
 package_data = {}
 

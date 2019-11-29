@@ -1,0 +1,9 @@
+rep: /Users/leget/gppf/gastrometry/tests/137108_z_tests
+
+NBIN: 21
+
+MAX: 1020.
+
+P0: [3000., 0., 0.]
+
+kernel: 15**2 * AnisotropicVonKarman(invLam=np.array([[1./3000.**2,0],[0,1./3000.**2]]))
