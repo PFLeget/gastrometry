@@ -1,3 +1,14 @@
+import yaml
+
+def read_config(file_name):
+    """Read a configuration dict from a file.
+    
+    :param file_name:   The file name from which the configuration dict should be read.
+    """
+    with open(file_name) as fin:
+        config = yaml.load(fin.read())
+    return config
+
 
 def gastrogp(config, read_input_only=False, 
              interp_only=False, write_output=False):

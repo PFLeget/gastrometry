@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+
+import sys
+import gastrometry
+
+def parse_args():
+    """Handle the command line arguments to gastrogp executable.
+
+    Returns the args as an argparse.Namespace object.
+
+    It will have the following fields:
+
+    args.config_file
+    args.verbose
+    args.log_file
+    args.version
+    """
+    import argparse
+
+    description = "Run Gaussian Processes on astrometry residuals.\n"
+    description += "See https://github.com/PFLeget/gastrometry for documentation."
+
+    parser = argparse.ArgumentParser(description=description, add_help=True)
+    parser.add_argument(
+            'config_file', type=str, nargs='?',
+            help='the configuration file')
+
+    parser.add_argument("--read_input_only", "-r",
+                        dest="read_input_only", help="read input astrometry files", 
+                        default=False, action="store_true")
+    parser.add_argument("--interp_only", "-i",
+                        dest="interp_only", help="do gp", 
+                        default=False, action="store_true")
+    parser.add_argument("--write_output", "-w",
+                        dest="write_output", help="write output gp/astrometry files", 
+                        default=False, action="store_true")
+
+    #parser.add_argument(
+    #        '-v', '--verbose', type=int, action='store', default=None, choices=(0, 1, 2, 3),
+    #        help='integer verbosity level: min=0, max=3 '
+    #        '[default=1; overrides config verbose value]')
+
+    args = parser.parse_args()
+
+    if args.config_file == None:
+        if args.version:
+            print(version_str)
+        else:
+            parser.print_help()
+        sys.exit()
+
+    return args
+
+def main():
+    args = parse_args()
+    # Read the config file
+    config = gastrometry.read_config(args.config_file)
+    # Run the gastrogp function
+    print config
+    gastrometry.gastrogp(config, 
+                         read_input_only=args.read_input_only,
+                         interp_only=args.interp_only,
+                         write_output=args.write_output)
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,8 @@
+input:
+
+    directory: /sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJY/fitastrom_FUINMJY/data/
+    filt_telescop: ['g', 'r', 'r2', 'i', 'i2', 'z', 'y']
+
+output:
+
+    directory: /pbs/home/l/leget/sps_lsst/HSC/gastrometry_test

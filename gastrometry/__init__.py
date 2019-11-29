@@ -9,3 +9,6 @@ from . import plotting
 
 from .input import read_input
 
+from .config import read_config
+from .config import gastrogp
+
