@@ -1,5 +1,4 @@
 import yaml
-import cPickle
 
 def read_config(file_name):
     """Read a configuration dict from a file.
@@ -9,7 +8,6 @@ def read_config(file_name):
     with open(file_name) as fin:
         config = yaml.load(fin.read())
     return config
-
 
 def gastrogp(config, read_input_only=False, 
              interp_only=False, write_output=False):
@@ -110,6 +108,9 @@ def gastrogp(config, read_input_only=False,
 
 def gastrify(config):
 
+    import cPickle
+    import os
+    from gastrometry import gpastro
     for key in ['rep', 'NBIN', 'MAX', 'P0', 'kernel']:
         if key not in config:
                 raise ValueError("%s field is required in config dict"%key)
@@ -118,15 +119,15 @@ def gastrify(config):
 
     dic = cPickle.load(open(INPUT))
     print "gp_astro start"
-    gp = gastrometry.gpastro(dic['u'], dic['v'],
-                             dic['du'], dic['dv'],
-                             dic['du_err'], dic['dv_err'],
-                             NBIN=config['NBIN'], MAX = config['MAX'],
-                             P0=config['P0'],
-                             kernel = config['kernel'],
-                             mas=3600.*1e3, arcsec=3600.,
-                             exp_id=dic['exp_id'], visit_id="",
-                             rep=config['rep'], save=True)
+    gp = gpastro(dic['u'], dic['v'],
+                 dic['du'], dic['dv'],
+                 dic['du_err'], dic['dv_err'],
+                 NBIN=config['NBIN'], MAX = config['MAX'],
+                 P0=config['P0'],
+                 kernel = config['kernel'],
+                 mas=3600.*1e3, arcsec=3600.,
+                 exp_id=dic['exp_id'], visit_id="",
+                 rep=config['rep'], save=True)
     gp.comp_eb()
     gp.comp_xi()
     print "start gp"
@@ -143,7 +144,7 @@ if __name__ == '__main__':
               'interp':{'NBIN':21,
                         'MAX': 17.*60.,
                         'P0': [3000., 0., 0.],
-                        'kernel': '15**2 * AnisotropicVonKarman(invLam=np.array([[1./3000.**2,0],[0,1./3000.**2]]))'}
+                        'kernel': '15**2 * AnisotropicVonKarman(invLam=np.array([[1./3000.**2,0],[0,1./3000.**2]]))'},
               'output':{'directory':'/pbs/home/l/leget/sps_lsst/HSC/gastrometry_test'}}
 
     gastrogp(config, read_input_only=True,
