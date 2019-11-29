@@ -8,7 +8,9 @@ from .math_toolbox import return_var_map
 from . import plotting
 
 from .input import read_input
+from .gpastro import gpastro
 
 from .config import read_config
 from .config import gastrogp
+from .config import gastrify
 

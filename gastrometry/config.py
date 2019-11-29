@@ -1,4 +1,5 @@
 import yaml
+import cPickle
 
 def read_config(file_name):
     """Read a configuration dict from a file.
@@ -30,13 +31,24 @@ def gastrogp(config, read_input_only=False,
 
     if read_input_only:
         if 'input' not in config:
-            raise ValueError("output field is required in config dict")
+            raise ValueError("input field is required in config dict")
         for key in ['directory', 'filt_telescop']:
             if key not in config['input']:
-                raise ValueError("%s field is required in config dict"%key) 
+                raise ValueError("%s field is required in config dict"%key)
         read_input(input_astrometry=config['input']['directory'],
                    output=config['output']['directory'],
                    filt_telescop=config['input']['filt_telescop'])
+    if interp_only:
+        if 'interp' not in config:
+            raise ValueError("interp field is required in config dict")
+        for key in ['NBIN', 'MAX', 'P0', 'kernel']:
+            raise ValueError("%s field is required in config dict"%key)
+
+        #'NBIN':21,
+        #'MAX': 17.*60.,
+        #'P0': [3000., 0., 0.],
+        #'kernel'
+        
     #for key in ['output', 'hyper']:
     #    if key not in config:
     #        raise ValueError("%s field is required in config dict"%key)
@@ -95,10 +107,43 @@ def gastrogp(config, read_input_only=False,
     #    logger.debug('npsfs = %d',npsfs)
     #    config['output']['file_name'] = psf_list
 
+
+def gastrify(config):
+
+    for key in ['rep', 'NBIN', 'MAX', 'P0', 'kernel']:
+        if key not in config:
+                raise ValueError("%s field is required in config dict"%key)
+
+    INPUT = os.path.join(config['rep'], 'input.pkl')
+
+    dic = cPickle.load(open(INPUT))
+    print "gp_astro start"
+    gp = gastrometry.gpastro(dic['u'], dic['v'],
+                             dic['du'], dic['dv'],
+                             dic['du_err'], dic['dv_err'],
+                             NBIN=config['NBIN'], MAX = config['MAX'],
+                             P0=config['P0'],
+                             kernel = config['kernel'],
+                             mas=3600.*1e3, arcsec=3600.,
+                             exp_id=dic['exp_id'], visit_id="",
+                             rep=config['rep'], save=True)
+    gp.comp_eb()
+    gp.comp_xi()
+    print "start gp"
+    gp.gp_interp()
+    print "do plot"
+    gp.plot_gaussian_process()
+    gp.save_output()
+
+
 if __name__ == '__main__':
 
     config = {'input':{'directory':'/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJY/fitastrom_FUINMJY/data/',
                        'filt_telescop':['g', 'r', 'r2', 'i', 'i2', 'z', 'y']},
+              'interp':{'NBIN':21,
+                        'MAX': 17.*60.,
+                        'P0': [3000., 0., 0.],
+                        'kernel': '15**2 * AnisotropicVonKarman(invLam=np.array([[1./3000.**2,0],[0,1./3000.**2]]))'}
               'output':{'directory':'/pbs/home/l/leget/sps_lsst/HSC/gastrometry_test'}}
 
     gastrogp(config, read_input_only=True,
