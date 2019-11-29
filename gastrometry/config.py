@@ -41,11 +41,12 @@ def gastrogp(config, read_input_only=False,
             raise ValueError("interp field is required in config dict")
         for key in ['NBIN', 'MAX', 'P0', 'kernel']:
             raise ValueError("%s field is required in config dict"%key)
-
-        #'NBIN':21,
-        #'MAX': 17.*60.,
-        #'P0': [3000., 0., 0.],
-        #'kernel'
+        launch_jobs_ccin2p3(rep_inout=config['output']['directory'],
+                            filt_telescop = config['interp']['filt_telescop'],
+                            NBIN=config['interp']['NBIN'],
+                            MAX = config['interp']['MAX'],
+                            P0=config['interp']['P0'],
+                            kernel = config['interp']['kernel'])
         
     #for key in ['output', 'hyper']:
     #    if key not in config:

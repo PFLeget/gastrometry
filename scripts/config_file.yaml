@@ -6,3 +6,11 @@ input:
 output:
 
     directory: /pbs/home/l/leget/sps_lsst/HSC/gastrometry_test
+
+interp:
+
+    filt_telescop: ['g', 'r', 'r2', 'i', 'i2', 'z', 'y']
+    NBIN: 21
+    MAX: 1020.
+    P0: [3000., 0., 0.]
+    kernel: 15**2 * AnisotropicVonKarman(invLam=np.array([[1./3000.**2,0],[0,1./3000.**2]]))

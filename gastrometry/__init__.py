@@ -8,6 +8,7 @@ from .math_toolbox import return_var_map
 from . import plotting
 
 from .input import read_input
+from .machine_gun_jobs import launch_jobs_ccin2p3
 from .gpastro import gpastro
 
 from .config import read_config
