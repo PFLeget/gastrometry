@@ -18,7 +18,7 @@ def launch_jobs_ccin2p3(rep_inout='/pbs/home/l/leget/sps_lsst/HSC/gp_output/',
 
             yaml_name = os.path.join(visits[i], 'config_file.yaml')
             config_yaml = open(yaml_name,'w')
-            config_yaml.write('rep: %s\n'%yaml_name)
+            config_yaml.write('rep: %s\n'%visits[i])
             config_yaml.write('\n')
             config_yaml.write('NBIN: %i\n'%NBIN)
             config_yaml.write('\n')
@@ -43,9 +43,9 @@ def launch_jobs_ccin2p3(rep_inout='/pbs/home/l/leget/sps_lsst/HSC/gp_output/',
             os.system(command)
             os.system('rm machine_gun_jobs_%i.sh*'%(J))
             J += 1
-            if i > 10:
-                stop = True
-                break
-        if stop:
-            break
+            #if i > 10:
+            #    stop = True
+            #    break
+        #if stop:
+        #    break
 
