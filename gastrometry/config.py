@@ -10,19 +10,24 @@ def read_config(file_name):
     return config
 
 def gastrogp(config, read_input_only=False, 
-             interp_only=False, write_output=False):
+             interp_only=False, write_output_only=False):
     """
     To do.
     """
     import glob
+    import os
     import numpy as np
     from gastrometry import read_input
+    from gastrometry import gather_input_all
     from gastrometry import launch_jobs_ccin2p3
 
-    if not read_input_only and not interp_only:
+    config_setup = [read_input_only, interp_only,
+                    write_output_only]
+
+    if sum([not i for i in config_setup]) == len(config_setup):
         raise ValueError("At least one option should be set to True.")
 
-    if read_input_only and interp_only:
+    if sum(config_setup) >= 2:
         raise ValueError("Just one option should be set to True.")
 
     if 'output' not in config:
@@ -49,64 +54,16 @@ def gastrogp(config, read_input_only=False,
                             MAX = config['interp']['MAX'],
                             P0=config['interp']['P0'],
                             kernel = config['interp']['kernel'])
-        
-    #for key in ['output', 'hyper']:
-    #    if key not in config:
-    #        raise ValueError("%s field is required in config dict"%key)
-    #for key in ['file_name']:
-    #    if key not in config['output']:
-    #        raise ValueError("%s field is required in config dict output"%key)
+    if write_output_only:
+        if 'input' not in config:
+            raise ValueError("input field is required in config dict")
+        for key in ['directory', 'filt_telescop']:
+            if key not in config['input']:
+                raise ValueError("%s field is required in config dict"%key)
 
-    #for key in ['file_name']:
-    #    if key not in config['hyper']:
-    #        raise ValueError("%s field is required in config dict hyper"%key)
-
-    #if 'dir' in config['output']:
-    #    dir = config['output']['dir']
-    #else:
-    #    dir = None
-
-    #if 'bin_spacing' in config['hyper']:
-    #    bin_spacing = config['hyper']['bin_spacing'] #in arcsec
-    #else:
-    #    bin_spacing = 120. #default bin_spacing: 120 arcsec
-
-    #if 'statistic' in config['hyper']:
-    #    if config['hyper']['statistic'] not in ['mean', 'median']:
-    #        raise ValueError("%s is not a suported statistic (only mean and median are currently suported)"
-    #                         %config['hyper']['statistic'])
-    #    else:
-    #        stat_used = config['hyper']['statistic']
-    #else:
-    #    stat_used = 'mean' #default statistics: arithmetic mean over each bin
-
-    #if 'params_fitted' in config['hyper']:
-    #    if type(config['hyper']['params_fitted']) != list:
-    #        raise TypeError('must give a list of index for params_fitted')
-    #    else:
-    #        params_fitted = config['hyper']['params_fitted']
-    #else:
-    #    params_fitted = None
-
-    #if isinstance(config['output']['file_name'], list):
-    #    psf_list = config['output']['file_name']
-    #    if len(psf_list) == 0:
-    #        raise ValueError("file_name may not be an empty list")
-    #elif isinstance(config['output']['file_name'], str):
-    #    file_name = config['output']['file_name']
-    #    if dir is not None:
-    #        file_name = os.path.join(dir, file_name)
-    #    psf_list = sorted(glob.glob(file_name))
-    #    if len(psf_list) == 0:
-    #        raise ValueError("No files found corresponding to "+config['file_name'])
-    #elif not isinstance(config['file_name'], dict):
-    #    raise ValueError("file_name should be either a dict or a string")
-
-    #if psf_list is not None:
-    #    logger.debug('psf_list = %s',psf_list)
-    #    npsfs = len(psf_list)
-    #    logger.debug('npsfs = %d',npsfs)
-    #    config['output']['file_name'] = psf_list
+        rep_save = os.path.join(config['output']['directory'], 'outputs')
+        os.system('mkdir %s'%(rep_save))
+        gather_input_all(config['output']['directory'], rep_save=rep_save)
 
 
 def gastrify(config):

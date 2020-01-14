@@ -2,7 +2,8 @@ import numpy as np
 import glob
 import os
 
-outputs = glob.glob('/pbs/home/l/leget/sps_lsst/HSC/gp_output/*')
+#../../../sps_lsst/HSC/gastrometry_test/
+outputs = glob.glob('/pbs/home/l/leget/sps_lsst/HSC/gp_output_VK/*')
 
 ndone = 0
 not_done = []
@@ -11,7 +12,7 @@ for output in outputs:
     pdf = glob.glob(os.path.join(output, '*.pdf'))
     pkl = glob.glob(os.path.join(output, '*.pkl'))
     log = glob.glob(os.path.join(output, '*.log'))
-    
+
     ok = True
     
     if len(pdf) != 16:

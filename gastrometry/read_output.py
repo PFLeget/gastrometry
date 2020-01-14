@@ -153,7 +153,7 @@ def gather_input_all(rep_out, rep_save=''):
     for f in filters:
         print f
         rep_filters = glob.glob(os.path.join(rep_out, '*_%s*'%(f)))
-        lo = load_output(rep_filters)
+        lo = gather_input(rep_filters)
         lo.load_data()
         lo.save_output(os.path.join(rep_save, 'inputs_%s.pkl'%(f)))
 
@@ -176,4 +176,5 @@ def write_output(rep_out, rep_save=''):
 if __name__ == '__main__':
 
     #write_output('../../../sps_lsst/HSC/gp_output/', rep_save='')
-    gather_input_all('../../../sps_lsst/HSC/gp_output/', rep_save='')
+    gather_input_all('../../../sps_lsst/HSC/gastrometry_test', rep_save='../../../sps_lsst/HSC/gastrometry_test/outputs')
+    #gather_input_all('../../../sps_lsst/HSC/gp_output_VK', rep_save='../../../sps_lsst/HSC/gp_output_VK/outputs')

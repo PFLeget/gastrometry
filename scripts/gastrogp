@@ -31,8 +31,8 @@ def parse_args():
     parser.add_argument("--interp_only", "-i",
                         dest="interp_only", help="do gp", 
                         default=False, action="store_true")
-    parser.add_argument("--write_output", "-w",
-                        dest="write_output", help="write output gp/astrometry files", 
+    parser.add_argument("--write_output_only", "-w",
+                        dest="write_output_only", help="write output gp/astrometry files", 
                         default=False, action="store_true")
 
     #parser.add_argument(
@@ -59,7 +59,7 @@ def main():
     gastrometry.gastrogp(config, 
                          read_input_only=args.read_input_only,
                          interp_only=args.interp_only,
-                         write_output=args.write_output)
+                         write_output_only=args.write_output_only)
 
 if __name__ == '__main__':
     main()
