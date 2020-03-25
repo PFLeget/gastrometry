@@ -6,7 +6,8 @@ import glob
 import os
 import treegp
 from sklearn.neighbors import KNeighborsRegressor
-from astroeb import vcorr, xiB
+from gastrometry import vcorr, xiB, biweight_median
+from astropy.stats import median_absolute_deviation as mad_astropy
 
 def median_check_finite(x):
     """
@@ -22,7 +23,37 @@ def median_check_finite(x):
             median[i] = np.nan
         else:
             median[i] = biweight_median(x[:,i][Filtre])
+
     return median
+
+def mean_sigma_clipping(x, n_sigma=6):
+    Filtre = np.array([True]*len(x))
+    counts = [np.sum(Filtre)+1, np.sum(Filtre)]
+    i = 0 
+    while counts[-2] != counts[-1]:
+        Filtre &= (abs(x-np.median(x)) < n_sigma * mad_astropy(x[Filtre]))
+        counts.append(np.sum(Filtre))
+        i += 1
+        if i>10:
+            break
+    print 'PF mean:', np.sum(Filtre), '/',  len(Filtre), float(np.sum(Filtre)) / float(len(Filtre))
+    return np.mean(x[Filtre])
+
+def mean_check_finite(x):
+    """
+    Mean, but remove the nan.
+
+    :param sample: 1d numpy array. The sample where you want
+                   to compute the mean with outlier rejection.
+    """
+    mean = np.zeros_like(x[0])
+    for i in range(len(mean)):
+        Filtre = np.isfinite(x[:,i])
+        if np.sum(Filtre) == 0:
+            mean[i] = np.nan
+        else:
+            mean[i] = mean_sigma_clipping(x[:,i][Filtre])
+    return mean
 
 class load_output(object):
 
@@ -328,28 +359,34 @@ class plot_output(object):
         
         print "eb mode plot"
         plt.figure(figsize=(12,8))
-        for i in range(len(self.exp_id)):
-            plt.scatter(np.exp(self.logr[i]), self.e_mode[i], s=5, alpha=0.009, c='b')
-            plt.scatter(np.exp(self.logr[i]), self.b_mode[i], s=5, alpha=0.009, c='r')
+        #for i in range(len(self.exp_id)):
+        #    plt.scatter(np.exp(self.logr[i]), self.e_mode[i], s=5, alpha=0.009, c='b')
+        #    plt.scatter(np.exp(self.logr[i]), self.b_mode[i], s=5, alpha=0.009, c='r')
 
-        efilter = np.isfinite(self.e_mode)
-        ew = np.ones_like(self.e_mode)
-        self.e_mode[~efilter] = 0
-        ew[~efilter] = 0
+        #efilter = np.isfinite(self.e_mode)
+        #ew = np.ones_like(self.e_mode)
+        #self.e_mode[~efilter] = 0
+        #ew[~efilter] = 0
 
-        bfilter = np.isfinite(self.b_mode)
-        bw = np.ones_like(self.b_mode)
-        self.b_mode[~bfilter] = 0
-        bw[~bfilter] = 0
+        #bfilter = np.isfinite(self.b_mode)
+        #bw = np.ones_like(self.b_mode)
+        #self.b_mode[~bfilter] = 0
+        #bw[~bfilter] = 0
  
-        #plt.scatter(np.exp(self.logr[0]), np.average(self.e_mode, weights=ew, axis=0), s=50, c='b', label='average E-mode')
-        #plt.scatter(np.exp(self.logr[0]), np.average(self.b_mode, weights=bw, axis=0), s=50, c='r', label='average B-mode')
-        med_e = return_median(self.e_mode)
-        med_b = return_median(self.b_mode)
-        plt.scatter(np.exp(self.logr[0]), med_e, s=50, c='b', label='median E-mode')
-        plt.scatter(np.exp(self.logr[0]), med_b, s=50, c='r', label='median B-mode')
+        mean_e = mean_check_finite(self.e_mode)
+        mean_b = mean_check_finite(self.b_mode)
+        
+        plt.scatter(np.exp(self.logr[0]), 
+                    mean_e, s=50, c='b', label='mean E-mode')
+        plt.scatter(np.exp(self.logr[0]), 
+                    mean_b, s=50, c='r', label='mean B-mode')
+
+        #med_e = median_check_finite(self.e_mode)
+        #med_b = median_check_finite(self.b_mode)
+        #plt.scatter(np.exp(self.logr[0]), med_e, s=50, c='b', marker="+", label='median E-mode')
+        #plt.scatter(np.exp(self.logr[0]), med_b, s=50, c='r', marker="+", label='median B-mode')
         plt.plot(np.exp(self.logr[0]), np.zeros_like(self.logr[0]), 'k--', lw=3)
-        plt.ylim(-20,40)
+        plt.ylim(-5, 30)
         plt.xlim(0.005, 1.5)
         plt.xscale('log')
         plt.xticks(size=16)
@@ -381,8 +418,8 @@ class plot_output(object):
         #            s=50, c='b', label='average E-mode (test)')
         #plt.scatter(np.exp(self.logr[0][20:]), np.average(self.b_mode_test[:,20:], weights=bw[:,20:], axis=0), 
         #            s=50, c='r', label='average B-mode (test)')
-        med_e =return_median(self.e_mode_test)
-        med_b =return_median(self.b_mode_test)
+        med_e = median_check_finite(self.e_mode_test)
+        med_b = median_check_finite(self.b_mode_test)
         plt.scatter(np.exp(self.logr[0][20:]), med_e[20:], s=50, c='b', label='median E-mode (test)')
         plt.scatter(np.exp(self.logr[0][20:]), med_b[20:], s=50, c='r', label='median B-mode (test)')
         plt.plot(np.exp(self.logr[0]), np.zeros_like(self.logr[0]), 'k--', lw=3)
@@ -418,8 +455,8 @@ class plot_output(object):
         #            s=50, c='b', label='average E-mode (test, after GP)')
         #plt.scatter(np.exp(self.logr[0][20:]), np.average(self.b_mode_residuals[:,20:], weights=bw[:,20:], axis=0), 
         #            s=50, c='r', label='average B-mode (test, after GP)')
-        med_e =return_median(self.e_mode_residuals)
-        med_b =return_median(self.b_mode_residuals)
+        med_e = median_check_finite(self.e_mode_residuals)
+        med_b = median_check_finite(self.b_mode_residuals)
         plt.scatter(np.exp(self.logr[0]), med_e, s=50, c='b', label='median E-mode (test, after GP)')
         plt.scatter(np.exp(self.logr[0]), med_b, s=50, c='r', label='median B-mode (test, after GP)')
         plt.plot(np.exp(self.logr[0]), np.zeros_like(self.logr[0]), 'k--', lw=3)
@@ -484,14 +521,18 @@ if __name__ == '__main__':
     ##lo.load_data()
     ##lo.save_output('final_gp_outputs.pkl')
 
-    po = plot_output('final_gp_outputs.pkl')
-    ##po.plot_eb_mode()
-    ##plt.savefig('../../Desktop/1_eb_glob.png')
-    ##po.plot_eb_mode_test()
-    ##plt.savefig('../../Desktop/2_eb_glob_test.png')
-    ##po.plot_eb_mode_test_residuals()
-    ##plt.savefig('../../Desktop/3_eb_glob_test_afterGP.png')
+    po = plot_output('final_gp_outputs_all_vk.pkl')
+    po.plot_eb_mode()
+    plt.savefig('../../../../Desktop/eb_mean_all_ssp_vk.pdf')
+    #plt.savefig('../../../../Desktop/1_eb_glob_vk.png')
+
+
+    #po.plot_eb_mode_test()
+    #plt.savefig('../../../../Desktop/2_eb_glob_test_vk.png')
+    #po.plot_eb_mode_test_residuals()
+    #plt.savefig('../../../../Desktop/3_eb_glob_test_afterGP_vk.png')
+
     ##po.plot_residuals()
     ##po.meanify()
     #po.plot_2pcf()
-    po.meanify_ccd(CMAP = None, MAX = 1.)
+    #po.meanify_ccd(CMAP = None, MAX = 1.)
