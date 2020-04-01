@@ -19,6 +19,7 @@ def gastrogp(config, read_input_only=False,
     import numpy as np
     from gastrometry import read_input
     from gastrometry import gather_input_all
+    from gastrometry import write_output
     from gastrometry import launch_jobs_ccin2p3
 
     config_setup = [read_input_only, interp_only,
@@ -64,6 +65,7 @@ def gastrogp(config, read_input_only=False,
         rep_save = os.path.join(config['output']['directory'], 'outputs')
         os.system('mkdir %s'%(rep_save))
         gather_input_all(config['output']['directory'], rep_save=rep_save)
+        write_output(config['output']['directory'], rep_save=rep_save) 
 
 
 def gastrify(config):
