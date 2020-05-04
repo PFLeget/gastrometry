@@ -37,7 +37,7 @@ def mean_sigma_clipping(x, n_sigma=6):
         if i>10:
             break
     print 'PF mean:', np.sum(Filtre), '/',  len(Filtre), float(np.sum(Filtre)) / float(len(Filtre))
-    return np.mean(x[Filtre])
+    return np.mean(x[Filtre]), np.std(x[Filtre])
 
 def mean_check_finite(x):
     """
@@ -47,13 +47,15 @@ def mean_check_finite(x):
                    to compute the mean with outlier rejection.
     """
     mean = np.zeros_like(x[0])
+    std = np.zeros_like(x[0])
     for i in range(len(mean)):
         Filtre = np.isfinite(x[:,i])
         if np.sum(Filtre) == 0:
             mean[i] = np.nan
+            std[i] = np.nan
         else:
-            mean[i] = mean_sigma_clipping(x[:,i][Filtre])
-    return mean
+            mean[i], std[i] = mean_sigma_clipping(x[:,i][Filtre])
+    return mean, std
 
 class load_output(object):
 
@@ -359,6 +361,7 @@ class plot_output(object):
         
         print "eb mode plot"
         plt.figure(figsize=(12,8))
+        plt.subplots_adjust(bottom=0.12, top=0.98,right=0.99)
         #for i in range(len(self.exp_id)):
         #    plt.scatter(np.exp(self.logr[i]), self.e_mode[i], s=5, alpha=0.009, c='b')
         #    plt.scatter(np.exp(self.logr[i]), self.b_mode[i], s=5, alpha=0.009, c='r')
@@ -373,13 +376,18 @@ class plot_output(object):
         #self.b_mode[~bfilter] = 0
         #bw[~bfilter] = 0
  
-        mean_e = mean_check_finite(self.e_mode)
-        mean_b = mean_check_finite(self.b_mode)
+        mean_e, std_e = mean_check_finite(self.e_mode)
+        mean_b, std_b = mean_check_finite(self.b_mode)
         
-        plt.scatter(np.exp(self.logr[0]), 
-                    mean_e, s=50, c='b', label='mean E-mode')
-        plt.scatter(np.exp(self.logr[0]), 
-                    mean_b, s=50, c='r', label='mean B-mode')
+        #plt.scatter(np.exp(self.logr[0]),
+        #            mean_e, s=50, c='b', label='mean E-mode')
+        #plt.scatter(np.exp(self.logr[0]), 
+        #            mean_b, s=50, c='r', label='mean B-mode')
+
+        plt.plot(np.exp(self.logr[0]), mean_e,'b', lw=3, label='mean E-mode')
+        plt.fill_between(np.exp(self.logr[0]), mean_e-std_e, mean_e+std_e, color='b', alpha=0.4, label='$\pm 1 \sigma$ E-mode')
+        plt.plot(np.exp(self.logr[0]), mean_b,'r', lw=3, label='mean B-mode')
+        plt.fill_between(np.exp(self.logr[0]), mean_b-std_b, mean_b+std_b, color='r', alpha=0.4, label='$\pm 1 \sigma$ B-mode')
 
         #med_e = median_check_finite(self.e_mode)
         #med_b = median_check_finite(self.b_mode)
@@ -393,7 +401,7 @@ class plot_output(object):
         plt.yticks(size=16)
         plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
         plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
-        plt.legend(fontsize=22)
+        plt.legend(fontsize=20)
 
 
     def plot_eb_mode_test(self):

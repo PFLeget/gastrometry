@@ -7,7 +7,11 @@ from gastrometry import vcorr, xiB
 
 
 def plot_single_exposure(input_pkl, CMAP=plt.cm.seismic, MAX=14, 
-                         SIZE=20, mas=3600.*1e3, arcsec=3600.):
+                         SIZE=20, mas=3600.*1e3, arcsec=3600., 
+                         scale_arrow=0.2, subtitle3="", 
+                         x_arrow=1900, y_arrow=2500, size_arrow=40,
+                         x_text=2050, y_text=2450):
+
 
     dic = cPickle.load(open(input_pkl))
 
@@ -40,16 +44,16 @@ def plot_single_exposure(input_pkl, CMAP=plt.cm.seismic, MAX=14,
                        scale_units='xy',
                        width=0.003,
                        color='blue',
-                       scale=0.2)
+                       scale=scale_arrow)
     indice = np.linspace(0, len(dic['u'])-1, len(dic['u'])).astype(int)
     indice_train, indice_test = train_test_split(indice, test_size=0.5, random_state=42)
     ax3.quiver(dic['u'][indice_train]*arcsec, dic['v'][indice_train]*arcsec,
                dic['du'][indice_train]*mas, dic['dv'][indice_train]*mas,**quiver_dict)
     ax3.set_yticks([],[])
-    ax3.quiver([1900],[2500],[40],[0], **quiver_dict)
-    ax3.text(2050,2450,"(40 mas)",fontsize=11)
+    ax3.quiver([x_arrow],[y_arrow],[size_arrow],[0], **quiver_dict)
+    ax3.text(x_text, y_text, "(%i mas)"%(size_arrow), fontsize=11)
     ax3.set_xticks(np.linspace(-2000, 2000, 5))
-    ax3.set_title('astrometric residuals', fontsize=16)
+    ax3.set_title('astrometric residuals'+subtitle3, fontsize=16)
 
     ax_cbar1 = fig.add_axes([0.08, 0.9, 0.29, 0.025])
     ax_cbar2 = fig.add_axes([0.385, 0.9, 0.29, 0.025])
@@ -107,7 +111,7 @@ def plot_single_exposure_hist(input_pkl, MAX=30., NBIN=30, mas=3600.*1e3, arcsec
     plt.xticks([],[])
     plt.yticks([],[])
 
-def plot_eb_mode_single_visit(input_pkl,mas=3600.*1e3, arcsec=3600.):
+def plot_eb_mode_single_visit(input_pkl,mas=3600.*1e3, arcsec=3600., YLIM=[-20,60], title=""):
 
     dic = cPickle.load(open(input_pkl))
 
@@ -117,11 +121,11 @@ def plot_eb_mode_single_visit(input_pkl,mas=3600.*1e3, arcsec=3600.):
     xie = xiplus - xib
 
     plt.figure(figsize=(10,6))
-    plt.subplots_adjust(bottom=0.12, top=0.98,right=0.99)
+    plt.subplots_adjust(bottom=0.12, top=0.9,right=0.99)
     plt.scatter(np.exp(logr), xie, c='b', label='E-mode')
     plt.scatter(np.exp(logr), xib, c='r', label='B-mode')
     plt.plot(np.exp(logr), np.zeros_like(logr), 'k--', zorder=0)
-    plt.ylim(-40,60)
+    plt.ylim(YLIM[0], YLIM[1])
     plt.xlim(0.005, 1.5)
     plt.xscale('log')
     plt.xticks(size=16)
@@ -129,19 +133,36 @@ def plot_eb_mode_single_visit(input_pkl,mas=3600.*1e3, arcsec=3600.):
     plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
     plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
     #plt.title(int(self.exp_id), fontsize=20)
+    plt.title(title, fontsize=20)
     plt.legend(loc=1, fontsize=16)
 
 
 if __name__ == '__main__':
 
-    #plot_single_exposure('../../tests/before_spline/137108_z/input.pkl')
-    #plt.savefig('../../../../Dropbox/hsc_astro/figures/137108_z.pdf')
+    plot_single_exposure('/Users/leget/Desktop/hsc_astro_exposure/13268_z/input.pkl',
+                         subtitle3="\n(exp id: 13268)")
+    plt.savefig('../../../../Dropbox/hsc_astro/figures/13268_z.pdf')
+    plot_single_exposure('/Users/leget/Desktop/hsc_astro_exposure/53732_z/input.pkl',
+                         subtitle3="\n(exp id: 53732)")
+    plt.savefig('../../../../Dropbox/hsc_astro/figures/53732_z.pdf')
+    plot_single_exposure('/Users/leget/Desktop/hsc_astro_exposure/137108_z/input.pkl',
+                         subtitle3="\n(exp id: 137108)")
+    plt.savefig('../../../../Dropbox/hsc_astro/figures/137108_z.pdf')
+    plot_single_exposure('/Users/leget/Desktop/hsc_astro_exposure/96450_z/input.pkl',
+                         MAX=39, scale_arrow=0.5, subtitle3="\n(exp id: 96450)",
+                         x_arrow=1600, y_arrow=2700, size_arrow=100,
+                         x_text=1750, y_text=2650)
+    plt.savefig('../../../../Dropbox/hsc_astro/figures/96450_z_b_mode.pdf')
     #plot_single_exposure_hist('../../tests/before_spline/137108_z/input.pkl')
     #plt.savefig('../../../../Dropbox/hsc_astro/figures/137108_z_hist.pdf')
-    #plt.show()
 
     plot_eb_mode_single_visit('../../tests/before_spline/137108_z/input.pkl', 
-                              mas=3600.*1e3, arcsec=3600.)
+                              mas=3600.*1e3, arcsec=3600., title="(exp id: 137108)")
     plt.savefig('../../../../Dropbox/hsc_astro/figures/137108_z_eb_mode.pdf')
-    plt.show()
+
+    plot_eb_mode_single_visit('/Users/leget/Desktop/hsc_astro_exposure/96450_z/input.pkl',
+                              mas=3600.*1e3, arcsec=3600., YLIM=[-5,200], title="(exp id: 96450)")
+    plt.savefig('../../../../Dropbox/hsc_astro/figures/96450_z_b_mode_eb_mode.pdf')
+
+    #plt.show()
     
