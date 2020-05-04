@@ -149,11 +149,9 @@ class gpastro(object):
     def gp_interp(self):
 
         print "start gp interp"
-        gpu = treegp.GPInterpolation(kernel=self.kernel, optimize=True,
-                                     optimizer='two-pcf', anisotropic=True,
+        gpu = treegp.GPInterpolation(kernel=self.kernel, optimizer='anisotropic', 
                                      normalize=True, nbins=self.NBIN, min_sep=0.,
-                                     max_sep=self.MAX, robust_fit=True, 
-                                     p0=self.P0)
+                                     max_sep=self.MAX, p0=self.P0)
         gpu.initialize(self.coords_train, self.du_train, y_err=self.du_err_train)
         gpu.solve()
         self.du_test_predict = gpu.predict(self.coords_test, return_cov=False)
@@ -169,11 +167,9 @@ class gpastro(object):
                                              'gpu.coords_test':self.coords_test})
         
         print "I did half"
-        gpv = treegp.GPInterpolation(kernel=self.kernel, optimize=True,
-                                     optimizer='two-pcf', anisotropic=True,
+        gpv = treegp.GPInterpolation(kernel=self.kernel, optimizer='anisotropic',
                                      normalize=True, nbins=self.NBIN, min_sep=0.,
-                                     max_sep=self.MAX, robust_fit=True,
-                                     p0=self.P0)
+                                     max_sep=self.MAX, p0=self.P0)
         gpv.initialize(self.coords_train, self.dv_train, y_err=self.dv_err_train)
         gpv.solve()
         self.dv_test_predict = gpv.predict(self.coords_test, return_cov=False)
