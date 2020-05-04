@@ -3,14 +3,14 @@ import pylab as plt
 import os
 from gastrometry import biweight_median, biweight_mad
 from gastrometry import median_check_finite
-import cPickle
+import pickle
 
 def plot_distribution_residuals(path='../data/', stat = None,
                                 filters=['g', 'r', 'i', 'z', 'y'], 
                                 colors=['b', 'g', 'r', 'k', 'c'] ,mas=3600.*1e3):
 
     if stat is not None:
-        stat = cPickle.load(open(stat))
+        stat = pickle.load(open(stat, 'rb'))
     else:
         stat = {'du':{'mad':[],
                       'median':[],
@@ -24,10 +24,10 @@ def plot_distribution_residuals(path='../data/', stat = None,
 
         for f in filters:
             pkl = os.path.join(path, 'inputs_%s.pkl'%(f))
-            dic = cPickle.load(open(pkl))
+            dic = pickle.load(open(pkl, 'rb'))
         
             for exp in range(len(dic['exp_id'])):
-                print exp
+                print(exp)
                 for comp in ['du', 'dv']:
                     stat[comp]['median'].append(biweight_median(dic[comp][exp]*mas))
                     stat[comp]['mad'].append(biweight_mad(dic[comp][exp]*mas))
@@ -38,8 +38,8 @@ def plot_distribution_residuals(path='../data/', stat = None,
                 stat['D']['mad'].append(biweight_mad(D))
                 stat['D']['filters'].append(f)
                 
-        stat_file = open('stat.pkl', 'w')
-        cPickle.dump(stat, stat_file)
+        stat_file = open('stat.pkl', 'wb')
+        pickle.dump(stat, stat_file)
         stat_file.close()
 
     plt.figure(figsize=(5, 5))
@@ -71,7 +71,7 @@ def plot_distribution_residuals(path='../data/', stat = None,
 
 def plot_eb_mode_full_survey(output_pkl):
      
-    dic = cPickle.load(open(output_pkl))
+    dic = pickle.load(open(output_pkl, 'rb'))
     
     plt.figure(figsize=(12,8))
     for i in range(len(dic['e_mode'][:,0])):

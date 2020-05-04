@@ -104,13 +104,13 @@ def vcorr(x,y,dx,dy,
     if len(x) > maxpts:
         # Subsample array to get desired number of points
         rate = float(maxpts) / len(x)
-        print "Subsampling rate {:5.3f}%".format(rate*100.)
+        print("Subsampling rate {:5.3f}%".format(rate*100.))
         use = np.random.random(len(x)) <= rate
         x = x[use]
         y = y[use]
         dx = dx[use]
         dy = dy[use]
-    print "Length ",len(x)
+    print("Length ",len(x))
     # Get index arrays that make all unique pairs
     i1, i2 = np.triu_indices(len(x))
     # Omit self-pairs

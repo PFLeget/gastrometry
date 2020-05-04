@@ -1,4 +1,4 @@
-import cPickle
+import pickle
 import os
 import glob
 import numpy as np
@@ -17,7 +17,7 @@ class get_var_ebmode:
 
     def __init__(self, pkl_file):
 
-        dic = cPickle.load(open(pkl_file))
+        dic = pickle.load(open(pkl_file, 'rb'))
 
         self.exp_id = dic['exp_id']
         self.xie = dic['2pcf_stat']['xie']
@@ -105,7 +105,7 @@ def comp_eb_mode_info(gp_outputs_rep="/sps/lsst/users/leget/HSC/v2/astro_VK/", r
     nrep = len(gp_outputs)
     dic_out = {}
     for pkl_name in gp_outputs:
-        print "%i / %i"%((i+1, nrep))
+        print("%i / %i"%((i+1, nrep)))
         gve = get_var_ebmode(pkl_name)
         gve.minimize_minuit()
         dic_out.update({gve.exp_id:{'e_stat':gve.result_e,
@@ -113,8 +113,8 @@ def comp_eb_mode_info(gp_outputs_rep="/sps/lsst/users/leget/HSC/v2/astro_VK/", r
         i += 1
 
     pkl_name = os.path.join(rep_out, 'eb_stat.pkl')
-    pkl_file = open(pkl_name, 'w')
-    cPickle.dump(dic_out, pkl_file)
+    pkl_file = open(pkl_name, 'wb')
+    pickle.dump(dic_out, pkl_file)
     pkl_file.close()
     
 

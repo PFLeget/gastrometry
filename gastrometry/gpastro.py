@@ -5,7 +5,7 @@ import treegp
 from gastrometry import vcorr, xiB, plotting
 from sklearn.model_selection import train_test_split
 import os
-import cPickle
+import pickle
 import parser, optparse
 
 def read_option():
@@ -148,7 +148,7 @@ class gpastro(object):
 
     def gp_interp(self):
 
-        print "start gp interp"
+        print("start gp interp")
         gpu = treegp.GPInterpolation(kernel=self.kernel, optimizer='anisotropic', 
                                      normalize=True, nbins=self.NBIN, min_sep=0.,
                                      max_sep=self.MAX, p0=self.P0)
@@ -166,7 +166,7 @@ class gpastro(object):
                                              'gpu.du_test':self.du_test,
                                              'gpu.coords_test':self.coords_test})
         
-        print "I did half"
+        print("I did half")
         gpv = treegp.GPInterpolation(kernel=self.kernel, optimizer='anisotropic',
                                      normalize=True, nbins=self.NBIN, min_sep=0.,
                                      max_sep=self.MAX, p0=self.P0)
@@ -213,8 +213,8 @@ class gpastro(object):
     def save_output(self):
 
         pkl_name = os.path.join(self.rep, 'gp_output_%i.pkl'%(int(self.exp_id)))
-        pkl_file = open(pkl_name, 'w')
-        cPickle.dump(self.dic_output, pkl_file)
+        pkl_file = open(pkl_name, 'wb')
+        pickle.dump(self.dic_output, pkl_file)
         pkl_file.close()
 
 if __name__ == "__main__":
@@ -222,8 +222,8 @@ if __name__ == "__main__":
     option = read_option()
     INPUT = os.path.join(option.rep, 'input.pkl')
 
-    dic = cPickle.load(open(INPUT))
-    print "gp_astro start"
+    dic = pickle.load(open(INPUT, 'rb'))
+    print("gp_astro start")
     gp = gpastro(dic['u'], dic['v'], 
                  dic['du'], dic['dv'], 
                  dic['du_err'], dic['dv_err'],
@@ -232,8 +232,8 @@ if __name__ == "__main__":
                  rep=option.rep, save=True)
     gp.comp_eb()
     gp.comp_xi()
-    print "start gp"
+    print("start gp")
     gp.gp_interp()
-    print "do plot"
+    print("do plot")
     gp.plot_gaussian_process()
     gp.save_output()

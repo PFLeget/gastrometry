@@ -1,7 +1,7 @@
 import glob
 import os
 import numpy as np
-import cPickle
+import pickle
 
 def read_input(input_astrometry='/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJY/fitastrom_FUINMJY/data/',
                output='/pbs/home/l/leget/sps_lsst/HSC/gp_output',
@@ -19,14 +19,14 @@ def read_input(input_astrometry='/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJ
                     exp_id.update({exp:None})
             E = 1
             for exp in exp_id:
-                print "%i/%i "%((N, len(nights))), "%i/%i "%((E, len(exp_id))), "%s"%f
+                print("%i/%i "%((N, len(nights))), "%i/%i "%((E, len(exp_id))), "%s"%f)
                 Filtre = (A[:,4]<-6)
                 Filtre &= (A[:,21] == exp)
                 rep  = os.path.join(output, "%i_%s"%((int(exp), f)))
                 os.system('mkdir %s'%(rep))
 
                 pkl_name = os.path.join(rep, 'input.pkl')
-                pkl_file = open(pkl_name, 'w')
+                pkl_file = open(pkl_name, 'wb')
                 dic = {'exp_id':'%i'%(exp),
                        'u':A[:,8][Filtre], 
                        'v':A[:,9][Filtre],
@@ -37,7 +37,7 @@ def read_input(input_astrometry='/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJ
                        'dv':A[:,11][Filtre],
                        'du_err':A[:,12][Filtre],
                        'dv_err':A[:,13][Filtre]}
-                cPickle.dump(dic, pkl_file)
+                pickle.dump(dic, pkl_file)
                 pkl_file.close()
                 E += 1
             N += 1

@@ -29,7 +29,7 @@ for output in outputs:
     else:
         not_done.append(output)
 
-print "%i/%i"%((ndone, len(outputs)))
+print("%i/%i"%((ndone, len(outputs))))
 
 
     

@@ -14,7 +14,7 @@ def launch_jobs_ccin2p3(rep_inout='/pbs/home/l/leget/sps_lsst/HSC/gp_output/',
         visits = os.path.join(rep_inout, '*%s'%f) 
         visits = glob.glob(visits)
         for i in range(len(visits)):
-            print visits[i]
+            print(visits[i])
 
             yaml_name = os.path.join(visits[i], 'config_file.yaml')
             config_yaml = open(yaml_name,'w')

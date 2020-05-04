@@ -1,6 +1,6 @@
 import numpy as np
 import copy
-import cPickle
+import pickle
 import glob
 import os
 
@@ -21,11 +21,11 @@ class gather_input(object):
 
         I = 1
         for rep in self.rep_output:
-            print "%i/%i"%((I,len(self.rep_output)))
+            print("%i/%i"%((I,len(self.rep_output))))
             try:
-                dic_input = cPickle.load(open(os.path.join(rep,'input.pkl')))
+                dic_input = pickle.load(open(os.path.join(rep,'input.pkl'), 'rb'))
             except:
-                print 'file do not exist'
+                print('file do not exist')
                 continue
             self.exp_id.append(dic_input['exp_id'])
             self.u.append(dic_input['u'])
@@ -42,8 +42,8 @@ class gather_input(object):
                'du': np.array(self.du),
                'dv': np.array(self.dv)}
 
-        pkl = open(pkl_name, 'w')
-        cPickle.dump(dic, pkl)
+        pkl = open(pkl_name, 'wb')
+        pickle.dump(dic, pkl)
         pkl.close()
 
 
@@ -81,13 +81,13 @@ class load_output(object):
 
         I = 1
         for rep in self.rep_output:
-            print "%i/%i"%((I,len(self.rep_output)))
+            print("%i/%i"%((I,len(self.rep_output))))
             try:
                 pkl = glob.glob(os.path.join(rep,'gp_output*.pkl'))[0]
-                dic = cPickle.load(open(pkl))
-                dic_input = cPickle.load(open(os.path.join(rep,'input.pkl')))
+                dic = pickle.load(open(pkl, 'rb'))
+                dic_input = pickle.load(open(os.path.join(rep,'input.pkl'), 'rb'))
             except:
-                print 'file do not exist'
+                print('file do not exist')
                 continue
 
             self.exp_id.append(dic['exp_id'])
@@ -137,8 +137,8 @@ class load_output(object):
                'x_test': np.array(self.x_test),
                'y_test': np.array(self.y_test)}
 
-        pkl = open(pkl_name, 'w')
-        cPickle.dump(dic, pkl)
+        pkl = open(pkl_name, 'wb')
+        pickle.dump(dic, pkl)
         pkl.close()
 
 def gather_input_all(rep_out, rep_save=''):
@@ -151,7 +151,7 @@ def gather_input_all(rep_out, rep_save=''):
     lo.save_output(os.path.join(rep_save, 'inputs_all.pkl'))
 
     for f in filters:
-        print f
+        print(f)
         rep_filters = glob.glob(os.path.join(rep_out, '*_%s*'%(f)))
         lo = gather_input(rep_filters)
         lo.load_data()
@@ -167,7 +167,7 @@ def write_output(rep_out, rep_save=''):
     lo.save_output(os.path.join(rep_save, 'final_gp_outputs_all.pkl'))
 
     for f in filters:
-        print f
+        print(f)
         rep_filters = glob.glob(os.path.join(rep_out, '*_%s*'%(f)))
         lo = load_output(rep_filters)
         lo.load_data()

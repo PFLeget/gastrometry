@@ -70,7 +70,7 @@ def gastrogp(config, read_input_only=False,
 
 def gastrify(config):
 
-    import cPickle
+    import pickle
     import os
     from gastrometry import gpastro
     for key in ['rep', 'NBIN', 'MAX', 'P0', 'kernel']:
@@ -79,8 +79,8 @@ def gastrify(config):
 
     INPUT = os.path.join(config['rep'], 'input.pkl')
 
-    dic = cPickle.load(open(INPUT))
-    print "gp_astro start"
+    dic = pickle.load(open(INPUT, 'rb'))
+    print("gp_astro start")
     gp = gpastro(dic['u'], dic['v'],
                  dic['du'], dic['dv'],
                  dic['du_err'], dic['dv_err'],
@@ -92,9 +92,9 @@ def gastrify(config):
                  rep=config['rep'], save=True)
     gp.comp_eb()
     gp.comp_xi()
-    print "start gp"
+    print("start gp")
     gp.gp_interp()
-    print "do plot"
+    print("do plot")
     gp.plot_gaussian_process()
     gp.save_output()
 

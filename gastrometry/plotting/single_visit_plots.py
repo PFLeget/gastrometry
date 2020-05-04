@@ -1,6 +1,6 @@
 import numpy as np
 import pylab as plt
-import cPickle
+import pickle
 from sklearn.model_selection import train_test_split
 from gastrometry import biweight_median, biweight_mad
 from gastrometry import vcorr, xiB
@@ -13,7 +13,7 @@ def plot_single_exposure(input_pkl, CMAP=plt.cm.seismic, MAX=14,
                          x_text=2050, y_text=2450):
 
 
-    dic = cPickle.load(open(input_pkl))
+    dic = pickle.load(open(input_pkl, 'rb'))
 
     fig = plt.figure(figsize=(15.5,6.5))
     plt.subplots_adjust(wspace=0,top=0.85,right=0.99,left=0.07)
@@ -66,7 +66,7 @@ def plot_single_exposure(input_pkl, CMAP=plt.cm.seismic, MAX=14,
        
 def plot_single_exposure_hist(input_pkl, MAX=30., NBIN=30, mas=3600.*1e3, arcsec=3600.):
 
-    dic = cPickle.load(open(input_pkl))
+    dic = pickle.load(open(input_pkl, 'rb'))
 
     plt.figure(figsize=(8,8))
     plt.subplots_adjust(wspace=0, hspace=0, top=0.99, right=0.99)
@@ -113,7 +113,7 @@ def plot_single_exposure_hist(input_pkl, MAX=30., NBIN=30, mas=3600.*1e3, arcsec
 
 def plot_eb_mode_single_visit(input_pkl,mas=3600.*1e3, arcsec=3600., YLIM=[-20,60], title=""):
 
-    dic = cPickle.load(open(input_pkl))
+    dic = pickle.load(open(input_pkl, 'rb'))
 
     logr, xiplus, ximinus, xicross, xiz2 = vcorr(dic['u'], dic['v'],
                                                  dic['du']*mas, dic['dv']*mas)

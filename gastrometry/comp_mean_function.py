@@ -32,10 +32,10 @@ class comp_mean(object):
                     exp_id.update({exp:None})
             self.nvisits += len(exp_id.keys())
             self.nstars += np.sum(Filtre)
-            print night
-            print "total visit: ", self.nvisits
-            print "total object: ", self.nstars
-            print ""
+            print(night)
+            print("total visit: ", self.nvisits)
+            print("total object: ", self.nstars)
+            print("")
 
             coords = np.array([A[:,8][Filtre] * self.arcsec, A[:,9][Filtre] * self.arcsec]).T
             du = A[:,10][Filtre] * self.mas
@@ -81,7 +81,7 @@ def plot_mean(fits_file, cmap=None, MAX=2):
     plt.figure()
     plt.hist(y0, bins=np.linspace(-6, 6, 200))
     plt.title("mean=%f, std=%f"%((np.mean(y0), np.std(y0))))
-    print len(y0)
+    print(len(y0))
 
 if __name__ == "__main__":
 

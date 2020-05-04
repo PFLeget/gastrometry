@@ -1,7 +1,7 @@
 import numpy as np
 import pylab as plt
 import copy
-import cPickle
+import pickle
 import glob
 import os
 import treegp
@@ -36,7 +36,7 @@ def mean_sigma_clipping(x, n_sigma=6):
         i += 1
         if i>10:
             break
-    print 'PF mean:', np.sum(Filtre), '/',  len(Filtre), float(np.sum(Filtre)) / float(len(Filtre))
+    print('PF mean:', np.sum(Filtre), '/',  len(Filtre), float(np.sum(Filtre)) / float(len(Filtre)))
     return np.mean(x[Filtre]), np.std(x[Filtre])
 
 def mean_check_finite(x):
@@ -91,13 +91,13 @@ class load_output(object):
 
         I = 1
         for rep in self.rep_output:
-            print "%i/%i"%((I,len(self.rep_output)))
+            print("%i/%i"%((I,len(self.rep_output))))
             try:
                 pkl = glob.glob(os.path.join(rep,'gp_output*.pkl'))[0]
-                dic = cPickle.load(open(pkl))
-                dic_input = cPickle.load(open(os.path.join(rep,'input.pkl')))
+                dic = pickle.load(open(pkl, 'rb'))
+                dic_input = pickle.load(open(os.path.join(rep,'input.pkl'), 'rb'))
             except:
-                print 'file do not exist'
+                print('file do not exist')
                 continue
 
             self.exp_id.append(dic['exp_id'])
@@ -147,8 +147,8 @@ class load_output(object):
                'x_test': np.array(self.x_test),
                'y_test': np.array(self.y_test)}
 
-        pkl = open(pkl_name, 'w')
-        cPickle.dump(dic, pkl)
+        pkl = open(pkl_name, 'wb')
+        pickle.dump(dic, pkl)
         pkl.close()
 
 
@@ -156,9 +156,9 @@ class plot_output(object):
 
     def __init__(self, pkl_output):
 
-        print "start load"
-        dic = cPickle.load(open(pkl_output))
-        print "done loading"
+        print("start load")
+        dic = pickle.load(open(pkl_output, 'rb'))
+        print("done loading")
 
         # remove night when rotation was done by the PI,
         # B mode appears due to the fact that this is not
@@ -359,7 +359,7 @@ class plot_output(object):
             
     def plot_eb_mode(self):
         
-        print "eb mode plot"
+        print("eb mode plot")
         plt.figure(figsize=(12,8))
         plt.subplots_adjust(bottom=0.12, top=0.98,right=0.99)
         #for i in range(len(self.exp_id)):
@@ -406,7 +406,7 @@ class plot_output(object):
 
     def plot_eb_mode_test(self):
         
-        print "eb mode plot"
+        print("eb mode plot")
         plt.figure(figsize=(12,8))
         for i in range(len(self.exp_id)):
             plt.scatter(np.exp(self.logr[i]), self.e_mode_test[i], s=5, alpha=0.009, c='b')
@@ -443,7 +443,7 @@ class plot_output(object):
 
     def plot_eb_mode_test_residuals(self):
 
-        print "eb mode plot"
+        print("eb mode plot")
         plt.figure(figsize=(12,8))
         for i in range(len(self.exp_id)):
             plt.scatter(np.exp(self.logr[i]), self.e_mode_residuals[i], s=5, alpha=0.009, c='b')

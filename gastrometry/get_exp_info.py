@@ -1,7 +1,7 @@
 from astropy.io import fits
 import os
 import glob
-import cPickle
+import pickle
 
 def get_exp_id(filename):
     exp_id = ""
@@ -32,15 +32,15 @@ def get_exp_info(hsc_images="/sps/lsst/HSC/prod.2020-03.calib/dbimage_UI5XG7I/da
     i = 0
     nfiles = len(filesname)
     for filename in filesname:
-        print "%i / %i"%((i+1, nfiles))
+        print("%i / %i"%((i+1, nfiles)))
         fits_file = fits.open(filename)
         exp_id = get_exp_id(filename)
         dic_output.update({exp_id:{key: fits_file[1].header[key] for key in KEY}})
         i += 1
 
     pkl_name = os.path.join(rep_output, 'exp_info_hsc.pkl')
-    pkl_file = open(pkl_name, 'w')
-    cPickle.dump(dic_output, pkl_file)
+    pkl_file = open(pkl_name, 'wb')
+    pickle.dump(dic_output, pkl_file)
     pkl_file.close()
 
 if __name__ == "__main__":
