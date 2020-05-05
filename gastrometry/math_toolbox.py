@@ -84,7 +84,7 @@ def return_var_map(weight, xi):
             break
     VAR = VAR.reshape(N,N) + np.flipud(np.fliplr(VAR.reshape(N,N)))
     if N%2 == 1:
-        VAR[N/2, N/2] /= 2. 
+        VAR[int(N/2), int(N/2)] /= 2. 
     return VAR
 
 def vcorr(x,y,dx,dy,
