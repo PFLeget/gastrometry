@@ -12,6 +12,8 @@ make some config file config_file.yaml
     gastrogp config_file.yaml --interp_only
 
     # drink coffee, probably eat a meal and sleep
+    # to gather outputs for plotting purpose
+    gastrogp config_file.yaml --write_output_only
 
     # to run only on a single exposure 
     
