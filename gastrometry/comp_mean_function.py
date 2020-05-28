@@ -2,6 +2,7 @@ import numpy as np
 import treegp
 import pylab as plt
 import fitsio
+import os
 
 class comp_mean(object):
 
@@ -63,8 +64,8 @@ class comp_mean(object):
         plt.colorbar()
 
     def save_mean(self, directory='', name_outputs=['mean_gp_du.fits','mean_gp_dv.fits']):
-        self.mean_u.save_results(directory=directory, name_output=name_outputs[0])
-        self.mean_v.save_results(directory=directory, name_output=name_outputs[1])
+        self.mean_u.save_results(name_output=os.path.join(directory, name_outputs[0]))
+        self.mean_v.save_results(name_output=os.path.join(directory, name_outputs[1]))
 
 def plot_mean(fits_file, cmap=None, MAX=2):
 
@@ -85,24 +86,18 @@ def plot_mean(fits_file, cmap=None, MAX=2):
 
 if __name__ == "__main__":
 
-    #nights = ['../../Downloads/residuals4pfl/57402-z/res-meas.list',
-    #          '../../Downloads/residuals4pfl/57755-z/res-meas.list',
-    #          '../../Downloads/residuals4pfl/58131-z/res-meas.list']
-
     import glob
-    ##nights = glob.glob('/sps/snls13/HSC/prod.2019-04/dbimage_35UN7JY/fitastrom_ULHBNSI/data/*z/res-meas.list')
-    nights = glob.glob('/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJY/fitastrom_ZNLFUYQ/data/*z/res-meas.list')
+    #nights = glob.glob('/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJY/fitastrom_ZNLFUYQ/data/*z/res-meas.list')
 
-    #cm = comp_mean(nights, mas=3600.*1e3, arcsec=3600.,
-    #               bin_spacing=30., statistics='mean')
-    #cm.load()
-    #cm.comp_mean()
-    #cm.plot(cmap=None)
-    #cm.save_mean(directory='', name_outputs=['mean_gp_du_z_gaia_dr2.fits',
-    #                                         'mean_gp_dv_z_gaia_dr2.fits'])
+    nights = glob.glob('/sps/lsst/HSC/prod.2020-03.calib/dbimage_UI5XG7I/fitastrom_EKYBJYQ/data/*/res-meas.list')
 
-    plot_mean('mean_gp_du_z_gaia_dr2.fits', cmap=None, MAX=1)
-    plot_mean('mean_gp_dv_z_gaia_dr2.fits', cmap=None, MAX=1)
+    cm = comp_mean(nights, mas=3600.*1e3, arcsec=3600.,
+                   bin_spacing=1., statistics='mean')
+    cm.load()
+    cm.comp_mean()
+    cm.plot(cmap=None)
+    cm.save_mean(directory='', name_outputs=['mean_gp_du_1.fits',
+                                             'mean_gp_dv_1.fits'])
 
-    plot_mean('mean_gp_du_z_new.fits', cmap=None, MAX=1)
-    plot_mean('mean_gp_dv_z_new.fits', cmap=None, MAX=1)
+    plot_mean('mean_gp_du_z.fits', cmap=None, MAX=1)
+    plot_mean('mean_gp_dv_z.fits', cmap=None, MAX=1)
