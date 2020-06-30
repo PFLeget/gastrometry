@@ -357,44 +357,23 @@ class plot_output(object):
         plt.colorbar()
 
             
-    def plot_eb_mode(self):
+    def plot_eb_mode(self, YLIM=[-5,30]):
         
         print("eb mode plot")
         plt.figure(figsize=(12,8))
         plt.subplots_adjust(bottom=0.12, top=0.98,right=0.99)
-        #for i in range(len(self.exp_id)):
-        #    plt.scatter(np.exp(self.logr[i]), self.e_mode[i], s=5, alpha=0.009, c='b')
-        #    plt.scatter(np.exp(self.logr[i]), self.b_mode[i], s=5, alpha=0.009, c='r')
-
-        #efilter = np.isfinite(self.e_mode)
-        #ew = np.ones_like(self.e_mode)
-        #self.e_mode[~efilter] = 0
-        #ew[~efilter] = 0
-
-        #bfilter = np.isfinite(self.b_mode)
-        #bw = np.ones_like(self.b_mode)
-        #self.b_mode[~bfilter] = 0
-        #bw[~bfilter] = 0
  
         mean_e, std_e = mean_check_finite(self.e_mode)
         mean_b, std_b = mean_check_finite(self.b_mode)
         
-        #plt.scatter(np.exp(self.logr[0]),
-        #            mean_e, s=50, c='b', label='mean E-mode')
-        #plt.scatter(np.exp(self.logr[0]), 
-        #            mean_b, s=50, c='r', label='mean B-mode')
 
         plt.plot(np.exp(self.logr[0]), mean_e,'b', lw=3, label='mean E-mode')
         plt.fill_between(np.exp(self.logr[0]), mean_e-std_e, mean_e+std_e, color='b', alpha=0.4, label='$\pm 1 \sigma$ E-mode')
         plt.plot(np.exp(self.logr[0]), mean_b,'r', lw=3, label='mean B-mode')
         plt.fill_between(np.exp(self.logr[0]), mean_b-std_b, mean_b+std_b, color='r', alpha=0.4, label='$\pm 1 \sigma$ B-mode')
 
-        #med_e = median_check_finite(self.e_mode)
-        #med_b = median_check_finite(self.b_mode)
-        #plt.scatter(np.exp(self.logr[0]), med_e, s=50, c='b', marker="+", label='median E-mode')
-        #plt.scatter(np.exp(self.logr[0]), med_b, s=50, c='r', marker="+", label='median B-mode')
         plt.plot(np.exp(self.logr[0]), np.zeros_like(self.logr[0]), 'k--', lw=3)
-        plt.ylim(-5, 30)
+        plt.ylim(YLIM[0], YLIM[1])
         plt.xlim(0.005, 1.5)
         plt.xscale('log')
         plt.xticks(size=16)
@@ -404,78 +383,54 @@ class plot_output(object):
         plt.legend(fontsize=20)
 
 
-    def plot_eb_mode_test(self):
+    def plot_eb_mode_test(self, YLIM=[-5,30]):
+
+        print("eb mode plot test")
+        plt.figure(figsize=(12,8))
+        plt.subplots_adjust(bottom=0.12, top=0.98,right=0.99)
         
-        print("eb mode plot")
-        plt.figure(figsize=(12,8))
-        for i in range(len(self.exp_id)):
-            plt.scatter(np.exp(self.logr[i]), self.e_mode_test[i], s=5, alpha=0.009, c='b')
-            plt.scatter(np.exp(self.logr[i]), self.b_mode_test[i], s=5, alpha=0.009, c='r')
+        mean_e, std_e = mean_check_finite(self.e_mode_test)
+        mean_b, std_b = mean_check_finite(self.b_mode_test)
 
-        efilter = np.isfinite(self.e_mode_test)
-        ew = np.ones_like(self.e_mode_test)
-        self.e_mode_test[~efilter] = 0
-        ew[~efilter] = 0
+        plt.plot(np.exp(self.logr[0]), mean_e,'b', lw=3, label='mean E-mode (test)')
+        plt.fill_between(np.exp(self.logr[0]), mean_e-std_e, mean_e+std_e, color='b', alpha=0.4, label='$\pm 1 \sigma$ E-mode')
+        plt.plot(np.exp(self.logr[0]), mean_b,'r', lw=3, label='mean B-mode (test)')
+        plt.fill_between(np.exp(self.logr[0]), mean_b-std_b, mean_b+std_b, color='r', alpha=0.4, label='$\pm 1 \sigma$ B-mode')
 
-        bfilter = np.isfinite(self.b_mode_test)
-        bw = np.ones_like(self.b_mode_test)
-        self.b_mode_test[~bfilter] = 0
-        bw[~bfilter] = 0
- 
-        #plt.scatter(np.exp(self.logr[0][20:]), np.average(self.e_mode_test[:,20:], weights=ew[:,20:], axis=0), 
-        #            s=50, c='b', label='average E-mode (test)')
-        #plt.scatter(np.exp(self.logr[0][20:]), np.average(self.b_mode_test[:,20:], weights=bw[:,20:], axis=0), 
-        #            s=50, c='r', label='average B-mode (test)')
-        med_e = median_check_finite(self.e_mode_test)
-        med_b = median_check_finite(self.b_mode_test)
-        plt.scatter(np.exp(self.logr[0][20:]), med_e[20:], s=50, c='b', label='median E-mode (test)')
-        plt.scatter(np.exp(self.logr[0][20:]), med_b[20:], s=50, c='r', label='median B-mode (test)')
         plt.plot(np.exp(self.logr[0]), np.zeros_like(self.logr[0]), 'k--', lw=3)
-        plt.ylim(-20,40)
+        plt.ylim(YLIM[0], YLIM[1])
         plt.xlim(0.005, 1.5)
         plt.xscale('log')
         plt.xticks(size=16)
         plt.yticks(size=16)
         plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
         plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
-        plt.legend(fontsize=22)
+        plt.legend(fontsize=20)
 
 
-    def plot_eb_mode_test_residuals(self):
+    def plot_eb_mode_test_residuals(self, YLIM=[-5,30]):
 
-        print("eb mode plot")
+        print("eb mode plot test residuals")
         plt.figure(figsize=(12,8))
-        for i in range(len(self.exp_id)):
-            plt.scatter(np.exp(self.logr[i]), self.e_mode_residuals[i], s=5, alpha=0.009, c='b')
-            plt.scatter(np.exp(self.logr[i]), self.b_mode_residuals[i], s=5, alpha=0.009, c='r')
+        plt.subplots_adjust(bottom=0.12, top=0.98,right=0.99)
 
-        efilter = np.isfinite(self.e_mode_residuals)
-        ew = np.ones_like(self.e_mode_residuals)
-        self.e_mode_residuals[~efilter] = 0
-        ew[~efilter] = 0
+        mean_e, std_e = mean_check_finite(self.e_mode_residuals)
+        mean_b, std_b = mean_check_finite(self.b_mode_residuals)
 
-        bfilter = np.isfinite(self.b_mode_residuals)
-        bw = np.ones_like(self.b_mode_residuals)
-        self.b_mode_residuals[~bfilter] = 0
-        bw[~bfilter] = 0
- 
-        #plt.scatter(np.exp(self.logr[0][20:]), np.average(self.e_mode_residuals[:,20:], weights=ew[:,20:], axis=0), 
-        #            s=50, c='b', label='average E-mode (test, after GP)')
-        #plt.scatter(np.exp(self.logr[0][20:]), np.average(self.b_mode_residuals[:,20:], weights=bw[:,20:], axis=0), 
-        #            s=50, c='r', label='average B-mode (test, after GP)')
-        med_e = median_check_finite(self.e_mode_residuals)
-        med_b = median_check_finite(self.b_mode_residuals)
-        plt.scatter(np.exp(self.logr[0]), med_e, s=50, c='b', label='median E-mode (test, after GP)')
-        plt.scatter(np.exp(self.logr[0]), med_b, s=50, c='r', label='median B-mode (test, after GP)')
+        plt.plot(np.exp(self.logr[0]), mean_e,'b', lw=3, label='mean E-mode (test, after GP)')
+        plt.fill_between(np.exp(self.logr[0]), mean_e-std_e, mean_e+std_e, color='b', alpha=0.4, label='$\pm 1 \sigma$ E-mode')
+        plt.plot(np.exp(self.logr[0]), mean_b,'r', lw=3, label='mean B-mode (test, after GP)')
+        plt.fill_between(np.exp(self.logr[0]), mean_b-std_b, mean_b+std_b, color='r', alpha=0.4, label='$\pm 1 \sigma$ B-mode')
+
         plt.plot(np.exp(self.logr[0]), np.zeros_like(self.logr[0]), 'k--', lw=3)
-        plt.ylim(-20,40)
+        plt.ylim(YLIM[0], YLIM[1])
         plt.xlim(0.005, 1.5)
         plt.xscale('log')
         plt.xticks(size=16)
         plt.yticks(size=16)
         plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
         plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
-        plt.legend(fontsize=22)
+        plt.legend(fontsize=20)
 
 
     def plot_2pcf(self):
@@ -529,16 +484,14 @@ if __name__ == '__main__':
     ##lo.load_data()
     ##lo.save_output('final_gp_outputs.pkl')
 
-    po = plot_output('final_gp_outputs_all_vk.pkl')
-    po.plot_eb_mode()
-    plt.savefig('../../../../Desktop/eb_mean_all_ssp_vk.pdf')
-    #plt.savefig('../../../../Desktop/1_eb_glob_vk.png')
-
-
-    #po.plot_eb_mode_test()
-    #plt.savefig('../../../../Desktop/2_eb_glob_test_vk.png')
-    #po.plot_eb_mode_test_residuals()
-    #plt.savefig('../../../../Desktop/3_eb_glob_test_afterGP_vk.png')
+    po = plot_output('../../../hsc_outputs/v3/outputs/final_gp_outputs_all.pkl')
+    
+    po.plot_eb_mode(YLIM=[-10,60])
+    plt.savefig('1_eb_glob_vk_v3.pdf')
+    po.plot_eb_mode_test(YLIM=[-10,60])
+    plt.savefig('2_eb_glob_test_vk_v3.pdf')
+    po.plot_eb_mode_test_residuals(YLIM=[-10,60])
+    plt.savefig('3_eb_glob_test_afterGP_vk_v3.pdf')
 
     ##po.plot_residuals()
     ##po.meanify()
