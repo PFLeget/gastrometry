@@ -154,15 +154,18 @@ class load_output(object):
 
 class plot_output(object):
 
-    def __init__(self, pkl_output):
+    def __init__(self, pkl_output, read_python2=False):
 
         print("start load")
-        dic = pickle.load(open(pkl_output, 'rb'))
+        if read_python2:
+            dic = pickle.load(open(pkl_output, 'rb'), encoding='latin1')
+        else:
+            dic = pickle.load(open(pkl_output, 'rb'))
         print("done loading")
 
         # remove night when rotation was done by the PI,
         # B mode appears due to the fact that this is not
-        # build in JoinCal. 
+        # build in JoinCal.
         exp = dic['exp_id'].astype(int)
         Filtre = ~((exp>= 96446) & (exp<= 96656))
 
@@ -484,14 +487,16 @@ if __name__ == '__main__':
     ##lo.load_data()
     ##lo.save_output('final_gp_outputs.pkl')
 
-    po = plot_output('../../../hsc_outputs/v3/outputs/final_gp_outputs_all.pkl')
+    #po = plot_output('../../../hsc_outputs/v3/outputs/final_gp_outputs_all.pkl')
+    po = plot_output('../../../hsc_outputs/v3/outputs/final_gp_outputs_all_v3_with_v1_exp.pkl')
+    #po = plot_output('../../../hsc_outputs/v1/final_gp_outputs_all_vk.pkl', read_python2=True)
     
-    po.plot_eb_mode(YLIM=[-10,60])
-    plt.savefig('1_eb_glob_vk_v3.pdf')
-    po.plot_eb_mode_test(YLIM=[-10,60])
-    plt.savefig('2_eb_glob_test_vk_v3.pdf')
+    #po.plot_eb_mode(YLIM=[-10,60])
+    #plt.savefig('1_eb_glob_vk_v1.pdf')
+    #po.plot_eb_mode_test(YLIM=[-10,60])
+    #plt.savefig('2_eb_glob_test_vk_v1.pdf')
     po.plot_eb_mode_test_residuals(YLIM=[-10,60])
-    plt.savefig('3_eb_glob_test_afterGP_vk_v3.pdf')
+    plt.savefig('3_eb_glob_test_afterGP_vk_v1_but_v3.pdf')
 
     ##po.plot_residuals()
     ##po.meanify()

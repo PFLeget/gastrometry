@@ -7,3 +7,9 @@ gastrometry.egg-info/
 gastrometry/plotting/.DS_Store
 gastrometry/.DS_Store
 gastrometry/plotting/*.pkl
+gastrometry/plotting/*.pdf
+gastrometry/plotting/.ipynb_checkpoints/
+gastrometry/astro_bias/.ipynb_checkpoints/
+gastrometry/astro_bias/*.pdf
+
+

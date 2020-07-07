@@ -10,10 +10,12 @@ def plot_single_exposure(input_pkl, CMAP=plt.cm.seismic, MAX=14,
                          SIZE=20, mas=3600.*1e3, arcsec=3600., 
                          scale_arrow=0.2, subtitle3="", 
                          x_arrow=1900, y_arrow=2500, size_arrow=40,
-                         x_text=2050, y_text=2450):
+                         x_text=2050, y_text=2450, read_python2=False):
 
-
-    dic = pickle.load(open(input_pkl, 'rb'))
+    if read_python2:
+        dic = pickle.load(open(input_pkl, 'rb'), encoding='latin1')
+    else:
+        dic = pickle.load(open(input_pkl, 'rb'))
 
     fig = plt.figure(figsize=(15.5,6.5))
     plt.subplots_adjust(wspace=0,top=0.85,right=0.99,left=0.07)
@@ -111,9 +113,12 @@ def plot_single_exposure_hist(input_pkl, MAX=30., NBIN=30, mas=3600.*1e3, arcsec
     plt.xticks([],[])
     plt.yticks([],[])
 
-def plot_eb_mode_single_visit(input_pkl,mas=3600.*1e3, arcsec=3600., YLIM=[-20,60], title=""):
+def plot_eb_mode_single_visit(input_pkl,mas=3600.*1e3, arcsec=3600., YLIM=[-20,60], title="",read_python2=False):
 
-    dic = pickle.load(open(input_pkl, 'rb'))
+    if read_python2:
+        dic = pickle.load(open(input_pkl, 'rb'), encoding='latin1')
+    else:
+        dic = pickle.load(open(input_pkl, 'rb'))
 
     logr, xiplus, ximinus, xicross, xiz2 = vcorr(dic['u'], dic['v'],
                                                  dic['du']*mas, dic['dv']*mas)
@@ -139,30 +144,38 @@ def plot_eb_mode_single_visit(input_pkl,mas=3600.*1e3, arcsec=3600., YLIM=[-20,6
 
 if __name__ == '__main__':
 
-    plot_single_exposure('/Users/leget/Desktop/hsc_astro_exposure/13268_z/input.pkl',
-                         subtitle3="\n(exp id: 13268)")
-    plt.savefig('../../../../Dropbox/hsc_astro/figures/13268_z.pdf')
-    plot_single_exposure('/Users/leget/Desktop/hsc_astro_exposure/53732_z/input.pkl',
-                         subtitle3="\n(exp id: 53732)")
-    plt.savefig('../../../../Dropbox/hsc_astro/figures/53732_z.pdf')
-    plot_single_exposure('/Users/leget/Desktop/hsc_astro_exposure/137108_z/input.pkl',
+    #plot_single_exposure('/Users/leget/Desktop/hsc_astro_exposure/13268_z/input.pkl',
+    #                     subtitle3="\n(exp id: 13268)")
+    #plt.savefig('../../../../Dropbox/hsc_astro/figures/13268_z.pdf')
+    #plot_single_exposure('/Users/leget/Desktop/hsc_astro_exposure/53732_z/input.pkl',
+    #                     subtitle3="\n(exp id: 53732)")
+    #plt.savefig('../../../../Dropbox/hsc_astro/figures/53732_z.pdf')
+    plot_single_exposure('../../../hsc_outputs/v1/137108_z/input.pkl',
+                         subtitle3="\n(exp id: 137108)", read_python2=True)
+    plt.savefig('../../../../../Desktop/137108_z_v1.pdf')
+
+    plot_single_exposure('../../../hsc_outputs/v3/137108_z/input.pkl',
                          subtitle3="\n(exp id: 137108)")
-    plt.savefig('../../../../Dropbox/hsc_astro/figures/137108_z.pdf')
-    plot_single_exposure('/Users/leget/Desktop/hsc_astro_exposure/96450_z/input.pkl',
-                         MAX=39, scale_arrow=0.5, subtitle3="\n(exp id: 96450)",
-                         x_arrow=1600, y_arrow=2700, size_arrow=100,
-                         x_text=1750, y_text=2650)
-    plt.savefig('../../../../Dropbox/hsc_astro/figures/96450_z_b_mode.pdf')
+    plt.savefig('../../../../../Desktop/137108_z_v3.pdf')
+    #plot_single_exposure('/Users/leget/Desktop/hsc_astro_exposure/96450_z/input.pkl',
+    #                     MAX=39, scale_arrow=0.5, subtitle3="\n(exp id: 96450)",
+    #                     x_arrow=1600, y_arrow=2700, size_arrow=100,
+    #                     x_text=1750, y_text=2650)
+    #plt.savefig('../../../../Dropbox/hsc_astro/figures/96450_z_b_mode.pdf')
+    
     #plot_single_exposure_hist('../../tests/before_spline/137108_z/input.pkl')
     #plt.savefig('../../../../Dropbox/hsc_astro/figures/137108_z_hist.pdf')
 
-    plot_eb_mode_single_visit('../../tests/before_spline/137108_z/input.pkl', 
+    plot_eb_mode_single_visit('../../../hsc_outputs/v1/137108_z/input.pkl', 
+                              mas=3600.*1e3, arcsec=3600., title="(exp id: 137108)", read_python2=True)
+    plt.savefig('../../../../../Desktop/eb_mode_137108_z_v1.pdf')
+    plot_eb_mode_single_visit('../../../hsc_outputs/v3/137108_z/input.pkl', 
                               mas=3600.*1e3, arcsec=3600., title="(exp id: 137108)")
-    plt.savefig('../../../../Dropbox/hsc_astro/figures/137108_z_eb_mode.pdf')
+    plt.savefig('../../../../../Desktop/eb_mode_137108_z_v3.pdf')
 
-    plot_eb_mode_single_visit('/Users/leget/Desktop/hsc_astro_exposure/96450_z/input.pkl',
-                              mas=3600.*1e3, arcsec=3600., YLIM=[-5,200], title="(exp id: 96450)")
-    plt.savefig('../../../../Dropbox/hsc_astro/figures/96450_z_b_mode_eb_mode.pdf')
+    #plot_eb_mode_single_visit('/Users/leget/Desktop/hsc_astro_exposure/96450_z/input.pkl',
+    #                          mas=3600.*1e3, arcsec=3600., YLIM=[-5,200], title="(exp id: 96450)")
+    #plt.savefig('../../../../Dropbox/hsc_astro/figures/96450_z_b_mode_eb_mode.pdf')
 
     #plt.show()
     
