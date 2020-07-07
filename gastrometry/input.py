@@ -28,7 +28,7 @@ def read_input(input_astrometry='/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJ
                 pkl_name = os.path.join(rep, 'input.pkl')
                 pkl_file = open(pkl_name, 'wb')
                 dic = {'exp_id':'%i'%(exp),
-                       'u':A[:,8][Filtre], 
+                       'u':A[:,8][Filtre],
                        'v':A[:,9][Filtre],
                        'x':A[:,6][Filtre],
                        'y':A[:,7][Filtre],
@@ -36,7 +36,8 @@ def read_input(input_astrometry='/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJ
                        'du':A[:,10][Filtre],
                        'dv':A[:,11][Filtre],
                        'du_err':A[:,12][Filtre],
-                       'dv_err':A[:,13][Filtre]}
+                       'dv_err':A[:,13][Filtre],
+                       'chip_num':A[:,20][Filtre]}
                 pickle.dump(dic, pkl_file)
                 pkl_file.close()
                 E += 1
