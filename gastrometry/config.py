@@ -96,6 +96,7 @@ def gastrify(config):
     gp = gpastro(dic['u'], dic['v'],
                  dic['du'], dic['dv'],
                  dic['du_err'], dic['dv_err'],
+                 xccd=dic['x'], yccd=dic['y'], chipnum=dic['chip_num'],
                  NBIN=config['NBIN'], MAX = config['MAX'],
                  P0=config['P0'],
                  kernel = config['kernel'],
