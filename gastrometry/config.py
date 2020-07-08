@@ -49,12 +49,24 @@ def gastrogp(config, read_input_only=False,
         for key in ['NBIN', 'MAX', 'P0', 'kernel', 'filt_telescop']:
             if key not in config['interp']:
                 raise ValueError("%s field is required in config dict"%key)
+        if 'queue' not in config['interp']:
+            queue = 'lsst'
+        else:
+            queue = config['interp']['queue']
+    
+        if 'cpu_time' not in config['interp']:
+            cpu_time = '04:00:00'
+        else:
+            cpu_time = config['interp']['cpu_time']
+
         launch_jobs_ccin2p3(rep_inout=config['output']['directory'],
                             filt_telescop = config['interp']['filt_telescop'],
                             NBIN=config['interp']['NBIN'],
                             MAX = config['interp']['MAX'],
                             P0=config['interp']['P0'],
-                            kernel = config['interp']['kernel'])
+                            kernel = config['interp']['kernel'],
+                            queue = queue,
+                            cpu_time = cpu_time)
     if write_output_only:
         if 'input' not in config:
             raise ValueError("input field is required in config dict")

@@ -2,11 +2,12 @@ import os
 import glob
 import numpy as np 
 
-
 def launch_jobs_ccin2p3(rep_inout='/pbs/home/l/leget/sps_lsst/HSC/gp_output/',
                         filt_telescop = ['z', 'g', 'r', 'r2', 'i', 'i2', 'y'],
                         NBIN=21, MAX = 17.*60.,
                         P0=[3000., 0., 0.],
+                        queue = 'lsst',
+                        cpu_time = '04:00:00',
                         kernel = "15**2 * AnisotropicVonKarman(invLam=np.array([[1./3000.**2,0],[0,1./3000.**2]]))"):
     J = 0
     stop = False
@@ -38,8 +39,8 @@ def launch_jobs_ccin2p3(rep_inout='/pbs/home/l/leget/sps_lsst/HSC/gp_output/',
 
             o_log = os.path.join(visits[i], "output_o.log")
             e_log = os.path.join(visits[i], "output_e.log")
-            command = 'qsub -P P_lsst -pe multicores 8 -q mc_long'
-            command += ' -o %s -e %s -l sps=1 machine_gun_jobs_%i.sh'%((o_log, e_log, J))
+            command = 'qsub -P P_%s -pe multicores 8 -q mc_long'%(queue)
+            command += ' -o %s -e %s -l h_cpu=%s -l sps=1 machine_gun_jobs_%i.sh'%((o_log, e_log, cpu_time, J))
             os.system(command)
             os.system('rm machine_gun_jobs_%i.sh*'%(J))
             J += 1

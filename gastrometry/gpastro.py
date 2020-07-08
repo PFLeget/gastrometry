@@ -22,7 +22,7 @@ def read_option():
 class gpastro(object):
 
     def __init__(self, u, v, du, dv, du_err, dv_err,
-                 NBIN=21, MAX = 17.*60.,
+                 NBIN=21, MAX = 17.*60., xccd=None, yccd=None, chipnum=None,
                  P0=[3000., 0., 0.],
                  kernel = "15**2 * AnisotropicVonKarman(invLam=np.array([[1./3000.**2,0],[0,1./3000.**2]]))",
                  mas=3600.*1e3, arcsec=3600.,
@@ -42,6 +42,9 @@ class gpastro(object):
         self.u = u * arcsec
         self.v = v * arcsec
         self.coords = np.array([self.u, self.v]).T
+        self.xccd = xccd
+        self.yccd = yccd
+        self.chipnum = chipnum
         self.du = du * mas
         self.dv = dv * mas
         self.du_err = du_err * mas
@@ -155,6 +158,7 @@ class gpastro(object):
         gpu.initialize(self.coords_train, self.du_train, y_err=self.du_err_train)
         gpu.solve()
         self.du_test_predict = gpu.predict(self.coords_test, return_cov=False)
+        self.du_predict = gpu.predict(self.coords, return_cov=False)
         self.gpu = gpu
         self.dic_output['gp_output'].update({'gpu.2pcf':gpu._optimizer._2pcf,
                                              'gpu.2pcf_weight':gpu._optimizer._2pcf_weight,
@@ -162,10 +166,16 @@ class gpastro(object):
                                              'gpu.2pcf_fit':gpu._optimizer._2pcf_fit,
                                              'gpu.2pcf_mask':gpu._optimizer._2pcf_mask,
                                              'gpu.kernel':gpu._optimizer._kernel,
+                                             'gpu.du':self.du,
+                                             'gpu.du_predict':self.du_predict,
                                              'gpu.du_test_predict':self.du_test_predict,
                                              'gpu.du_test':self.du_test,
-                                             'gpu.coords_test':self.coords_test})
-        
+                                             'gpu.coords':self.coords,
+                                             'gpu.coords_test':self.coords_test,
+                                             'gpu.xccd':self.xccd,
+                                             'gpu.yccd':self.yccd,
+                                             'gpu.chipnum':self.chipnum})
+
         print("I did half")
         gpv = treegp.GPInterpolation(kernel=self.kernel, optimizer='anisotropic',
                                      normalize=True, nbins=self.NBIN, min_sep=0.,
@@ -173,6 +183,7 @@ class gpastro(object):
         gpv.initialize(self.coords_train, self.dv_train, y_err=self.dv_err_train)
         gpv.solve()
         self.dv_test_predict = gpv.predict(self.coords_test, return_cov=False)
+        self.dv_predict = gpv.predict(self.coords, return_cov=False)
         self.gpv = gpv
 
         self.dic_output['gp_output'].update({'gpv.2pcf':gpv._optimizer._2pcf,
@@ -181,9 +192,15 @@ class gpastro(object):
                                              'gpv.2pcf_fit':gpv._optimizer._2pcf_fit,
                                              'gpv.2pcf_mask':gpv._optimizer._2pcf_mask,
                                              'gpv.kernel':gpv._optimizer._kernel,
+                                             'gpv.dv':self.dv,
+                                             'gpv.dv_predict':self.dv_predict,
                                              'gpv.dv_test_predict':self.dv_test_predict,
                                              'gpv.dv_test':self.dv_test,
-                                             'gpv.coords_test':self.coords_test})
+                                             'gpv.coords':self.coords,
+                                             'gpv.coords_test':self.coords_test,
+                                             'gpv.xccd':self.xccd,
+                                             'gpv.yccd':self.yccd,
+                                             'gpv.chipnum':self.chipnum})
 
         X_valid = self.coords_test
         Y_valid = np.array([self.du_test, self.dv_test]).T
@@ -227,6 +244,7 @@ if __name__ == "__main__":
     gp = gpastro(dic['u'], dic['v'], 
                  dic['du'], dic['dv'], 
                  dic['du_err'], dic['dv_err'],
+                 xccd=dic['x'], yccd=dic['y'], chipnum=dic['chip_num'],
                  mas=3600.*1e3, arcsec=3600.,
                  exp_id=dic['exp_id'], visit_id="",
                  rep=option.rep, save=True)
