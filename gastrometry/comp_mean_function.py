@@ -3,102 +3,117 @@ import treegp
 import pylab as plt
 import fitsio
 import os
+import pickle
+import glob
 
 class comp_mean(object):
 
-    def __init__(self, nights, mas=3600.*1e3, arcsec=3600.,
-                 bin_spacing=30., statistics='mean'):
+    def __init__(self, files_out, bin_spacing=10., statistics='mean', nccd=104):
 
-        self.nights = nights
-        self.mas = mas
-        self.arcsec = arcsec
+        self.files_out = files_out
         self.bin_spacing = bin_spacing
         self.statistics = statistics
+        self.nccd = nccd
+        self.mean = {}
 
-        self.mean_u = treegp.meanify(bin_spacing=self.bin_spacing, 
+        for i in range(nccd):
+            mean_du = treegp.meanify(bin_spacing=self.bin_spacing, 
                                      statistics=self.statistics)
-        self.mean_v = treegp.meanify(bin_spacing=self.bin_spacing, 
-                                     statistics=self.statistics)
-        self.nstars = 0
-        self.nvisits = 0
+            mean_dv = treegp.meanify(bin_spacing=self.bin_spacing, 
+                                     statistics=self.statistics) 
+            self.mean.update({i+1: {'du':mean_du,
+                                    'dv':mean_dv,}})
+    
+    def stack_fields(self):
 
-    def load(self):
-        for night in self.nights:
-            A = np.loadtxt(night)
-            Filtre = (A[:,4]<-6)
+        for f in self.files_out:
+            print(f)
+            dic = pickle.load(open(os.path.join(f), 'rb'))
+            coord_ccd = {}
+            residuals = {}
+            for coord in ['u', 'v']:
+                coord_ccd[coord] = np.array([dic['gp_output']['gp%s.xccd'%(coord)],
+                                             dic['gp_output']['gp%s.yccd'%(coord)]]).T
+                residuals[coord] = dic['gp_output']['gp%s.d%s'%((coord, coord))] - dic['gp_output']['gp%s.d%s_predict'%((coord, coord))]
 
-            exp_id = {}
-            for exp in A[:,21]:
-                if exp not in exp_id:
-                    exp_id.update({exp:None})
-            self.nvisits += len(exp_id.keys())
-            self.nstars += np.sum(Filtre)
-            print(night)
-            print("total visit: ", self.nvisits)
-            print("total object: ", self.nstars)
-            print("")
+            for chipnum in self.mean:
+                for coord in ['u', 'v']:
+                    filtre = (dic['gp_output']['gp%s.chipnum'%(coord)] == chipnum)
+                    if np.sum(filtre) != 0:                         
+                        self.mean[chipnum]['d%s'%(coord)].add_field(coord_ccd[coord][filtre], 
+                                                                    residuals[coord][filtre])
 
-            coords = np.array([A[:,8][Filtre] * self.arcsec, A[:,9][Filtre] * self.arcsec]).T
-            du = A[:,10][Filtre] * self.mas
-            dv = A[:,11][Filtre] * self.mas
-
-            self.mean_u.add_field(coords, du)
-            self.mean_v.add_field(coords, dv)
-            
     def comp_mean(self):
-        self.mean_u.meanify()
-        self.mean_v.meanify()
+        for chipnum in self.mean:
+            print(chipnum)
+            for coord in ['u', 'v']:
+                if len(self.mean[chipnum]['d%s'%(coord)].params) !=0:
+                    self.mean[chipnum]['d%s'%(coord)].meanify()
 
-    def plot(self, cmap=plt.cm.seismic, MAX=2.):
+    def save_results(self, rep_out):
+        for chipnum in self.mean:
+            print(chipnum)
+            for coord in ['u', 'v']:
+                file_name = 'mean_d%s_%i.fits'%((coord, chipnum))
+                fits_file = os.path.join(rep_out, file_name)
+                if len(self.mean[chipnum]['d%s'%(coord)].params) !=0:
+                    self.mean[chipnum]['d%s'%(coord)].save_results(name_output=fits_file)
 
-        plt.figure(figsize=(12,10))
-        plt.scatter(self.mean_u.coords0[:,0], self.mean_u.coords0[:,1], 
-                    c=self.mean_u.params0, cmap = cmap, vmin=-MAX, vmax=MAX,
-                    lw=0, s=8)
-        plt.colorbar()
 
-        plt.figure(figsize=(12,10))
-        plt.scatter(self.mean_v.coords0[:,0], self.mean_v.coords0[:,1], 
-                    c=self.mean_v.params0, cmap = cmap, vmin=-MAX,vmax=MAX,
-                    lw=0, s=8)
-        plt.colorbar()
+def plot_mean(fits_file_du,
+              fits_file_dv, name= '',
+              cmap=None, MAX=2, name_fig=None):
 
-    def save_mean(self, directory='', name_outputs=['mean_gp_du.fits','mean_gp_dv.fits']):
-        self.mean_u.save_results(name_output=os.path.join(directory, name_outputs[0]))
-        self.mean_v.save_results(name_output=os.path.join(directory, name_outputs[1]))
 
-def plot_mean(fits_file, cmap=None, MAX=2, name_fig=None):
-
-    mean = fitsio.read(fits_file)
+    plt.figure(figsize=(12,8))
+    plt.subplots_adjust(wspace=0.3)
+    plt.subplot(1,2,1)
+    mean = fitsio.read(fits_file_du)
     y0 = mean['PARAMS0'][0]
     coord0 = mean['COORDS0'][0]
-
-    plt.figure(figsize=(22,20))
     plt.scatter(coord0[:,0], coord0[:,1],
                 c=y0, cmap = cmap, vmin=-MAX,vmax=MAX,
                 lw=0, s=8)
-    plt.colorbar()
+    plt.xlabel('x (pixel)',fontsize=14)
+    plt.ylabel('y (pixel)',fontsize=14)
+    cb = plt.colorbar()
+    cb.set_label('$<du>$ (mas)', fontsize=14)
+
+    plt.subplot(1,2,2)
+    mean = fitsio.read(fits_file_dv)
+    y0 = mean['PARAMS0'][0]
+    coord0 = mean['COORDS0'][0]
+    plt.scatter(coord0[:,0], coord0[:,1],
+                c=y0, cmap = cmap, vmin=-MAX,vmax=MAX,
+                lw=0, s=8)
+
+    plt.xlabel('x (pixel)',fontsize=14)
+    cb = plt.colorbar()
+    cb.set_label('$<dv>$ (mas)', fontsize=14)
+
+
+    plt.suptitle(name, fontsize=14)
     if name_fig is not None:
         plt.savefig(name_fig)
         plt.close()
 
-    #plt.figure()
-    #plt.hist(y0, bins=np.linspace(-6, 6, 200))
-    #plt.title("mean=%f, std=%f"%((np.mean(y0), np.std(y0))))
-    #print(len(y0))
-
 if __name__ == "__main__":
 
-    import glob
-    nights = glob.glob('/sps/lsst/HSC/prod.2020-03.calib/dbimage_UI5XG7I/fitastrom_EKYBJYQ/data/*/res-meas.list')
+    #files_out = glob.glob('../../../../sps_lsst/HSC/v3.2/astro_VK/*/gp_output*.pkl')
 
-    #cm = comp_mean(nights, mas=3600.*1e3, arcsec=3600.,
-    #               bin_spacing=1., statistics='mean')
-    #cm.load()
+    #cm = comp_mean(files_out, bin_spacing=10., statistics='mean', nccd=104)
+    #cm.stack_fields()
     #cm.comp_mean()
-    #cm.plot(cmap=None)
-    #cm.save_mean(directory='', name_outputs=['mean_gp_du_1.fits',
-    #                                         'mean_gp_dv_1.fits'])
+    #cm.save_results('../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function')
 
-    plot_mean('mean_gp_du_1.fits', cmap=None, MAX=1, name_fig='du_mean.png')
-    plot_mean('mean_gp_dv_1.fits', cmap=None, MAX=1, name_fig='dv_mean.png')
+    for i in range(104):
+        print(i+1)
+        try:
+            plot_mean('../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function/mean_du_%i.fits'%(i+1),
+                      '../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function/mean_dv_%i.fits'%(i+1),
+                      name='CCD %i'%(i+1),
+                      cmap=None,
+                      name_fig='../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function/plotting/CCD_%i.png'%(i+1))
+        except:
+            print('files %i does not exist'%(i+1))
+    plt.show()
