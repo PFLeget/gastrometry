@@ -8,13 +8,16 @@ import glob
 
 class comp_mean(object):
 
-    def __init__(self, files_out, bin_spacing=10., statistics='mean', nccd=104):
+    def __init__(self, files_out, bin_spacing=10., 
+                 statistics='mean', nccd=104,
+                 gp_corrected=True):
 
         self.files_out = files_out
         self.bin_spacing = bin_spacing
         self.statistics = statistics
         self.nccd = nccd
         self.mean = {}
+        self.gp_corrected = gp_corrected
 
         for i in range(nccd):
             mean_du = treegp.meanify(bin_spacing=self.bin_spacing, 
@@ -34,7 +37,9 @@ class comp_mean(object):
             for coord in ['u', 'v']:
                 coord_ccd[coord] = np.array([dic['gp_output']['gp%s.xccd'%(coord)],
                                              dic['gp_output']['gp%s.yccd'%(coord)]]).T
-                residuals[coord] = dic['gp_output']['gp%s.d%s'%((coord, coord))] - dic['gp_output']['gp%s.d%s_predict'%((coord, coord))]
+                residuals[coord] = dic['gp_output']['gp%s.d%s'%((coord, coord))] 
+                if self.gp_corrected:
+                    residuals[coord]-= dic['gp_output']['gp%s.d%s_predict'%((coord, coord))]
 
             for chipnum in self.mean:
                 for coord in ['u', 'v']:
@@ -101,19 +106,21 @@ if __name__ == "__main__":
 
     #files_out = glob.glob('../../../../sps_lsst/HSC/v3.2/astro_VK/*/gp_output*.pkl')
 
-    #cm = comp_mean(files_out, bin_spacing=10., statistics='mean', nccd=104)
+    #cm = comp_mean(files_out, bin_spacing=10., 
+    #               statistics='mean', nccd=104,
+    #               gp_corrected=False)
     #cm.stack_fields()
     #cm.comp_mean()
-    #cm.save_results('../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function')
+    #cm.save_results('../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_no_gp_correction/')
 
     for i in range(104):
         print(i+1)
         try:
-            plot_mean('../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function/mean_du_%i.fits'%(i+1),
-                      '../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function/mean_dv_%i.fits'%(i+1),
+            plot_mean('../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_no_gp_correction/mean_du_%i.fits'%(i+1),
+                      '../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_no_gp_correction/mean_dv_%i.fits'%(i+1),
                       name='CCD %i'%(i+1),
                       cmap=None,
-                      name_fig='../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function/plotting/CCD_%i.png'%(i+1))
+                      name_fig='../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_no_gp_correction/plotting/CCD_%i.png'%(i+1))
         except:
             print('files %i does not exist'%(i+1))
-    plt.show()
+    #plt.show()
