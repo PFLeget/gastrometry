@@ -8,8 +8,8 @@ import glob
 
 class comp_mean(object):
 
-    def __init__(self, files_out, bin_spacing=10., 
-                 statistics='mean', nccd=104,
+    def __init__(self, files_out, bin_spacing=10.,
+                 statistics='weighted', nccd=104,
                  gp_corrected=True):
 
         self.files_out = files_out
@@ -20,13 +20,13 @@ class comp_mean(object):
         self.gp_corrected = gp_corrected
 
         for i in range(nccd):
-            mean_du = treegp.meanify(bin_spacing=self.bin_spacing, 
+            mean_du = treegp.meanify(bin_spacing=self.bin_spacing,
                                      statistics=self.statistics)
-            mean_dv = treegp.meanify(bin_spacing=self.bin_spacing, 
-                                     statistics=self.statistics) 
+            mean_dv = treegp.meanify(bin_spacing=self.bin_spacing,
+                                     statistics=self.statistics)
             self.mean.update({i+1: {'du':mean_du,
                                     'dv':mean_dv,}})
-    
+
     def stack_fields(self):
 
         for f in self.files_out:
@@ -34,19 +34,27 @@ class comp_mean(object):
             dic = pickle.load(open(os.path.join(f), 'rb'))
             coord_ccd = {}
             residuals = {}
+            residuals_err = {}
             for coord in ['u', 'v']:
                 coord_ccd[coord] = np.array([dic['gp_output']['gp%s.xccd'%(coord)],
                                              dic['gp_output']['gp%s.yccd'%(coord)]]).T
-                residuals[coord] = dic['gp_output']['gp%s.d%s'%((coord, coord))] 
+                residuals[coord] = dic['gp_output']['gp%s.d%s'%((coord, coord))]
                 if self.gp_corrected:
                     residuals[coord]-= dic['gp_output']['gp%s.d%s_predict'%((coord, coord))]
+                if self.statistics == 'weighted':
+                    residuals_err[coord] = dic['input_data']['d%s_err'%(coord)]
 
             for chipnum in self.mean:
                 for coord in ['u', 'v']:
                     filtre = (dic['gp_output']['gp%s.chipnum'%(coord)] == chipnum)
-                    if np.sum(filtre) != 0:                         
-                        self.mean[chipnum]['d%s'%(coord)].add_field(coord_ccd[coord][filtre], 
-                                                                    residuals[coord][filtre])
+                    if np.sum(filtre) != 0:
+                        if self.statistics == 'weighted':
+                            error = residuals_err[coord][filtre]
+                        else:
+                            error = None
+                        self.mean[chipnum]['d%s'%(coord)].add_field(coord_ccd[coord][filtre],
+                                                                    residuals[coord][filtre],
+                                                                    params_err=error)
 
     def comp_mean(self):
         for chipnum in self.mean:
@@ -63,7 +71,6 @@ class comp_mean(object):
                 fits_file = os.path.join(rep_out, file_name)
                 if len(self.mean[chipnum]['d%s'%(coord)].params) !=0:
                     self.mean[chipnum]['d%s'%(coord)].save_results(name_output=fits_file)
-
 
 def plot_mean(fits_file_du,
               fits_file_dv, name= '',
@@ -107,20 +114,20 @@ if __name__ == "__main__":
     #files_out = glob.glob('../../../../sps_lsst/HSC/v3.2/astro_VK/*/gp_output*.pkl')
 
     #cm = comp_mean(files_out, bin_spacing=10., 
-    #               statistics='mean', nccd=104,
-    #               gp_corrected=False)
+    #               statistics='weighted', nccd=104,
+    #               gp_corrected=True)
     #cm.stack_fields()
     #cm.comp_mean()
-    #cm.save_results('../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_no_gp_correction/')
+    #cm.save_results('../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_weighted/')
 
     for i in range(104):
         print(i+1)
         try:
-            plot_mean('../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_no_gp_correction/mean_du_%i.fits'%(i+1),
-                      '../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_no_gp_correction/mean_dv_%i.fits'%(i+1),
+            plot_mean('../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_weighted/mean_du_%i.fits'%(i+1),
+                      '../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_weighted/mean_dv_%i.fits'%(i+1),
                       name='CCD %i'%(i+1),
                       cmap=None,
-                      name_fig='../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_no_gp_correction/plotting/CCD_%i.png'%(i+1))
+                      name_fig='../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_weighted/plotting/CCD_%i_weighted.png'%(i+1))
         except:
             print('files %i does not exist'%(i+1))
     #plt.show()
