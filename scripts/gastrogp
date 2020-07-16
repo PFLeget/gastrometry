@@ -34,11 +34,9 @@ def parse_args():
     parser.add_argument("--write_output_only", "-w",
                         dest="write_output_only", help="write output gp/astrometry files", 
                         default=False, action="store_true")
-
-    #parser.add_argument(
-    #        '-v', '--verbose', type=int, action='store', default=None, choices=(0, 1, 2, 3),
-    #        help='integer verbosity level: min=0, max=3 '
-    #        '[default=1; overrides config verbose value]')
+    parser.add_argument("--comp_meanify", "-c",
+                        dest="comp_meanify", help="comp mean function across FoV", 
+                        default=False, action="store_true")
 
     args = parser.parse_args()
 
@@ -59,7 +57,8 @@ def main():
     gastrometry.gastrogp(config, 
                          read_input_only=args.read_input_only,
                          interp_only=args.interp_only,
-                         write_output_only=args.write_output_only)
+                         write_output_only=args.write_output_only, 
+                         comp_meanify=args.comp_meanify)
 
 if __name__ == '__main__':
     main()

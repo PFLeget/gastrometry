@@ -10,7 +10,7 @@ class comp_mean(object):
 
     def __init__(self, files_out, bin_spacing=10.,
                  statistics='weighted', nccd=104,
-                 gp_corrected=True):
+                 gp_corrected=True, alias=None):
 
         self.files_out = files_out
         self.bin_spacing = bin_spacing
@@ -18,6 +18,7 @@ class comp_mean(object):
         self.nccd = nccd
         self.mean = {}
         self.gp_corrected = gp_corrected
+        self.alias = alias
 
         for i in range(nccd):
             mean_du = treegp.meanify(bin_spacing=self.bin_spacing,
@@ -67,7 +68,10 @@ class comp_mean(object):
         for chipnum in self.mean:
             print(chipnum)
             for coord in ['u', 'v']:
-                file_name = 'mean_d%s_%i.fits'%((coord, chipnum))
+                if self.alias is None:
+                    file_name = 'mean_d%s_%i.fits'%((coord, chipnum))
+                else:
+                    file_name = 'mean_d%s_%i_%s.fits'%((coord, chipnum, self.alias))
                 fits_file = os.path.join(rep_out, file_name)
                 if len(self.mean[chipnum]['d%s'%(coord)].params) !=0:
                     self.mean[chipnum]['d%s'%(coord)].save_results(name_output=fits_file)
@@ -103,31 +107,62 @@ def plot_mean(fits_file_du,
     cb = plt.colorbar()
     cb.set_label('$<dv>$ (mas)', fontsize=14)
 
-
     plt.suptitle(name, fontsize=14)
     if name_fig is not None:
         plt.savefig(name_fig)
         plt.close()
 
-if __name__ == "__main__":
+def run_ma_poule_mean(rep_out, bin_spacing=30.,
+                      statistics='weighted', nccd=104,
+                      gp_corrected=True, sub_rep='all'):
 
-    #files_out = glob.glob('../../../../sps_lsst/HSC/v3.2/astro_VK/*/gp_output*.pkl')
+    if sub_rep == 'all':
+        # across all filters
+        files_out = glob.glob(os.path.join(rep_out, '*/gp_output*.pkl'))
+        path_mean = os.path.join(rep_out, 'mean_function')
+        os.system('mkdir %s'%(path_mean))
+        path_mean = os.path.join(path_mean, 'all')
+        os.system('mkdir %s'%(path_mean))
+    else:
+        if sub_rep not in ['i', 'r']:
+            files_out = glob.glob(os.path.join(rep_out, '*%s/gp_output*.pkl'%(sub_rep)))
+        else:
+            files_out1 = glob.glob(os.path.join(rep_out, '*%s/gp_output*.pkl'%(sub_rep)))
+            files_out2 = glob.glob(os.path.join(rep_out, '*%s2/gp_output*.pkl'%(sub_rep)))
+            files_out = files_out1 + files_out2
+        path_mean = os.path.join(rep_out, 'mean_function')
+        path_mean = os.path.join(path_mean, sub_rep)
+        os.system('mkdir %s'%(path_mean))
 
-    #cm = comp_mean(files_out, bin_spacing=10., 
-    #               statistics='weighted', nccd=104,
-    #               gp_corrected=True)
-    #cm.stack_fields()
-    #cm.comp_mean()
-    #cm.save_results('../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_weighted/')
+    cm = comp_mean(files_out, bin_spacing=bin_spacing,
+                   statistics=statistics, nccd=nccd,
+                   gp_corrected=gp_corrected, alias=sub_rep)
+    cm.stack_fields()
+    cm.comp_mean()
+    cm.save_results(path_mean)
 
-    for i in range(104):
+    os.system('mkdir %s'%(os.path.join(path_mean, 'plotting')))
+    for i in range(nccd):
         print(i+1)
         try:
-            plot_mean('../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_weighted/mean_du_%i.fits'%(i+1),
-                      '../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_weighted/mean_dv_%i.fits'%(i+1),
+            plot_mean(os.path.join(path_mean, 'mean_du_%i_%s.fits'%((i+1, sub_rep))),
+                      os.path.join(path_mean, 'mean_dv_%i_%s.fits'%((i+1, sub_rep))),
                       name='CCD %i'%(i+1),
                       cmap=None,
-                      name_fig='../../../../sps_lsst/HSC/v3.2/astro_VK/mean_function_weighted/plotting/CCD_%i_weighted.png'%(i+1))
+                      name_fig=os.path.join(path_mean,'plotting/CCD_%i_%s.png'%((i+1, sub_rep))))
         except:
             print('files %i does not exist'%(i+1))
-    #plt.show()
+
+    if sub_rep == 'all':
+        for hsc_filter in ['g', 'r', 'i', 'z', 'y']:
+            run_ma_poule_mean(rep_out, bin_spacing=bin_spacing,
+                              statistics=statistics, nccd=nccd,
+                              gp_corrected=gp_corrected,
+                              sub_rep=hsc_filter)
+
+if __name__ == "__main__":
+
+    rep_out = '/pbs/home/l/leget/sps_lsst/HSC/v3.2/astro_VK'
+    run_ma_poule_mean(rep_out, bin_spacing=15,
+                      statistics='weighted', nccd=104,
+                      gp_corrected=True)
