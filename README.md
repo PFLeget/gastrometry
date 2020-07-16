@@ -10,6 +10,9 @@ make some config file config_file.yaml
 
     # submit it all to the batch farm of cc in2p3>:)
     gastrogp config_file.yaml --interp_only
+    
+    # to compute the mean function once the gp is run across all visits
+    gastrogp config_file.yaml --comp_meanify
 
     # drink coffee, probably eat a meal and sleep
     # to gather outputs for plotting purpose
