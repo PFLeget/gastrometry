@@ -14,3 +14,11 @@ interp:
     MAX: 1020.
     P0: [3000., 0., 0.]
     kernel: 15**2 * AnisotropicVonKarman(invLam=np.array([[1./3000.**2,0],[0,1./3000.**2]]))
+    queue: snovae
+    cpu_time: 02:50:00
+
+comp_meanify:
+
+    bin_spacing: 15
+    statistics: weighted
+    gp_corrected: True
