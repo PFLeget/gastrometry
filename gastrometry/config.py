@@ -120,7 +120,7 @@ def gastrify(config):
     gp.comp_eb()
     gp.comp_xi()
     print("start gp")
-    gp.gp_interp()
+    gp.gp_interp(dic_all=dic['dic_all'])
     print("do plot")
     gp.plot_gaussian_process()
     gp.save_output()

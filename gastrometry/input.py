@@ -21,12 +21,25 @@ def read_input(input_astrometry='/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJ
             for exp in exp_id:
                 print("%i/%i "%((N, len(nights))), "%i/%i "%((E, len(exp_id))), "%s"%f)
                 Filtre = (A[:,4]<-6)
-                Filtre &= (A[:,21] == exp)
+                Filtre_exp = (A[:,21] == exp)
+                Filtre &= Filtre_exp
                 rep  = os.path.join(output, "%i_%s"%((int(exp), f)))
                 os.system('mkdir %s'%(rep))
 
                 pkl_name = os.path.join(rep, 'input.pkl')
                 pkl_file = open(pkl_name, 'wb')
+
+                dic_all = {'u':A[:,8][Filtre_exp],
+                           'v':A[:,9][Filtre_exp],
+                           'x':A[:,6][Filtre_exp],
+                           'y':A[:,7][Filtre_exp],
+                           'julian_date':A[:,5][Filtre_exp],
+                           'du':A[:,10][Filtre_exp],
+                           'dv':A[:,11][Filtre_exp],
+                           'du_err':A[:,12][Filtre_exp],
+                           'dv_err':A[:,13][Filtre_exp],
+                           'chip_num':A[:,20][Filtre_exp]}
+
                 dic = {'exp_id':'%i'%(exp),
                        'u':A[:,8][Filtre],
                        'v':A[:,9][Filtre],
@@ -37,7 +50,9 @@ def read_input(input_astrometry='/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJ
                        'dv':A[:,11][Filtre],
                        'du_err':A[:,12][Filtre],
                        'dv_err':A[:,13][Filtre],
-                       'chip_num':A[:,20][Filtre]}
+                       'chip_num':A[:,20][Filtre],
+                       'dic_all':dic_all}
+
                 pickle.dump(dic, pkl_file)
                 pkl_file.close()
                 E += 1

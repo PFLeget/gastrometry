@@ -38,7 +38,7 @@ class gpastro(object):
         self.MAX = MAX
         self.P0 = P0
         self.kernel = kernel
-
+        
         self.u = u * arcsec
         self.v = v * arcsec
         self.coords = np.array([self.u, self.v]).T
@@ -49,6 +49,9 @@ class gpastro(object):
         self.dv = dv * mas
         self.du_err = du_err * mas
         self.dv_err = dv_err * mas
+
+        self._arcsec = arcsec
+        self._mas = mas
 
         # split training/validation
         indice = np.linspace(0, len(self.u)-1, len(self.u)).astype(int)
@@ -149,7 +152,7 @@ class gpastro(object):
                                              'xi_dvdv':self.xi_dvdv,
                                              'xi_sep':self.xi_sep})
 
-    def gp_interp(self):
+    def gp_interp(self, dic_all=None):
 
         print("start gp interp")
         gpu = treegp.GPInterpolation(kernel=self.kernel, optimizer='anisotropic', 
@@ -160,6 +163,23 @@ class gpastro(object):
         self.du_test_predict = gpu.predict(self.coords_test, return_cov=False)
         self.du_predict = gpu.predict(self.coords, return_cov=False)
         self.gpu = gpu
+
+        if dic_all is not None:
+            self.coords_all = np.array([dic_all['u']*self._arcsec,
+                                        dic_all['v']*self._arcsec]).T
+            self.du_all = dic_all['du'] * self._mas
+            self.du_err_all = dic_all['du_err'] * self._mas
+            self.du_all_predict = gpu.predict(self.coords_all, return_cov=False)
+            self.xccd_all = dic_all['x']
+            self.yccd_all = dic_all['y']
+            self.chip_num_all = dic_all['chip_num']
+        else:
+            self.coords_all = None
+            self.du_all_predict = None
+            self.xccd_all = None
+            self.yccd_all = None
+            self.chip_num_all = None
+
         self.dic_output['gp_output'].update({'gpu.2pcf':gpu._optimizer._2pcf,
                                              'gpu.2pcf_weight':gpu._optimizer._2pcf_weight,
                                              'gpu.2pcf_dist':gpu._optimizer._2pcf_dist,
@@ -174,7 +194,14 @@ class gpastro(object):
                                              'gpu.coords_test':self.coords_test,
                                              'gpu.xccd':self.xccd,
                                              'gpu.yccd':self.yccd,
-                                             'gpu.chipnum':self.chipnum})
+                                             'gpu.chipnum':self.chipnum,
+                                             'gpu.coords_all':self.coords_all,
+                                             'gpu.du_all':self.du_all,
+                                             'gpu.du_err_all':self.du_err_all,
+                                             'gpu.du_all_predict':self.du_all_predict,
+                                             'gpu.xccd_all':self.xccd_all,
+                                             'gpu.yccd_all':self.yccd_all,
+                                             'gpu.chip_num_all':self.chip_num_all})
 
         print("I did half")
         gpv = treegp.GPInterpolation(kernel=self.kernel, optimizer='anisotropic',
@@ -185,6 +212,22 @@ class gpastro(object):
         self.dv_test_predict = gpv.predict(self.coords_test, return_cov=False)
         self.dv_predict = gpv.predict(self.coords, return_cov=False)
         self.gpv = gpv
+
+        if dic_all is not None:
+            self.coords_all = np.array([dic_all['u'] * self._arcsec, 
+                                        dic_all['v'] * self._arcsec]).T
+            self.dv_all = dic_all['dv'] * self._mas
+            self.dv_err_all = dic_all['dv_err'] * self._mas
+            self.dv_all_predict = gpv.predict(self.coords_all, return_cov=False)
+            self.xccd_all = dic_all['x']
+            self.yccd_all = dic_all['y']
+            self.chip_num_all = dic_all['chip_num']
+        else:
+            self.coords_all = None
+            self.dv_all_predict = None
+            self.xccd_all = None
+            self.yccd_all = None
+            self.chip_num_all = None
 
         self.dic_output['gp_output'].update({'gpv.2pcf':gpv._optimizer._2pcf,
                                              'gpv.2pcf_weight':gpv._optimizer._2pcf_weight,
@@ -200,7 +243,14 @@ class gpastro(object):
                                              'gpv.coords_test':self.coords_test,
                                              'gpv.xccd':self.xccd,
                                              'gpv.yccd':self.yccd,
-                                             'gpv.chipnum':self.chipnum})
+                                             'gpv.chipnum':self.chipnum,
+                                             'gpv.coords_all':self.coords_all,
+                                             'gpv.dv_all':self.dv_all,
+                                             'gpv.dv_err_all':self.dv_err_all,
+                                             'gpv.dv_all_predict':self.dv_all_predict,
+                                             'gpv.xccd_all':self.xccd_all,
+                                             'gpv.yccd_all':self.yccd_all,
+                                             'gpv.chip_num_all':self.chip_num_all})
 
         X_valid = self.coords_test
         Y_valid = np.array([self.du_test, self.dv_test]).T
