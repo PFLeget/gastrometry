@@ -37,17 +37,17 @@ class comp_mean(object):
             residuals = {}
             residuals_err = {}
             for coord in ['u', 'v']:
-                coord_ccd[coord] = np.array([dic['gp_output']['gp%s.xccd'%(coord)],
-                                             dic['gp_output']['gp%s.yccd'%(coord)]]).T
-                residuals[coord] = dic['gp_output']['gp%s.d%s'%((coord, coord))]
+                coord_ccd[coord] = np.array([dic['gp_output']['gp%s.xccd_all'%(coord)],
+                                             dic['gp_output']['gp%s.yccd_all'%(coord)]]).T
+                residuals[coord] = dic['gp_output']['gp%s.d%s_all'%((coord, coord))]
                 if self.gp_corrected:
-                    residuals[coord]-= dic['gp_output']['gp%s.d%s_predict'%((coord, coord))]
+                    residuals[coord]-= dic['gp_output']['gp%s.d%s_all_predict'%((coord, coord))]
                 if self.statistics == 'weighted':
-                    residuals_err[coord] = dic['input_data']['d%s_err'%(coord)]
+                    residuals_err[coord] = dic['gp_output']['gp%s.d%s_err_all'%((coord, coord))]
 
             for chipnum in self.mean:
                 for coord in ['u', 'v']:
-                    filtre = (dic['gp_output']['gp%s.chipnum'%(coord)] == chipnum)
+                    filtre = (dic['gp_output']['gp%s.chip_num_all'%(coord)] == chipnum)
                     if np.sum(filtre) != 0:
                         if self.statistics == 'weighted':
                             error = residuals_err[coord][filtre]
