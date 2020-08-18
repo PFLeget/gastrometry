@@ -62,7 +62,8 @@ class comp_mean(object):
             print(chipnum)
             for coord in ['u', 'v']:
                 if len(self.mean[chipnum]['d%s'%(coord)].params) !=0:
-                    self.mean[chipnum]['d%s'%(coord)].meanify()
+                    self.mean[chipnum]['d%s'%(coord)].meanify(lu_min=26., lu_max=2021.,
+                                                              lv_min=17., lv_max=4149.,)
 
     def save_results(self, rep_out):
         for chipnum in self.mean:
