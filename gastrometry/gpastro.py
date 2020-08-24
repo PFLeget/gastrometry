@@ -57,26 +57,16 @@ class gpastro(object):
         indice = np.linspace(0, len(self.u)-1, len(self.u)).astype(int)
         indice_train, indice_test = train_test_split(indice, test_size=0.2, random_state=42)
 
-        self.u_train = self.u[indice_train]
-        self.u_test = self.u[indice_test]
-
-        self.v_train = self.v[indice_train]
-        self.v_test = self.v[indice_test]
+        for comp in ['u', 'v']:
+            exec("self.%s_train = self.%s[indice_train]"%((comp, comp)))
+            exec("self.%s_test = self.%s[indice_test]"%((comp, comp)))
+            exec("self.d%s_train = self.d%s[indice_train]"%((comp, comp)))
+            exec("self.d%s_test = self.d%s[indice_test]"%((comp, comp)))
+            exec("self.d%s_err_train = self.d%s_err[indice_train]"%((comp, comp)))
+            exec("self.d%s_err_test = self.d%s_err[indice_test]"%((comp, comp)))
 
         self.coords_train = self.coords[indice_train]
         self.coords_test = self.coords[indice_test]
-
-        self.du_train = self.du[indice_train]
-        self.du_test = self.du[indice_test]
-        
-        self.dv_train = self.dv[indice_train]
-        self.dv_test = self.dv[indice_test]
-
-        self.du_err_train = self.du_err[indice_train]
-        self.du_err_test = self.du_err[indice_test]
-        
-        self.dv_err_train = self.dv_err[indice_train]
-        self.dv_err_test = self.dv_err[indice_test]
 
         self.logr = None
         self.xie = None
@@ -86,17 +76,6 @@ class gpastro(object):
         self.xi_dudu = None
         self.xi_dvdv = None
         self.xi_dudv = None
-
-        self.u = u * arcsec
-        self.v = v * arcsec
-        self.coords = np.array([self.u, self.v]).T
-        self.du = du * mas
-        self.dv = dv * mas
-        self.du_err = du_err * mas
-        self.dv_err = dv_err * mas
-
-        # split training/validation                                                                                                                             
-        indice_train, indice_test
 
         self.dic_output = {'exp_id':self.exp_id, 
                            'input_data':{'u':self.u,
