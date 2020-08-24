@@ -134,102 +134,59 @@ class gpastro(object):
     def gp_interp(self, dic_all=None):
 
         print("start gp interp")
-        gpu = treegp.GPInterpolation(kernel=self.kernel, optimizer='anisotropic', 
-                                     normalize=True, nbins=self.NBIN, min_sep=0.,
-                                     max_sep=self.MAX, p0=self.P0)
-        gpu.initialize(self.coords_train, self.du_train, y_err=self.du_err_train)
-        gpu.solve()
-        self.du_test_predict = gpu.predict(self.coords_test, return_cov=False)
-        self.du_predict = gpu.predict(self.coords, return_cov=False)
-        self.gpu = gpu
 
-        if dic_all is not None:
-            self.coords_all = np.array([dic_all['u']*self._arcsec,
-                                        dic_all['v']*self._arcsec]).T
-            self.du_all = dic_all['du'] * self._mas
-            self.du_err_all = dic_all['du_err'] * self._mas
-            self.du_all_predict = gpu.predict(self.coords_all, return_cov=False)
-            self.xccd_all = dic_all['x']
-            self.yccd_all = dic_all['y']
-            self.chip_num_all = dic_all['chip_num']
-        else:
-            self.coords_all = None
-            self.du_all_predict = None
-            self.xccd_all = None
-            self.yccd_all = None
-            self.chip_num_all = None
+        for comp in ['u', 'v']:
+            if comp == 'v':
+                print('I did half')
+            exec("gp%s = treegp.GPInterpolation(kernel=self.kernel, optimizer=\'anisotropic\', normalize=True, nbins=self.NBIN, min_sep=0., max_sep=self.MAX, p0=self.P0)"%(comp))
+            exec("gp%s.initialize(self.coords_train, self.d%s_train, y_err=self.d%s_err_train)"%((comp, comp, comp)))
+            exec("gp%s.solve()"%(comp))
+            exec("self.d%s_test_predict = gp%s.predict(self.coords_test, return_cov=False)"%((comp, comp)))
+            exec("self.d%s_predict = gp%s.predict(self.coords, return_cov=False)"%((comp, comp)))
+            exec("self.gp%s = gp%s"%((comp, comp)))
 
-        self.dic_output['gp_output'].update({'gpu.2pcf':gpu._optimizer._2pcf,
-                                             'gpu.2pcf_weight':gpu._optimizer._2pcf_weight,
-                                             'gpu.2pcf_dist':gpu._optimizer._2pcf_dist,
-                                             'gpu.2pcf_fit':gpu._optimizer._2pcf_fit,
-                                             'gpu.2pcf_mask':gpu._optimizer._2pcf_mask,
-                                             'gpu.kernel':gpu._optimizer._kernel,
-                                             'gpu.du':self.du,
-                                             'gpu.du_predict':self.du_predict,
-                                             'gpu.du_test_predict':self.du_test_predict,
-                                             'gpu.du_test':self.du_test,
-                                             'gpu.coords':self.coords,
-                                             'gpu.coords_test':self.coords_test,
-                                             'gpu.xccd':self.xccd,
-                                             'gpu.yccd':self.yccd,
-                                             'gpu.chipnum':self.chipnum,
-                                             'gpu.coords_all':self.coords_all,
-                                             'gpu.du_all':self.du_all,
-                                             'gpu.du_err_all':self.du_err_all,
-                                             'gpu.du_all_predict':self.du_all_predict,
-                                             'gpu.xccd_all':self.xccd_all,
-                                             'gpu.yccd_all':self.yccd_all,
-                                             'gpu.chip_num_all':self.chip_num_all})
+            if dic_all is not None:
+                self.coords_all = np.array([dic_all['u']*self._arcsec,
+                                            dic_all['v']*self._arcsec]).T
+                exec("self.d%s_all = dic_all['d%s'] * self._mas"%((comp, comp)))
+                exec("self.d%s_err_all = dic_all['d%s_err'] * self._mas"%((comp, comp)))
+                exec("self.d%s_all_predict = gp%s.predict(self.coords_all, return_cov=False)"%((comp, comp)))
+                self.xccd_all = dic_all['x']
+                self.yccd_all = dic_all['y']
+                self.chip_num_all = dic_all['chip_num']
+            else:
+                self.coords_all = None
+                exec("self.d%s_all_predict = None"%(comp))
+                self.xccd_all = None
+                self.yccd_all = None
+                self.chip_num_all = None
 
-        print("I did half")
-        gpv = treegp.GPInterpolation(kernel=self.kernel, optimizer='anisotropic',
-                                     normalize=True, nbins=self.NBIN, min_sep=0.,
-                                     max_sep=self.MAX, p0=self.P0)
-        gpv.initialize(self.coords_train, self.dv_train, y_err=self.dv_err_train)
-        gpv.solve()
-        self.dv_test_predict = gpv.predict(self.coords_test, return_cov=False)
-        self.dv_predict = gpv.predict(self.coords, return_cov=False)
-        self.gpv = gpv
+            gp_name = 'gp%s'%(comp)
+        
+            exec('self.dic_output[\'gp_output\'][gp_name+\'.2pcf\'] = gp%s._optimizer._2pcf'%(comp))
+            exec('self.dic_output[\'gp_output\'][gp_name+\'.2pcf_weight\'] = gp%s._optimizer._2pcf_weight'%(comp))
+            exec('self.dic_output[\'gp_output\'][gp_name+\'.2pcf_dist\'] = gp%s._optimizer._2pcf_dist'%(comp))
+            exec('self.dic_output[\'gp_output\'][gp_name+\'.2pcf_fit\'] = gp%s._optimizer._2pcf_fit'%(comp))
+            exec('self.dic_output[\'gp_output\'][gp_name+\'.2pcf_mask\'] = gp%s._optimizer._2pcf_mask'%(comp))
+            exec('self.dic_output[\'gp_output\'][gp_name+\'.kernel\'] = gp%s._optimizer._kernel'%(comp))
+            exec('self.dic_output[\'gp_output\'][gp_name+\'.d%s\'] = self.d%s'%((comp, comp)))
+            exec('self.dic_output[\'gp_output\'][gp_name+\'.d%s_predict\'] = self.d%s_predict'%((comp, comp)))
+            exec('self.dic_output[\'gp_output\'][gp_name+\'.d%s_test_predict\'] = self.d%s_test_predict'%((comp, comp)))
+            exec('self.dic_output[\'gp_output\'][gp_name+\'.d%s_test\'] = self.d%s_test'%((comp, comp)))
+            exec('self.dic_output[\'gp_output\'][gp_name+\'.d%s_all\'] = self.d%s_all'%((comp, comp)))
+            exec('self.dic_output[\'gp_output\'][gp_name+\'.d%s_err_all\'] = self.d%s_err_all'%((comp, comp)))
+            exec('self.dic_output[\'gp_output\'][gp_name+\'.d%s_all_predict\'] = self.d%s_all_predict'%((comp, comp)))
 
-        if dic_all is not None:
-            self.coords_all = np.array([dic_all['u'] * self._arcsec, 
-                                        dic_all['v'] * self._arcsec]).T
-            self.dv_all = dic_all['dv'] * self._mas
-            self.dv_err_all = dic_all['dv_err'] * self._mas
-            self.dv_all_predict = gpv.predict(self.coords_all, return_cov=False)
-            self.xccd_all = dic_all['x']
-            self.yccd_all = dic_all['y']
-            self.chip_num_all = dic_all['chip_num']
-        else:
-            self.coords_all = None
-            self.dv_all_predict = None
-            self.xccd_all = None
-            self.yccd_all = None
-            self.chip_num_all = None
+            self.dic_output['gp_output'][gp_name+'.coords'] = self.coords
+            self.dic_output['gp_output'][gp_name+'.coords_test'] = self.coords_test
+            self.dic_output['gp_output'][gp_name+'.xccd'] = self.xccd
+            self.dic_output['gp_output'][gp_name+'.yccd'] = self.yccd
+            self.dic_output['gp_output'][gp_name+'.chipnum'] = self.chipnum
+            self.dic_output['gp_output'][gp_name+'.coords_all'] = self.coords_all
+            self.dic_output['gp_output'][gp_name+'.xccd_all'] = self.xccd_all
+            self.dic_output['gp_output'][gp_name+'.yccd_all'] = self.yccd_all
+            self.dic_output['gp_output'][gp_name+'.chip_num_all'] = self.chip_num_all
 
-        self.dic_output['gp_output'].update({'gpv.2pcf':gpv._optimizer._2pcf,
-                                             'gpv.2pcf_weight':gpv._optimizer._2pcf_weight,
-                                             'gpv.2pcf_dist':gpv._optimizer._2pcf_dist,
-                                             'gpv.2pcf_fit':gpv._optimizer._2pcf_fit,
-                                             'gpv.2pcf_mask':gpv._optimizer._2pcf_mask,
-                                             'gpv.kernel':gpv._optimizer._kernel,
-                                             'gpv.dv':self.dv,
-                                             'gpv.dv_predict':self.dv_predict,
-                                             'gpv.dv_test_predict':self.dv_test_predict,
-                                             'gpv.dv_test':self.dv_test,
-                                             'gpv.coords':self.coords,
-                                             'gpv.coords_test':self.coords_test,
-                                             'gpv.xccd':self.xccd,
-                                             'gpv.yccd':self.yccd,
-                                             'gpv.chipnum':self.chipnum,
-                                             'gpv.coords_all':self.coords_all,
-                                             'gpv.dv_all':self.dv_all,
-                                             'gpv.dv_err_all':self.dv_err_all,
-                                             'gpv.dv_all_predict':self.dv_all_predict,
-                                             'gpv.xccd_all':self.xccd_all,
-                                             'gpv.yccd_all':self.yccd_all,
-                                             'gpv.chip_num_all':self.chip_num_all})
 
         X_valid = self.coords_test
         Y_valid = np.array([self.du_test, self.dv_test]).T
@@ -252,6 +209,7 @@ class gpastro(object):
                                              'xib_residuals':self.xib_residuals,
                                              'xie_residuals':self.xie_residuals,
                                              'logr_residuals':self.logr_residuals})
+
     def plot_gaussian_process(self):
 
         plotting.plot_gaussian_process(self)
