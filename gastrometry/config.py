@@ -61,6 +61,11 @@ def gastrogp(config, read_input_only=False,
         else:
             cpu_time = config['interp']['cpu_time']
 
+        if 'rep_mean' not in config['interp']:
+            rep_mean = None
+        else:
+            rep_mean = config['interp']['rep_mean']
+
         launch_jobs_ccin2p3(rep_inout=config['output']['directory'],
                             filt_telescop = config['interp']['filt_telescop'],
                             NBIN=config['interp']['NBIN'],
@@ -68,7 +73,8 @@ def gastrogp(config, read_input_only=False,
                             P0=config['interp']['P0'],
                             kernel = config['interp']['kernel'],
                             queue = queue,
-                            cpu_time = cpu_time)
+                            cpu_time = cpu_time,
+                            rep_mean=rep_mean)
     if write_output_only:
         if 'input' not in config:
             raise ValueError("input field is required in config dict")
@@ -103,6 +109,11 @@ def gastrify(config):
         if key not in config:
                 raise ValueError("%s field is required in config dict"%key)
 
+    if 'rep_mean' in config:
+        rep_mean = config['rep_mean']
+    else:
+        rep_mean = None
+            
     INPUT = os.path.join(config['rep'], 'input.pkl')
 
     dic = pickle.load(open(INPUT, 'rb'))
@@ -116,7 +127,8 @@ def gastrify(config):
                  kernel = config['kernel'],
                  mas=3600.*1e3, arcsec=3600.,
                  exp_id=dic['exp_id'], visit_id="",
-                 rep=config['rep'], save=True)
+                 rep=config['rep'],
+                 rep_mean=rep_mean, save=True)
     gp.comp_eb()
     gp.comp_xi()
     print("start gp")

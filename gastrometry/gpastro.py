@@ -4,9 +4,11 @@ import treecorr
 import treegp
 from gastrometry import vcorr, xiB, plotting
 from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsRegressor
 import os
 import pickle
 import parser, optparse
+import fitsio
 
 def read_option():
 
@@ -19,6 +21,55 @@ def read_option():
 
     return option
 
+class get_mean(object):
+
+    def __init__(self, fits_file):
+
+        self.mean = fitsio.read(fits_file)
+        self.params0 = self.mean['PARAMS0'][0]
+        self.coord0 = self.mean['COORDS0'][0]
+        self.y0 = self.mean['_AVERAGE'][0]
+        self.u0 = self.mean['_U0'][0]
+        self.v0 = self.mean['_V0'][0]
+        
+def build_average_knn(X, rep='', comp='du',ccd_name='42', n_neighbors=4):
+    """Compute spatial average from meanify output for a given coordinate using KN interpolation.               
+        If no average_fits was given, return array of 0.                                                            
+                                                                                                                    
+        :param X: Coordinates of training stars or coordinates where to interpolate. (n_samples, 2)                 
+    """
+    file = "mean_%s_%s_all.fits"%((comp, ccd_name))
+    
+    gm = get_mean(os.path.join(rep, file))
+
+    neigh = KNeighborsRegressor(n_neighbors=n_neighbors ,weights='distance')
+    neigh.fit(gm.coord0, gm.params0)
+    average = neigh.predict(X)
+        
+    return average
+        
+class comp_mean_interp(object):
+    
+    def __init__(self, xccd, yccd, ccd_name, rep_mean=''):
+        
+        self.X = np.array([xccd, yccd]).T
+        self.rep_mean = rep_mean
+        self.ccd_name = ccd_name
+        self.y0_du = np.zeros(len(xccd))
+        self.y0_dv = np.zeros(len(xccd))
+        
+    def return_mean(self):
+        
+        for i in range(104):
+            try:
+                Filtre = (self.ccd_name == (i+1))
+                self.y0_du[Filtre] = build_average_knn(self.X[Filtre], rep=self.rep_mean, comp='du',
+                                                       ccd_name=str(i+1), n_neighbors=9)
+                self.y0_dv[Filtre] = build_average_knn(self.X[Filtre], rep=self.rep_mean, comp='dv',
+                                                       ccd_name=str(i+1), n_neighbors=9)
+            except:
+                print("no file exit for this CCD (name: %s)"%(str(i+1)))
+
 class gpastro(object):
 
     def __init__(self, u, v, du, dv, du_err, dv_err,
@@ -27,11 +78,12 @@ class gpastro(object):
                  kernel = "15**2 * AnisotropicVonKarman(invLam=np.array([[1./3000.**2,0],[0,1./3000.**2]]))",
                  mas=3600.*1e3, arcsec=3600.,
                  exp_id="", visit_id="", rep="", 
-                 save=False):
+                 save=False, rep_mean=None):
 
         self.exp_id = exp_id
         self.visit_id = visit_id
         self.rep = rep
+        self.rep_mean = rep_mean
         self.save = save
 
         self.NBIN = NBIN
@@ -50,6 +102,24 @@ class gpastro(object):
         self.du_err = du_err * mas
         self.dv_err = dv_err * mas
 
+        if self.rep_mean is not None:
+            print('A mean function is used, the rep used is this one: %s'%(self.rep_mean))
+            if xccd is None:
+                ValueError("need an xccd")
+            if yccd is None:
+                ValueError("need an yccd")
+            if chipnum is None:
+                ValueError("need a ccd_name")
+            cmi = comp_mean_interp(self.xccd, self.yccd,
+                                   self.chipnum, rep_mean=self.rep_mean)
+            cmi.return_mean()
+            self.y0_du = cmi.y0_du
+            self.y0_dv = cmi.y0_dv
+        else:
+            print('No mean function is used')
+            self.y0_du = 0.
+            self.y0_dv = 0.
+            
         self._arcsec = arcsec
         self._mas = mas
 
@@ -62,6 +132,14 @@ class gpastro(object):
             exec("self.%s_test = self.%s[indice_test]"%((comp, comp)))
             exec("self.d%s_train = self.d%s[indice_train]"%((comp, comp)))
             exec("self.d%s_test = self.d%s[indice_test]"%((comp, comp)))
+
+            if self.rep_mean is not None:
+                exec("self.y0_d%s_train = self.y0_d%s[indice_train]"%((comp, comp)))
+                exec("self.y0_d%s_test = self.y0_d%s[indice_test]"%((comp, comp)))
+            else:
+                exec("self.y0_d%s_train = 0."%(comp))
+                exec("self.y0_d%s_test = 0."%(comp))
+
             exec("self.d%s_err_train = self.d%s_err[indice_train]"%((comp, comp)))
             exec("self.d%s_err_test = self.d%s_err[indice_test]"%((comp, comp)))
 
@@ -88,7 +166,6 @@ class gpastro(object):
                            'indice_test':indice_test},
                            '2pcf_stat':{},
                            'gp_output':{}}
-        
 
     def comp_eb(self):
 
@@ -133,16 +210,30 @@ class gpastro(object):
 
     def gp_interp(self, dic_all=None):
 
+        if dic_all is not None:
+            if self.rep_mean is not None:
+                cmi = comp_mean_interp(dic_all['x'], dic_all['y'],
+                                       dic_all['chip_num'], rep_mean=self.rep_mean)
+                cmi.return_mean()
+                self.y0_du_all = cmi.y0_du
+                self.y0_dv_all = cmi.y0_dv
+            
         print("start gp interp")
 
         for comp in ['u', 'v']:
             if comp == 'v':
                 print('I did half')
             exec("gp%s = treegp.GPInterpolation(kernel=self.kernel, optimizer=\'anisotropic\', normalize=True, nbins=self.NBIN, min_sep=0., max_sep=self.MAX, p0=self.P0)"%(comp))
-            exec("gp%s.initialize(self.coords_train, self.d%s_train, y_err=self.d%s_err_train)"%((comp, comp, comp)))
+            # remove mean function
+            exec("ygp = self.d%s_train - self.y0_d%s_train"%((comp, comp)))
+            exec("gp%s.initialize(self.coords_train, ygp, y_err=self.d%s_err_train)"%((comp, comp)))
             exec("gp%s.solve()"%(comp))
             exec("self.d%s_test_predict = gp%s.predict(self.coords_test, return_cov=False)"%((comp, comp)))
             exec("self.d%s_predict = gp%s.predict(self.coords, return_cov=False)"%((comp, comp)))
+            # add back mean function
+            exec("self.d%s_test_predict += self.y0_d%s_test"%((comp, comp)))
+            exec("self.d%s_predict += self.y0_d%s"%((comp, comp)))
+            
             exec("self.gp%s = gp%s"%((comp, comp)))
 
             if dic_all is not None:
@@ -154,6 +245,8 @@ class gpastro(object):
                 self.xccd_all = dic_all['x']
                 self.yccd_all = dic_all['y']
                 self.chip_num_all = dic_all['chip_num']
+                if self.rep_mean is not None:
+                    exec("self.d%s_all_predict += self.y0_d%s_all"%((comp, comp)))
             else:
                 self.coords_all = None
                 exec("self.d%s_all_predict = None"%(comp))

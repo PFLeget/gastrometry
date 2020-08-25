@@ -8,7 +8,8 @@ def launch_jobs_ccin2p3(rep_inout='/pbs/home/l/leget/sps_lsst/HSC/gp_output/',
                         P0=[3000., 0., 0.],
                         queue = 'lsst',
                         cpu_time = '04:00:00',
-                        kernel = "15**2 * AnisotropicVonKarman(invLam=np.array([[1./3000.**2,0],[0,1./3000.**2]]))"):
+                        kernel = "15**2 * AnisotropicVonKarman(invLam=np.array([[1./3000.**2,0],[0,1./3000.**2]]))",
+                        rep_mean = None):
     J = 0
     stop = False
     for f in filt_telescop:
@@ -27,7 +28,10 @@ def launch_jobs_ccin2p3(rep_inout='/pbs/home/l/leget/sps_lsst/HSC/gp_output/',
             config_yaml.write('\n')
             config_yaml.write('P0: {0}\n'.format(P0))
             config_yaml.write('\n')
-            config_yaml.write('kernel: %s'%kernel)
+            config_yaml.write('kernel: %s\n'%kernel)
+            if rep_mean is not None:
+                config.yaml.write('\n')
+                config.yaml.write('rep_mean: %s'%rep_mean)
             config_yaml.close()
 
             fichier=open('machine_gun_jobs_%i.sh'%(J),'w')
