@@ -30,8 +30,8 @@ def launch_jobs_ccin2p3(rep_inout='/pbs/home/l/leget/sps_lsst/HSC/gp_output/',
             config_yaml.write('\n')
             config_yaml.write('kernel: %s\n'%kernel)
             if rep_mean is not None:
-                config.yaml.write('\n')
-                config.yaml.write('rep_mean: %s'%rep_mean)
+                config_yaml.write('\n')
+                config_yaml.write('rep_mean: %s'%rep_mean)
             config_yaml.close()
 
             fichier=open('machine_gun_jobs_%i.sh'%(J),'w')
@@ -48,9 +48,9 @@ def launch_jobs_ccin2p3(rep_inout='/pbs/home/l/leget/sps_lsst/HSC/gp_output/',
             os.system(command)
             os.system('rm machine_gun_jobs_%i.sh*'%(J))
             J += 1
-            #if i > 10:
-            #    stop = True
-            #    break
-        #if stop:
-        #    break
+       #     if J > 10:
+       #         stop = True
+       #         break
+       # if stop:
+       #     break
 
