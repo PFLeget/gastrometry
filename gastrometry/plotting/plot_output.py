@@ -488,15 +488,24 @@ if __name__ == '__main__':
     ##lo.save_output('final_gp_outputs.pkl')
 
     #po = plot_output('../../../hsc_outputs/v3/outputs/final_gp_outputs_all.pkl')
-    po = plot_output('../../../hsc_outputs/v3/outputs/final_gp_outputs_all_v3_with_v1_exp.pkl')
+    #po = plot_output('../../../hsc_outputs/v3/outputs/final_gp_outputs_all_v3_with_v1_exp.pkl')
     #po = plot_output('../../../hsc_outputs/v1/final_gp_outputs_all_vk.pkl', read_python2=True)
-    
-    #po.plot_eb_mode(YLIM=[-10,60])
-    #plt.savefig('1_eb_glob_vk_v1.pdf')
-    #po.plot_eb_mode_test(YLIM=[-10,60])
-    #plt.savefig('2_eb_glob_test_vk_v1.pdf')
+
+    po = plot_output('../../../hsc_outputs/v3.3/astro_VK_with_mean/outputs/final_gp_outputs_all.pkl')
+    po.plot_eb_mode(YLIM=[-10,60])
+    plt.savefig('1_eb_glob_vk_with_mean.pdf')
+    po.plot_eb_mode_test(YLIM=[-10,60])
+    plt.savefig('2_eb_glob_test_with_mean.pdf')
     po.plot_eb_mode_test_residuals(YLIM=[-10,60])
-    plt.savefig('3_eb_glob_test_afterGP_vk_v1_but_v3.pdf')
+    plt.savefig('3_eb_glob_test_afterGP_with_mean.pdf')
+
+    po = plot_output('../../../hsc_outputs/v3.3/astro_VK/outputs/final_gp_outputs_all.pkl')
+    po.plot_eb_mode(YLIM=[-10,60])
+    plt.savefig('1_eb_glob_vk_no_mean.pdf')
+    po.plot_eb_mode_test(YLIM=[-10,60])
+    plt.savefig('2_eb_glob_test_no_mean.pdf')
+    po.plot_eb_mode_test_residuals(YLIM=[-10,60])
+    plt.savefig('3_eb_glob_test_afterGP_no_mean.pdf')
 
     ##po.plot_residuals()
     ##po.meanify()
