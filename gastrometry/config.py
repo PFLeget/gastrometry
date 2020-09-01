@@ -96,9 +96,8 @@ def gastrogp(config, read_input_only=False,
         run_ma_poule_mean(config['output']['directory'], 
                           bin_spacing=config['comp_meanify']['bin_spacing'],
                           statistics=config['comp_meanify']['statistics'], 
-                          nccd=104,
+                          nccd=105,
                           gp_corrected=config['comp_meanify']['gp_corrected'])
-
 
 def gastrify(config):
 

@@ -60,15 +60,15 @@ class comp_mean_interp(object):
         
     def return_mean(self):
         
-        for i in range(104):
+        for i in range(105):
             try:
-                Filtre = (self.ccd_name == (i+1))
+                Filtre = (self.ccd_name == (i))
                 self.y0_du[Filtre] = build_average_knn(self.X[Filtre], rep=self.rep_mean, comp='du',
-                                                       ccd_name=str(i+1), n_neighbors=4)
+                                                       ccd_name=str(i), n_neighbors=4)
                 self.y0_dv[Filtre] = build_average_knn(self.X[Filtre], rep=self.rep_mean, comp='dv',
-                                                       ccd_name=str(i+1), n_neighbors=4)
+                                                       ccd_name=str(i), n_neighbors=4)
             except:
-                print("no file exit for this CCD (name: %s)"%(str(i+1)))
+                print("no file exit for this CCD (name: %s)"%(str(i)))
 
 class gpastro(object):
 

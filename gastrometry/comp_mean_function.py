@@ -9,7 +9,7 @@ import glob
 class comp_mean(object):
 
     def __init__(self, files_out, bin_spacing=10.,
-                 statistics='weighted', nccd=104,
+                 statistics='weighted', nccd=105,
                  gp_corrected=True, alias=None):
 
         self.files_out = files_out
@@ -25,8 +25,8 @@ class comp_mean(object):
                                      statistics=self.statistics)
             mean_dv = treegp.meanify(bin_spacing=self.bin_spacing,
                                      statistics=self.statistics)
-            self.mean.update({i+1: {'du':mean_du,
-                                    'dv':mean_dv,}})
+            self.mean.update({i: {'du':mean_du,
+                                  'dv':mean_dv,}})
 
     def stack_fields(self):
 
@@ -114,7 +114,7 @@ def plot_mean(fits_file_du,
         plt.close()
 
 def run_ma_poule_mean(rep_out, bin_spacing=30.,
-                      statistics='weighted', nccd=104,
+                      statistics='weighted', nccd=105,
                       gp_corrected=True, sub_rep='all'):
 
     if sub_rep == 'all':
@@ -144,15 +144,15 @@ def run_ma_poule_mean(rep_out, bin_spacing=30.,
 
     os.system('mkdir %s'%(os.path.join(path_mean, 'plotting')))
     for i in range(nccd):
-        print(i+1)
+        print(i)
         try:
-            plot_mean(os.path.join(path_mean, 'mean_du_%i_%s.fits'%((i+1, sub_rep))),
-                      os.path.join(path_mean, 'mean_dv_%i_%s.fits'%((i+1, sub_rep))),
-                      name='CCD %i'%(i+1),
+            plot_mean(os.path.join(path_mean, 'mean_du_%i_%s.fits'%((i, sub_rep))),
+                      os.path.join(path_mean, 'mean_dv_%i_%s.fits'%((i, sub_rep))),
+                      name='CCD %i'%(i),
                       cmap=None,
-                      name_fig=os.path.join(path_mean,'plotting/CCD_%i_%s.png'%((i+1, sub_rep))))
+                      name_fig=os.path.join(path_mean,'plotting/CCD_%i_%s.png'%((i, sub_rep))))
         except:
-            print('files %i does not exist'%(i+1))
+            print('files %i does not exist'%(i))
 
     if sub_rep == 'all':
         for hsc_filter in ['g', 'r', 'i', 'z', 'y']:
@@ -165,5 +165,5 @@ if __name__ == "__main__":
 
     rep_out = '/pbs/home/l/leget/sps_lsst/HSC/v3.2/astro_VK'
     run_ma_poule_mean(rep_out, bin_spacing=15,
-                      statistics='weighted', nccd=104,
+                      statistics='weighted', nccd=105,
                       gp_corrected=True)
