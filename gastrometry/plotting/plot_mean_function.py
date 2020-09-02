@@ -1,6 +1,9 @@
 import numpy as np
 import pylab as plt
-import pyloka
+try:
+    import pyloka
+except:
+    print('poloka-core is not installed')
 import os
 import fitsio
 import pickle
@@ -67,6 +70,75 @@ def build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v3.3/astro_VK/mean_function/all/')
 
     return dic_mean
 
+def plot_fov_mean(file_tp):
+
+    dic = pickle.load(open(file_tp, 'rb'))
+
+    for comp in ['du', 'dv']:
+        plt.figure(figsize=(12, 11))
+        plt.subplots_adjust(left=0.1, bottom=0.1, top=0.95, right=0.95)
+        plt.scatter(dic[comp]['u0'], dic[comp]['v0'], c=dic[comp]['y0'],
+                    vmin=-2, vmax=2, s=1, cmap=plt.cm.inferno)
+        cb = plt.colorbar()
+        cb.set_label(comp+' (mas)', fontsize=20)
+        cb.ax.tick_params(labelsize=20)
+        plt.xticks(fontsize=20)
+        plt.xlabel('u (degree)', fontsize=20)
+        plt.yticks(fontsize=20)
+        plt.ylabel('v (degree)', fontsize=20)
+        plt.savefig(comp+'_mean.png')
+
+def plot_mean_ccd(fits_file_du,
+                  fits_file_dv, name= '',
+                  cmap=None, MAX=2, name_fig=None):
+
+    FONT = 10
+    
+    plt.figure(figsize=(6.5,5))
+    plt.subplots_adjust(wspace=0.4, top=0.9)#, right=0.95, left=0.07)
+    plt.subplot(1,2,1)
+    mean = fitsio.read(fits_file_du)
+    y0 = mean['PARAMS0'][0]
+    coord0 = mean['COORDS0'][0]
+    plt.scatter(coord0[:,0], coord0[:,1],
+                c=y0, cmap = cmap, vmin=-MAX,vmax=MAX,
+                lw=0, s=4)
+    plt.xlabel('x (pixel)',fontsize=FONT)
+    plt.ylabel('y (pixel)',fontsize=FONT)
+    plt.yticks(fontsize=8)
+    plt.xticks(fontsize=8)
+    cb = plt.colorbar()
+    cb.set_label('$du$ (mas)', fontsize=FONT)
+    cb.ax.tick_params(labelsize=8)
+
+    plt.subplot(1,2,2)
+    mean = fitsio.read(fits_file_dv)
+    y0 = mean['PARAMS0'][0]
+    coord0 = mean['COORDS0'][0]
+    plt.scatter(coord0[:,0], coord0[:,1],
+                c=y0, cmap = cmap, vmin=-MAX,vmax=MAX,
+                lw=0, s=6)
+    plt.xlabel('x (pixel)',fontsize=FONT)
+    plt.yticks([],[])
+    plt.xticks(fontsize=8)
+    cb = plt.colorbar()
+    cb.set_label('$dv$ (mas)', fontsize=FONT)
+    cb.ax.tick_params(labelsize=8)
+
+    plt.suptitle(name, fontsize=FONT)
+    if name_fig is not None:
+        plt.savefig(name_fig)
+        plt.close()
+
+
 if __name__ == '__main__':
 
-    dic = build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v3.3/astro_VK/mean_function/all/')
+    #dic = build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v3.3/astro_VK/mean_function/all/')
+    #plot_fov_mean('../../../hsc_outputs/v3.3/mean_tp.pkl')
+
+    for i in [7, 14, 42]:
+        plot_mean_ccd('../../../hsc_outputs/v3.3/astro_VK/mean_function_20/all/mean_du_%i_all.fits'%(i),
+                      '../../../hsc_outputs/v3.3/astro_VK/mean_function_20/all/mean_dv_%i_all.fits'%(i),
+                      name= 'CCD %i'%(i), cmap=plt.cm.inferno, MAX=2, name_fig='ccd_%i_mean.png'%(i))
+
+    plt.show()
