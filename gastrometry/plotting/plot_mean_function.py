@@ -75,8 +75,8 @@ def plot_fov_mean(file_tp):
     dic = pickle.load(open(file_tp, 'rb'))
 
     for comp in ['du', 'dv']:
-        plt.figure(figsize=(12, 11))
-        plt.subplots_adjust(left=0.1, bottom=0.1, top=0.95, right=0.95)
+        plt.figure(figsize=(13, 9))
+        plt.subplots_adjust(left=0.1, bottom=0.1, top=0.97, right=0.95)
         plt.scatter(dic[comp]['u0'], dic[comp]['v0'], c=dic[comp]['y0'],
                     vmin=-2, vmax=2, s=1, cmap=plt.cm.inferno)
         cb = plt.colorbar()
@@ -86,6 +86,7 @@ def plot_fov_mean(file_tp):
         plt.xlabel('u (degree)', fontsize=20)
         plt.yticks(fontsize=20)
         plt.ylabel('v (degree)', fontsize=20)
+        plt.axis('equal')
         plt.savefig(comp+'_mean.png')
 
 def plot_mean_ccd(fits_file_du,
@@ -134,11 +135,18 @@ def plot_mean_ccd(fits_file_du,
 if __name__ == '__main__':
 
     #dic = build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v3.3/astro_VK/mean_function/all/')
-    #plot_fov_mean('../../../hsc_outputs/v3.3/mean_tp.pkl')
+    plot_fov_mean('../../../hsc_outputs/v3.3/astro_VK/mean_tp.pkl')
 
-    for i in [7, 14, 42]:
-        plot_mean_ccd('../../../hsc_outputs/v3.3/astro_VK/mean_function_20/all/mean_du_%i_all.fits'%(i),
-                      '../../../hsc_outputs/v3.3/astro_VK/mean_function_20/all/mean_dv_%i_all.fits'%(i),
-                      name= 'CCD %i'%(i), cmap=plt.cm.inferno, MAX=2, name_fig='ccd_%i_mean.png'%(i))
+    #for i in [7, 14, 42]:
+    #    plot_mean_ccd('../../../hsc_outputs/v3.3/astro_VK/mean_function_20/all/mean_du_%i_all.fits'%(i),
+    #                  '../../../hsc_outputs/v3.3/astro_VK/mean_function_20/all/mean_dv_%i_all.fits'%(i),
+    #                  name= 'CCD %i'%(i), cmap=plt.cm.inferno, MAX=2, name_fig='ccd_%i_mean.png'%(i))
 
-    plt.show()
+    #plt.show()
+
+    #plot_mean_ccd('../../../hsc_outputs/v3.3/astro_VK/mean_function_20/all/mean_du_11_all.fits',
+    #              '../../../hsc_outputs/v3.3/astro_VK/mean_function_20/all/mean_dv_11_all.fits',
+    #              name= 'CCD 11', cmap=plt.cm.inferno, MAX=2, name_fig='ccd_11_mean.png')
+    #plot_mean_ccd('../../../hsc_outputs/v3.3/astro_VK_with_mean/mean_function/all/mean_du_11_all.fits',
+    #              '../../../hsc_outputs/v3.3/astro_VK_with_mean/mean_function/all/mean_dv_11_all.fits',
+    #              name= 'CCD 11 (corrected)', cmap=plt.cm.inferno, MAX=2, name_fig='ccd_11_mean_corrected.png')

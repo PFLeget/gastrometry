@@ -6,7 +6,7 @@ import glob
 import os
 import treegp
 from sklearn.neighbors import KNeighborsRegressor
-from gastrometry import vcorr, xiB, biweight_median
+from gastrometry import vcorr, xiB, biweight_median, get_var_ebmode
 from astropy.stats import median_absolute_deviation as mad_astropy
 
 def median_check_finite(x):
@@ -360,16 +360,21 @@ class plot_output(object):
         plt.colorbar()
 
             
-    def plot_eb_mode(self, YLIM=[-5,30]):
+    def plot_eb_mode(self, YLIM=[-5,30], add_title='toto'):
         
         print("eb mode plot")
-        plt.figure(figsize=(12,8))
-        plt.subplots_adjust(bottom=0.12, top=0.98,right=0.99)
- 
         mean_e, std_e = mean_check_finite(self.e_mode)
         mean_b, std_b = mean_check_finite(self.b_mode)
-        
 
+        Filtre0 = ((np.exp(self.logr[0])>6e-3) & (np.exp(self.logr[0])<1e-2))
+
+        Title = '$\\xi_E(0) = (%.1f \pm %.1f)$ mas$^2$ | $\\xi_B(0) = (%.1f \pm %.1f)$ mas$^2$'%((np.mean(mean_e[Filtre0]),
+                                                                                                  np.mean(std_e[Filtre0]),
+                                                                                                  np.mean(mean_b[Filtre0]),
+                                                                                                  np.mean(std_b[Filtre0])))
+        plt.figure(figsize=(12,8))
+        plt.subplots_adjust(bottom=0.12, top=0.88, right=0.99)
+ 
         plt.plot(np.exp(self.logr[0]), mean_e,'b', lw=3, label='mean E-mode')
         plt.fill_between(np.exp(self.logr[0]), mean_e-std_e, mean_e+std_e, color='b', alpha=0.4, label='$\pm 1 \sigma$ E-mode')
         plt.plot(np.exp(self.logr[0]), mean_b,'r', lw=3, label='mean B-mode')
@@ -381,19 +386,29 @@ class plot_output(object):
         plt.xscale('log')
         plt.xticks(size=16)
         plt.yticks(size=16)
-        plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
-        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
-        plt.legend(fontsize=20)
+        plt.xlabel('$\Delta \\theta$ (degree)', fontsize=18)
+        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=18)
+        plt.legend(fontsize=16)
+        if add_title is not None:
+            plt.title(add_title + '\n \n' + Title, fontsize=18)
+        else:
+            plt.title(Title, fontsize=16)
 
-
-    def plot_eb_mode_test(self, YLIM=[-5,30]):
+    def plot_eb_mode_test(self, YLIM=[-5,30], add_title='toto'):
 
         print("eb mode plot test")
         plt.figure(figsize=(12,8))
-        plt.subplots_adjust(bottom=0.12, top=0.98,right=0.99)
+        plt.subplots_adjust(bottom=0.12, top=0.88, right=0.99)
         
         mean_e, std_e = mean_check_finite(self.e_mode_test)
         mean_b, std_b = mean_check_finite(self.b_mode_test)
+
+        Filtre0 = ((np.exp(self.logr[0])>6e-3) & (np.exp(self.logr[0])<1e-2))
+        
+        Title = '$\\xi_E(0) = (%.1f \pm %.1f)$ mas$^2$ | $\\xi_B(0) = (%.1f \pm %.1f)$ mas$^2$'%((np.mean(mean_e[Filtre0]),
+                                                                                                  np.mean(std_e[Filtre0]),
+                                                                                                  np.mean(mean_b[Filtre0]),
+                                                                                                  np.mean(std_b[Filtre0])))
 
         plt.plot(np.exp(self.logr[0]), mean_e,'b', lw=3, label='mean E-mode (test)')
         plt.fill_between(np.exp(self.logr[0]), mean_e-std_e, mean_e+std_e, color='b', alpha=0.4, label='$\pm 1 \sigma$ E-mode')
@@ -406,19 +421,30 @@ class plot_output(object):
         plt.xscale('log')
         plt.xticks(size=16)
         plt.yticks(size=16)
-        plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
-        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
-        plt.legend(fontsize=20)
+        plt.xlabel('$\Delta \\theta$ (degree)', fontsize=18)
+        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=18)
+        plt.legend(fontsize=16)
+        if add_title is not None:
+            plt.title(add_title + '\n \n' + Title, fontsize=18)
+        else:
+            plt.title(Title, fontsize=16)
 
 
-    def plot_eb_mode_test_residuals(self, YLIM=[-5,30]):
+    def plot_eb_mode_test_residuals(self, YLIM=[-5,30], add_title='toto'):
 
         print("eb mode plot test residuals")
         plt.figure(figsize=(12,8))
-        plt.subplots_adjust(bottom=0.12, top=0.98,right=0.99)
+        plt.subplots_adjust(bottom=0.12, top=0.88, right=0.99)
 
         mean_e, std_e = mean_check_finite(self.e_mode_residuals)
         mean_b, std_b = mean_check_finite(self.b_mode_residuals)
+
+        Filtre0 = ((np.exp(self.logr[0])>6e-3) & (np.exp(self.logr[0])<1e-2))
+
+        Title = '$\\xi_E(0) = (%.1f \pm %.1f)$ mas$^2$ | $\\xi_B(0) = (%.1f \pm %.1f)$ mas$^2$'%((np.mean(mean_e[Filtre0]),
+                                                                                                  np.mean(std_e[Filtre0]),
+                                                                                                  np.mean(mean_b[Filtre0]),
+                                                                                                  np.mean(std_b[Filtre0])))
 
         plt.plot(np.exp(self.logr[0]), mean_e,'b', lw=3, label='mean E-mode (test, after GP)')
         plt.fill_between(np.exp(self.logr[0]), mean_e-std_e, mean_e+std_e, color='b', alpha=0.4, label='$\pm 1 \sigma$ E-mode')
@@ -431,9 +457,13 @@ class plot_output(object):
         plt.xscale('log')
         plt.xticks(size=16)
         plt.yticks(size=16)
-        plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
-        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
-        plt.legend(fontsize=20)
+        plt.xlabel('$\Delta \\theta$ (degree)', fontsize=18)
+        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=18)
+        plt.legend(fontsize=16)
+        if add_title is not None:
+            plt.title(add_title + '\n \n' + Title, fontsize=18)
+        else:
+            plt.title(Title, fontsize=16)
 
 
     def plot_2pcf(self):
@@ -481,33 +511,18 @@ class plot_output(object):
 
 if __name__ == '__main__':
 
-    #pkls = glob.glob('../../sps_lsst/HSC/gp_output/*_z/gp_output*.pkl')
-    ##rep = glob.glob('../../sps_lsst/HSC/gp_output/*')
-    ##lo = load_output(rep)
-    ##lo.load_data()
-    ##lo.save_output('final_gp_outputs.pkl')
-
-    #po = plot_output('../../../hsc_outputs/v3/outputs/final_gp_outputs_all.pkl')
-    #po = plot_output('../../../hsc_outputs/v3/outputs/final_gp_outputs_all_v3_with_v1_exp.pkl')
-    #po = plot_output('../../../hsc_outputs/v1/final_gp_outputs_all_vk.pkl', read_python2=True)
+    po = plot_output('../../../hsc_outputs/v3.3/astro_VK/outputs/final_gp_outputs_all.pkl')
+    po.plot_eb_mode(YLIM=[-10,60], add_title='No correction')
+    po.plot_eb_mode_test(YLIM=[-10,60], add_title='No correction (validation sample)')
+    plt.savefig('0_eb_mode_test_no_correction.pdf')
+    po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Von Karman kernel (validation sample)')
+    plt.savefig('2_eb_mode_test_gp_corrected_vk.pdf')
+    
+    po = plot_output('../../../hsc_outputs/v3.3/astro_GAUSS/outputs/final_gp_outputs_all.pkl')
+    po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Gaussian kernel (validation sample)')
+    plt.savefig('1_eb_mode_test_gp_corrected_gauss.pdf')
 
     po = plot_output('../../../hsc_outputs/v3.3/astro_VK_with_mean/outputs/final_gp_outputs_all.pkl')
-    po.plot_eb_mode(YLIM=[-10,60])
-    plt.savefig('1_eb_glob_vk_with_mean.pdf')
-    po.plot_eb_mode_test(YLIM=[-10,60])
-    plt.savefig('2_eb_glob_test_with_mean.pdf')
-    po.plot_eb_mode_test_residuals(YLIM=[-10,60])
-    plt.savefig('3_eb_glob_test_afterGP_with_mean.pdf')
-
-    po = plot_output('../../../hsc_outputs/v3.3/astro_VK/outputs/final_gp_outputs_all.pkl')
-    po.plot_eb_mode(YLIM=[-10,60])
-    plt.savefig('1_eb_glob_vk_no_mean.pdf')
-    po.plot_eb_mode_test(YLIM=[-10,60])
-    plt.savefig('2_eb_glob_test_no_mean.pdf')
-    po.plot_eb_mode_test_residuals(YLIM=[-10,60])
-    plt.savefig('3_eb_glob_test_afterGP_no_mean.pdf')
-
-    ##po.plot_residuals()
-    ##po.meanify()
-    #po.plot_2pcf()
-    #po.meanify_ccd(CMAP = None, MAX = 1.)
+    po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Von Karman kernel and mean function (validation sample)')
+    plt.savefig('3_eb_mode_test_gp_corrected_vk_and_mean.pdf')
+    
