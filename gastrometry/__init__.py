@@ -12,6 +12,7 @@ from .read_output import gather_input_all, write_output
 from .machine_gun_jobs import launch_jobs_ccin2p3
 from .gpastro import gpastro
 from .comp_mean_function import run_ma_poule_mean
+from .meanify1D import meanify1D_wrms
 
 from .config import read_config
 from .config import gastrogp
