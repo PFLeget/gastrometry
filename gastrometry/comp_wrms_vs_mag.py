@@ -26,17 +26,20 @@ class comp_wrms_vs_mag(object):
         for f in self.rep_out:
             print(f)
             file_out = glob.glob(os.path.join(f, 'gp_output*'))
-            dic_out = pickle.load(open(file_out[0], 'rb'))
-            dic_in = pickle.load(open(os.path.join(f,'input.pkl'), 'rb'))
+            try:
+                dic_out = pickle.load(open(file_out[0], 'rb'))
+                dic_in = pickle.load(open(os.path.join(f,'input.pkl'), 'rb'))
+            except:
+                print('for this rep there is nothing: ', file_out)
             
             for coord in ['u', 'v']:
-                mag = dicin['dic_all']['magic_mag']
-                residuals = dic['gp_output']['gp%s.d%s_all'%((coord, coord))]
+                mag = dic_in['dic_all']['magic_mag']
+                residuals = dic_out['gp_output']['gp%s.d%s_all'%((coord, coord))]
                 if self.gp_corrected:
-                    residuals -= dic['gp_output']['gp%s.d%s_all_predict'%((coord, coord))]
-                residuals_err = dic['gp_output']['gp%s.d%s_err_all'%((coord, coord))]
+                    residuals -= dic_out['gp_output']['gp%s.d%s_all_predict'%((coord, coord))]
+                residuals_err = dic_out['gp_output']['gp%s.d%s_err_all'%((coord, coord))]
                     
-                self.mean['d%s'%(coord)].add_field(mag, residuals, params_err=residuals_err)
+                self.mean['d%s'%(coord)].add_data(mag, residuals, params_err=residuals_err)
 
     def comp_mean(self):
             
@@ -60,13 +63,14 @@ def run_ma_poule_wrms_vs_mag(rep_out, bin_spacing=0.05,
                              gp_corrected=True):
 
     # across all filters
-    files_out = glob.glob(rep_out)
+    reps_out = glob.glob(os.path.join(rep_out,'*'))
+
     path_wrms = os.path.join(rep_out, 'wrms_vs_mag')
     os.system('mkdir %s'%(path_wrms))
-        
-    cm = comp_wrms_vs_mag(files_out, bin_spacing=bin_spacing,
+
+    cm = comp_wrms_vs_mag(reps_out, bin_spacing=bin_spacing,
                           gp_corrected=gp_corrected)
-    cm.stack_fields()
+    cm.stack_visits()
     cm.comp_mean()
     cm.save_results(path_wrms)
 
