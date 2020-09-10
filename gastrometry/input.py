@@ -52,7 +52,7 @@ def read_input(input_astrometry='/sps/snls15/HSC/prod.2019-04.dev/dbimage_JLBFUJ
                        'du_err':A[:,12][Filtre],
                        'dv_err':A[:,13][Filtre],
                        'chip_num':A[:,20][Filtre],
-                       'magic_mag':A[:,4][Filtre]
+                       'magic_mag':A[:,4][Filtre],
                        'dic_all':dic_all}
 
                 pickle.dump(dic, pkl_file)
