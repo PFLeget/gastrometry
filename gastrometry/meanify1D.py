@@ -2,7 +2,7 @@
 .. module:: meanify
 """
 import numpy as np
-from scipy.stats import binned_statistic_2d
+from scipy.stats import binned_statistic
 import fitsio
 import os
 
@@ -34,7 +34,7 @@ class meanify1D_wrms(object):
         else:
             self.params_err.append(params_err)
     
-    def meanify(self, x_min=None, x_max=None)
+    def meanify(self, x_min=None, x_max=None):
         """
         Compute the mean function.
         """
@@ -71,22 +71,14 @@ class meanify1D_wrms(object):
         wvar = (1. / sum_w) * (sum_wpp - 2.*average*sum_wp + average*average*sum_w)
         wrms = np.sqrt(wvar)
 
-
-        self._average = average
-        self._wrms = wrms
-        self._x0 = x0
-
         # get center of each bin 
         x0 = x0[:-1] + (x0[1] - x0[0])/2.
 
-        Filter &= np.isfinite(average)
-        Filter &= np.isfinite(wrms)
-
         # remove any entries with nan (counts == 0 and non finite value in
         # the 1D statistic computation) 
-        self.x0 = x0[Filter]
-        self.average = average[Filter]
-        self.wrms= wrms[Filter]
+        self.x0 = x0
+        self.average = average
+        self.wrms= wrms
 
     def save_results(self, name_output='wrms_mag.fits'):
         """
@@ -94,21 +86,46 @@ class meanify1D_wrms(object):
         
         :param name_output: Name of the output fits file. (default: 'mean_gp.fits')
         """
-        dtypes = [('X0', self.coords0.dtype, self.coords0.shape),
-                  ('AVERAGE', self.params0.dtype, self.params0.shape),
-                  ('WRMS', self.wrms0.dtype, self.wrms0.shape),
-                  ('_AVERAGE', self._average.dtype, self._average.shape),
-                  ('_WRMS', self._wrms.dtype, self._wrms.shape),
-                  ('_X0', self._u0.dtype, self._u0.shape),
+        dtypes = [('X0', self.x0.dtype, self.x0.shape),
+                  ('AVERAGE', self.average.dtype, self.average.shape),
+                  ('WRMS', self.wrms.dtype, self.wrms.shape),
                   ]
         data = np.empty(1, dtype=dtypes)
         
         data['X0'] = self.x0
         data['AVERAGE'] = self.average
         data['WRMS'] = self.wrms
-        data['_AVERAGE'] = self._average
-        data['_WRMS'] = self._wrms
-        data['_X0'] = self._x0
 
         with fitsio.FITS(name_output,'rw',clobber=True) as f:
             f.write_table(data, extname='average_solution')
+
+
+if __name__ == "__main__":
+
+    import pylab as plt
+
+    def polynomial(x):
+        return 8e-2*x*x - 5e-1*x -1.
+    
+    m = meanify1D_wrms(bin_spacing=0.05)
+    np.random.seed(42)
+    for i in range(300):
+        print(i+1)
+        N = 10000
+        x = np.random.uniform(-6,6, size=N)
+        y = polynomial(x)
+        y += np.random.normal(scale=0.5, size=N)
+        x += np.random.normal(scale=0.5, size=N)
+        
+        plt.scatter(x, y, c='b', s=1, alpha=0.05)
+        
+        m.add_data(x, y, params_err=None)
+
+    m.meanify(x_min=-4.9, x_max=4.9)
+    X = np.linspace(-5,5, 100)
+    plt.plot(X, polynomial(X), 'k--', lw=5)
+    plt.plot(m.x0, m.average, 'r', lw=3)
+    plt.plot(m.x0, m.average+3*m.wrms, 'r--', lw=3)
+    plt.plot(m.x0, m.average-3*m.wrms, 'r--', lw=3)
+
+    m.save_results()
