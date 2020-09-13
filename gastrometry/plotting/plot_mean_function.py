@@ -36,7 +36,8 @@ class get_mean(object):
         self.v0 = self.mean['_V0'][0]
 
 
-def build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v3.3/astro_VK/mean_function/all/'):
+def build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v3.3/astro_VK/mean_function/all/',
+                     file_out='mean_tp.pkl'):
 
     #'mean_du_23_all.fits'
     dic_mean = {'du':{},
@@ -64,7 +65,7 @@ def build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v3.3/astro_VK/mean_function/all/')
         dic_mean[comp]['u0'] = np.concatenate(u0)
         dic_mean[comp]['v0'] = np.concatenate(v0)
 
-    File = open('mean_tp.pkl', 'wb')
+    File = open(file_out, 'wb')
     pickle.dump(dic_mean, File)
     File.close()
 
@@ -134,8 +135,15 @@ def plot_mean_ccd(fits_file_du,
 
 if __name__ == '__main__':
 
+    build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v4/astro_VK_shoot3_chip4/mean_function/all/',
+                     file_out='../../../../../sps_lsst/HSC/v4/astro_VK_shoot3_chip4/mean_function/mean_tp.pkl')
+
+    build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v4/astro_VK_shoot4_chip3/mean_function/all/',
+                     file_out='../../../../../sps_lsst/HSC/v4/astro_VK_shoot4_chip3/mean_function/mean_tp.pkl')
+
     #dic = build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v3.3/astro_VK/mean_function/all/')
-    plot_fov_mean('../../../hsc_outputs/v3.3/astro_VK/mean_tp.pkl')
+
+    #plot_fov_mean('../../../hsc_outputs/v3.3/astro_VK/mean_tp.pkl')
 
     #for i in [7, 14, 42]:
     #    plot_mean_ccd('../../../hsc_outputs/v3.3/astro_VK/mean_function_20/all/mean_du_%i_all.fits'%(i),
