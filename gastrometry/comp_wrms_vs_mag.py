@@ -79,5 +79,5 @@ def run_ma_poule_wrms_vs_mag(rep_out, bin_spacing=0.05,
 if __name__ == "__main__":
 
     rep_out = '/pbs/home/l/leget/sps_lsst/HSC/v3.3/astro_VK'
-    run_ma_poule_wrms_vs_mag(rep_out, bin_spacing=0.05,
+    run_ma_poule_wrms_vs_mag(rep_out, bin_spacing=0.2,
                              gp_corrected=True)

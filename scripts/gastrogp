@@ -38,6 +38,11 @@ def parse_args():
                         dest="comp_meanify", help="comp mean function across FoV", 
                         default=False, action="store_true")
 
+    parser.add_argument("--comp_plot_paper", "-p",
+                        dest="comp_plot_paper", help="comp the plot for the paper", 
+                        default=False, action="store_true")
+
+
     args = parser.parse_args()
 
     if args.config_file == None:
@@ -58,7 +63,8 @@ def main():
                          read_input_only=args.read_input_only,
                          interp_only=args.interp_only,
                          write_output_only=args.write_output_only, 
-                         comp_meanify=args.comp_meanify)
+                         comp_meanify=args.comp_meanify,
+                         comp_plot_paper=args.comp_plot_paper)
 
 if __name__ == '__main__':
     main()

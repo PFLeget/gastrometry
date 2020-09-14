@@ -11,7 +11,7 @@ def read_config(file_name):
 
 def gastrogp(config, read_input_only=False, 
              interp_only=False, write_output_only=False,
-             comp_meanify=False):
+             comp_meanify=False, comp_plot_paper=False):
     """
     To do.
     """
@@ -23,9 +23,13 @@ def gastrogp(config, read_input_only=False,
     from gastrometry import write_output
     from gastrometry import launch_jobs_ccin2p3
     from gastrometry import run_ma_poule_mean
+    from gastrometry import run_ma_poule_wrms_vs_mag
+    from gastrometry.plotting import build_mean_in_tp
+    from gastrometry.plotting import plot_paper
 
     config_setup = [read_input_only, interp_only,
-                    write_output_only, comp_meanify]
+                    write_output_only, comp_meanify,
+                    comp_plot_paper]
 
     if sum([not i for i in config_setup]) == len(config_setup):
         raise ValueError("At least one option should be set to True.")
@@ -86,18 +90,30 @@ def gastrogp(config, read_input_only=False,
         os.system('mkdir %s'%(rep_save))
         gather_input_all(config['output']['directory'], rep_save=rep_save)
         write_output(config['output']['directory'], rep_save=rep_save)
-        
-    if comp_meanify:
+        for Bool in [False, True]:
+            run_ma_poule_wrms_vs_mag(config['output']['directory'], 
+                                     bin_spacing=0.2, gp_corrected=Bool)
+
+    if comp_meanify or write_output_only:
         if 'comp_meanify' not in config:
             raise ValueError("comp_meanify field is required in config dict")
         for key in ['bin_spacing', 'statistics', 'gp_corrected']:
             if key not in config['comp_meanify']:
                 raise ValueError("%s field is required in config dict"%key)
-        run_ma_poule_mean(config['output']['directory'], 
+        run_ma_poule_mean(config['output']['directory'],
                           bin_spacing=config['comp_meanify']['bin_spacing'],
-                          statistics=config['comp_meanify']['statistics'], 
+                          statistics=config['comp_meanify']['statistics'],
                           nccd=105,
                           gp_corrected=config['comp_meanify']['gp_corrected'])
+        build_mean_in_tp(rep_mean=os.path.join(config['output']['directory'], 'mean_function/all/'),
+                         file_out=os.path.join(config['output']['directory'], 'mean_function/mean_tp.pkl'))
+
+    if comp_plot_paper or write_output_only:
+        if 'correction_name' not in config['output']:
+                raise ValueError("%s field is required in config dict"%('correction_name'))
+        plot_paper(config['output']['directory'],
+                   correction_name=config['output']['correction_name'])
+
 
 def gastrify(config):
 

@@ -14,9 +14,11 @@ make some config file config_file.yaml
     # to compute the mean function once the gp is run across all visits
     gastrogp config_file.yaml --comp_meanify
 
-    # drink coffee, probably eat a meal and sleep
     # to gather outputs for plotting purpose
     gastrogp config_file.yaml --write_output_only
+
+    # to get the plot for the paper:
+    gastrogp config_file.yaml --comp_plot_paper
 
     # to run only on a single exposure 
     
