@@ -6,7 +6,7 @@ import glob
 import os
 import treegp
 from sklearn.neighbors import KNeighborsRegressor
-from gastrometry import vcorr, xiB, biweight_median, get_var_ebmode
+from gastrometry import vcorr, xiB, biweight_median
 from astropy.stats import median_absolute_deviation as mad_astropy
 
 def median_check_finite(x):
@@ -152,7 +152,7 @@ class load_output(object):
         pkl.close()
 
 
-class plot_output(object):
+class plot_outputeb(object):
 
     def __init__(self, pkl_output, read_python2=False):
 
@@ -391,8 +391,8 @@ class plot_output(object):
         plt.legend(fontsize=16)
         if add_title is not None:
             plt.title(add_title + '\n \n' + Title, fontsize=18)
-        else:
-            plt.title(Title, fontsize=16)
+        #else:
+        #    plt.title(Title, fontsize=16)
 
     def plot_eb_mode_test(self, YLIM=[-5,30], add_title='toto'):
 
@@ -511,18 +511,26 @@ class plot_output(object):
 
 if __name__ == '__main__':
 
-    po = plot_output('../../../hsc_outputs/v3.3/astro_VK/outputs/final_gp_outputs_all.pkl')
+    po = plot_outputeb('../../../hsc_outputs/v3.3/astro_VK/outputs/final_gp_outputs_all.pkl')
     po.plot_eb_mode(YLIM=[-10,60], add_title='No correction')
     po.plot_eb_mode_test(YLIM=[-10,60], add_title='No correction (validation sample)')
     plt.savefig('0_eb_mode_test_no_correction.pdf')
     po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Von Karman kernel (validation sample)')
     plt.savefig('2_eb_mode_test_gp_corrected_vk.pdf')
     
-    po = plot_output('../../../hsc_outputs/v3.3/astro_GAUSS/outputs/final_gp_outputs_all.pkl')
-    po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Gaussian kernel (validation sample)')
-    plt.savefig('1_eb_mode_test_gp_corrected_gauss.pdf')
+    #po = plot_outputeb('../../../hsc_outputs/v3.3/astro_GAUSS/outputs/final_gp_outputs_all.pkl')
+    #po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Gaussian kernel (validation sample)')
+    #plt.savefig('1_eb_mode_test_gp_corrected_gauss.pdf')
 
-    po = plot_output('../../../hsc_outputs/v3.3/astro_VK_with_mean/outputs/final_gp_outputs_all.pkl')
-    po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Von Karman kernel and mean function (validation sample)')
-    plt.savefig('3_eb_mode_test_gp_corrected_vk_and_mean.pdf')
-    
+    #po = plot_output('../../../hsc_outputs/v3.3/astro_VK_with_mean/outputs/final_gp_outputs_all.pkl')
+    #po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Von Karman kernel and mean function (validation sample)')
+    #plt.savefig('3_eb_mode_test_gp_corrected_vk_and_mean.pdf')
+
+    I = 1
+    for shoot, chip in zip([3, 4, 4], [4, 3, 4]):
+        po = plot_outputeb('../../../hsc_outputs/v4/astro_VK_shoot%i_chip%i/outputs/final_gp_outputs_all.pkl'%((shoot, chip)))
+        po.plot_eb_mode_test(YLIM=[-10,60], add_title='No correction (shoot=%i, chip=%i) (validation sample)'%((shoot, chip)))
+        plt.savefig('%i_eb_mode_test_shoot%i_chip%i.pdf'%((I, shoot, chip)))
+        po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Von Karman (shoot=%i, chip=%i) (validation sample)'%((shoot, chip)))
+        plt.savefig('%i_eb_mode_test_gp_corrected_vk_shoot%i_chip%i.pdf'%((I, shoot, chip)))
+        I+=1

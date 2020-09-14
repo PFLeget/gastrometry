@@ -71,7 +71,7 @@ def build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v3.3/astro_VK/mean_function/all/',
 
     return dic_mean
 
-def plot_fov_mean(file_tp):
+def plot_fov_mean(file_tp, rep_fig=''):
 
     dic = pickle.load(open(file_tp, 'rb'))
 
@@ -88,15 +88,17 @@ def plot_fov_mean(file_tp):
         plt.yticks(fontsize=20)
         plt.ylabel('v (degree)', fontsize=20)
         plt.axis('equal')
-        plt.savefig(comp+'_mean.png')
+        plt.savefig(os.path.join(rep_fig, comp+'_mean.png'))
+        plt.close()
 
 def plot_mean_ccd(fits_file_du,
                   fits_file_dv, name= '',
                   cmap=None, MAX=2, name_fig=None):
 
-    FONT = 10
+    FONT = 14
+    ticks_font = 12
     
-    plt.figure(figsize=(6.5,5))
+    plt.figure(figsize=(7,5))
     plt.subplots_adjust(wspace=0.4, top=0.9)#, right=0.95, left=0.07)
     plt.subplot(1,2,1)
     mean = fitsio.read(fits_file_du)
@@ -107,11 +109,12 @@ def plot_mean_ccd(fits_file_du,
                 lw=0, s=4)
     plt.xlabel('x (pixel)',fontsize=FONT)
     plt.ylabel('y (pixel)',fontsize=FONT)
-    plt.yticks(fontsize=8)
-    plt.xticks(fontsize=8)
+    plt.yticks(fontsize=ticks_font)
+    plt.xticks(fontsize=ticks_font)
     cb = plt.colorbar()
     cb.set_label('$du$ (mas)', fontsize=FONT)
-    cb.ax.tick_params(labelsize=8)
+    cb.ax.tick_params(labelsize=ticks_font)
+    plt.axis('equal')
 
     plt.subplot(1,2,2)
     mean = fitsio.read(fits_file_dv)
@@ -122,12 +125,13 @@ def plot_mean_ccd(fits_file_du,
                 lw=0, s=6)
     plt.xlabel('x (pixel)',fontsize=FONT)
     plt.yticks([],[])
-    plt.xticks(fontsize=8)
+    plt.xticks(fontsize=ticks_font)
     cb = plt.colorbar()
     cb.set_label('$dv$ (mas)', fontsize=FONT)
-    cb.ax.tick_params(labelsize=8)
+    cb.ax.tick_params(labelsize=ticks_font)
 
     plt.suptitle(name, fontsize=FONT)
+    plt.axis('equal')
     if name_fig is not None:
         plt.savefig(name_fig)
         plt.close()
@@ -135,15 +139,31 @@ def plot_mean_ccd(fits_file_du,
 
 if __name__ == '__main__':
 
-    build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v4/astro_VK_shoot3_chip4/mean_function/all/',
-                     file_out='../../../../../sps_lsst/HSC/v4/astro_VK_shoot3_chip4/mean_function/mean_tp.pkl')
+    #build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v4/astro_VK_shoot3_chip4/mean_function/all/',
+    #                 file_out='../../../../../sps_lsst/HSC/v4/astro_VK_shoot3_chip4/mean_function/mean_tp.pkl')
 
-    build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v4/astro_VK_shoot4_chip3/mean_function/all/',
-                     file_out='../../../../../sps_lsst/HSC/v4/astro_VK_shoot4_chip3/mean_function/mean_tp.pkl')
+    #build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v4/astro_VK_shoot4_chip3/mean_function/all/',
+    #                 file_out='../../../../../sps_lsst/HSC/v4/astro_VK_shoot4_chip3/mean_function/mean_tp.pkl')
 
     #dic = build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v3.3/astro_VK/mean_function/all/')
 
-    #plot_fov_mean('../../../hsc_outputs/v3.3/astro_VK/mean_tp.pkl')
+    #plot_fov_mean('../../../hsc_outputs/v3.3/astro_VK/mean_tp.pkl',
+    #              rep_fig='')
+
+    print('start 1')
+    plot_fov_mean('../../../hsc_outputs/v4/astro_VK_shoot3_chip4/mean_function/mean_tp.pkl',
+                  rep_fig='../../../hsc_outputs/v4/astro_VK_shoot3_chip4/mean_function/')
+
+    print('start 2')
+    plot_fov_mean('../../../hsc_outputs/v4/astro_VK_shoot4_chip3/mean_function/mean_tp.pkl',
+                  rep_fig='../../../hsc_outputs/v4/astro_VK_shoot4_chip3/mean_function/')
+
+    print('start 3')
+    plot_fov_mean('../../../hsc_outputs/v4/astro_VK_shoot4_chip4/mean_function/mean_tp.pkl',
+                  rep_fig='../../../hsc_outputs/v4/astro_VK_shoot4_chip4/mean_function/')
+
+
+
 
     #for i in [7, 14, 42]:
     #    plot_mean_ccd('../../../hsc_outputs/v3.3/astro_VK/mean_function_20/all/mean_du_%i_all.fits'%(i),

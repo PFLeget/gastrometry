@@ -6,6 +6,8 @@ import pickle
 import glob
 from gastrometry import meanify1D_wrms
 
+# TO DO --> Virer les nuits qui sont pourri, inclure un sigma clipping
+
 class comp_wrms_vs_mag(object):
 
     def __init__(self, rep_out, bin_spacing=0.05, gp_corrected=True):
