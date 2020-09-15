@@ -33,11 +33,32 @@ class meanify1D_wrms(object):
             self.params_err = None
         else:
             self.params_err.append(params_err)
-    
+
+    def sigma_clipping(self, sigma=3.):
+        self.std = []
+        nvisits = len(self.params)
+        for i in range(nvisits):
+            self.std.append(np.std(self.params[i]))
+        mean, std = np.mean(self.std), np.std(self.std)
+
+        I = 0
+        for i in range(nvisits):
+            if self.std[i] > mean + sigma * std:
+                #print('PF:', i)
+                del self.params[I]
+                if self.params_err is not None:
+                    del self.params_err[I]
+                del self.coords[I]
+            else:
+                I+=1
+        print('Number of visit removed / nvisits: ',
+              nvisits - len(self.params), '/', nvisits)
+
     def meanify(self, x_min=None, x_max=None):
         """
         Compute the mean function.
         """
+        self.sigma_clipping(sigma=3.)
         params = np.concatenate(self.params)
         coords = np.concatenate(self.coords)
         if self.params_err is not None:
@@ -114,7 +135,10 @@ if __name__ == "__main__":
         N = 10000
         x = np.random.uniform(-6,6, size=N)
         y = polynomial(x)
-        y += np.random.normal(scale=0.5, size=N)
+        if i in [42, 125, 128]:
+            y += np.random.normal(scale=5, size=N)
+        else:
+            y += np.random.normal(scale=0.5, size=N)
         x += np.random.normal(scale=0.5, size=N)
         
         plt.scatter(x, y, c='b', s=1, alpha=0.05)
