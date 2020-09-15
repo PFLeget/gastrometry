@@ -20,6 +20,8 @@ make some config file config_file.yaml
     # to get the plot for the paper:
     gastrogp config_file.yaml --comp_plot_paper
 
-    # to run only on a single exposure 
-    
+    # to get wrms of astrometry in terms of mag:
+    gastrogp config_file.yaml --comp_wrms_vs_mag
+
+    # to run only on a single exposure
     gastrify single_shot.yaml

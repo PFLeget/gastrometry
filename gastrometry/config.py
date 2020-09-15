@@ -11,7 +11,8 @@ def read_config(file_name):
 
 def gastrogp(config, read_input_only=False, 
              interp_only=False, write_output_only=False,
-             comp_meanify=False, comp_plot_paper=False):
+             comp_meanify=False, comp_plot_paper=False,
+             comp_wrms_vs_mag=False):
     """
     To do.
     """
@@ -29,7 +30,7 @@ def gastrogp(config, read_input_only=False,
 
     config_setup = [read_input_only, interp_only,
                     write_output_only, comp_meanify,
-                    comp_plot_paper]
+                    comp_plot_paper, comp_wrms_vs_mag]
 
     if sum([not i for i in config_setup]) == len(config_setup):
         raise ValueError("At least one option should be set to True.")
@@ -90,6 +91,8 @@ def gastrogp(config, read_input_only=False,
         os.system('mkdir %s'%(rep_save))
         gather_input_all(config['output']['directory'], rep_save=rep_save)
         write_output(config['output']['directory'], rep_save=rep_save)
+
+    if comp_wrms_vs_mag or write_output_only:
         for Bool in [False, True]:
             run_ma_poule_wrms_vs_mag(config['output']['directory'], 
                                      bin_spacing=0.2, gp_corrected=Bool)

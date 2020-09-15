@@ -42,6 +42,9 @@ def parse_args():
                         dest="comp_plot_paper", help="comp the plot for the paper", 
                         default=False, action="store_true")
 
+    parser.add_argument("--comp_wrms_vs_mag", "-m",
+                        dest="comp_wrms_vs_mag", help="comp wrms of astrometry in terms of mag", 
+                        default=False, action="store_true")
 
     args = parser.parse_args()
 
@@ -64,7 +67,8 @@ def main():
                          interp_only=args.interp_only,
                          write_output_only=args.write_output_only, 
                          comp_meanify=args.comp_meanify,
-                         comp_plot_paper=args.comp_plot_paper)
+                         comp_plot_paper=args.comp_plot_paper,
+                         comp_wrms_vs_mag=args.comp_wrms_vs_mag)
 
 if __name__ == '__main__':
     main()
