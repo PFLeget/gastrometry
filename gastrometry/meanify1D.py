@@ -3,6 +3,7 @@
 """
 import numpy as np
 from scipy.stats import binned_statistic
+from gastrometry import biweight_median, biweight_mad
 import fitsio
 import os
 
@@ -39,12 +40,13 @@ class meanify1D_wrms(object):
         nvisits = len(self.params)
         for i in range(nvisits):
             self.std.append(np.std(self.params[i]))
-        mean, std = np.mean(self.std), np.std(self.std)
+        #mean, std = np.mean(self.std), np.std(self.std)
+        mean, std = biweight_median(self.std), biweight_mad(self.std)
 
         I = 0
         for i in range(nvisits):
             if self.std[i] > mean + sigma * std:
-                #print('PF:', i)
+                print('PF:', i)
                 del self.params[I]
                 if self.params_err is not None:
                     del self.params_err[I]
@@ -135,8 +137,8 @@ if __name__ == "__main__":
         N = 10000
         x = np.random.uniform(-6,6, size=N)
         y = polynomial(x)
-        if i in [42, 125, 128]:
-            y += np.random.normal(scale=5, size=N)
+        if i in [42, 125, 128, 10, 23, 48, 55, 68]:
+            y += np.random.normal(scale=25, size=N)
         else:
             y += np.random.normal(scale=0.5, size=N)
         x += np.random.normal(scale=0.5, size=N)
