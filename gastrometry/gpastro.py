@@ -233,6 +233,7 @@ class gpastro(object):
             # add back mean function
             exec("self.d%s_test_predict += self.y0_d%s_test"%((comp, comp)))
             exec("self.d%s_predict += self.y0_d%s"%((comp, comp)))
+            exec("self.d%s_train_predict = self.d%s_predict[self.dic_output[\'input_data\'][\'indice_train\']]"%((comp, comp)))
             
             exec("self.gp%s = gp%s"%((comp, comp)))
 
@@ -281,6 +282,7 @@ class gpastro(object):
             self.dic_output['gp_output'][gp_name+'.chip_num_all'] = self.chip_num_all
 
 
+        # on test stars residuals
         X_valid = self.coords_test
         Y_valid = np.array([self.du_test, self.dv_test]).T
         Y_valid_interp = np.array([self.du_test_predict, self.dv_test_predict]).T
@@ -291,17 +293,41 @@ class gpastro(object):
         self.xib_residuals = xiB(self.logr_residuals, self.xiplus_residuals, self.ximinus_residuals)
         self.xie_residuals = self.xiplus_residuals - self.xib_residuals
 
+        # on test stars
         self.logr_test, self.xiplus_test, self.ximinus_test, self.xicross_test, xiz2 = vcorr(X_valid[:,0]/3600., X_valid[:,1]/3600., 
                                                                                              Y_valid[:,0], Y_valid[:,1])
         self.xib_test = xiB(self.logr_test, self.xiplus_test, self.ximinus_test)
         self.xie_test = self.xiplus_test - self.xib_test
 
+        # on validation stars residuals
+        X_train = self.coords_train
+        Y_train = np.array([self.du_train, self.dv_train]).T
+        Y_train_interp = np.array([self.du_train_predict, self.dv_train_predict]).T
+
+        self.logr_residuals_train, self.xiplus_residuals_train, self.ximinus_residuals_train, self.xicross_residuals_train, xiz2 = vcorr(X_train[:,0]/3600., X_train[:,1]/3600., 
+                                                                                                                                         Y_train[:,0]-Y_train_interp[:,0], 
+                                                                                                                                         Y_train[:,1]-Y_train_interp[:,1])
+        self.xib_residuals_train = xiB(self.logr_residuals_train, self.xiplus_residuals_train, self.ximinus_residuals_train)
+        self.xie_residuals_train = self.xiplus_residuals_train - self.xib_residuals_train
+
+        # on test stars
+        self.logr_train, self.xiplus_train, self.ximinus_train, self.xicross_train, xiz2 = vcorr(X_train[:,0]/3600., X_train[:,1]/3600., 
+                                                                                                 Y_train[:,0], Y_train[:,1])
+        self.xib_train = xiB(self.logr_train, self.xiplus_train, self.ximinus_train)
+        self.xie_train = self.xiplus_train - self.xib_train
+
         self.dic_output['2pcf_stat'].update({'xib_test':self.xib_test,
                                              'xie_test':self.xie_test,
                                              'logr_test':self.logr,
+                                             'xib_train':self.xib_train,
+                                             'xie_train':self.xie_train,
+                                             'logr_train':self.logr_train,
                                              'xib_residuals':self.xib_residuals,
                                              'xie_residuals':self.xie_residuals,
-                                             'logr_residuals':self.logr_residuals})
+                                             'logr_residuals':self.logr_residuals,
+                                             'xib_residuals_train':self.xib_residuals_train,
+                                             'xie_residuals_train':self.xie_residuals_train,
+                                             'logr_residuals_train':self.logr_residuals_train})
 
     def plot_gaussian_process(self):
 
