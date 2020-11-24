@@ -100,7 +100,6 @@ def vcorr(x,y,dx,dy,
     xi_x - <vr1 vt2 + vt1 vr2>
     xi_z2 - <vx1 vx2 - vy1 vy2 + 2 i vx1 vy2>
     """
-
     if len(x) > maxpts:
         # Subsample array to get desired number of points
         rate = float(maxpts) / len(x)
@@ -161,3 +160,48 @@ def xiB(logr, xiplus, ximinus):
     integral = np.cumsum(tmp[::-1])[::-1]
     return 0.5*(xiplus-ximinus) + integral
 
+def vcorr2d(x,y,dx,dy,
+            rmax=1., bins=513):
+    """
+    Produce 2d 2-point correlation function of total displacement power
+    for the supplied sample of data, using brute-force pair counting.
+    Output are 2d arrays giving the 2PCF and then the number of pairs that
+    went into each bin.  The 2PCF calculated is
+    xi_+ - <vr1 vr2 + vt1 vt2> = <vx1 vx2 + vy1 vy2>
+    Note that each pair is counted only once.  So to count all pairs one can
+    average xi_+ with itself reflected about the origin.
+    """
+
+    hrange = [ [-rmax,rmax], [-rmax,rmax] ]
+
+    print("Length ",len(x))
+
+    ind = np.linspace(0,len(x)-1,len(x)).astype(int)
+    i1, i2 = np.meshgrid(ind,ind)
+    Filtre = (i1 != i2)
+    i1 = i1.reshape(len(x)**2)
+    i2 = i2.reshape(len(x)**2)
+    Filtre = Filtre.reshape(len(x)**2)
+
+    i1 = i1[Filtre]
+    i2 = i2[Filtre]
+    del Filtre
+    print(np.shape(i1))
+
+    # Make separation vectors and count pairs
+    yshift = y[i2]-y[i1]
+    xshift = x[i2]-x[i1]
+    counts = np.histogram2d(xshift,yshift, bins=bins, range=hrange)[0]
+
+    # Accumulate displacement sums
+    v =  dx + 1j*dy
+    #print 'xiplus' ##
+    vv = dx[i1] * dx[i2] + dy[i1] * dy[i2]
+    xiplus, X, Y  = np.histogram2d(xshift,yshift, bins=bins, range=hrange, weights=vv)
+
+    xiplus /= counts
+    x = copy.deepcopy(X[:-1]) + (X[1] - X[0])/2.
+    y = copy.deepcopy(Y[:-1]) + (Y[1] - Y[0])/2.
+    x , y = np.meshgrid(x,y)
+
+    return xiplus.T, x, y
