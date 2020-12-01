@@ -4,6 +4,7 @@ import pickle
 import os
 import glob
 import warnings
+import gastrometry
 from astropy.utils.console import ProgressBar
 
 def get_varE(logr, xie):
@@ -48,5 +49,42 @@ def get_shot_noise_stat(rep_out = '/pbs/home/l/leget/sps_lsst/HSC/v3.3/astro_VK_
 
 if __name__ == '__main__':
 
-    get_shot_noise_stat(rep_out = '/pbs/home/l/leget/sps_lsst/HSC/v3.3/astro_VK_with_mean/')
+    #get_shot_noise_stat(rep_out = '/pbs/home/l/leget/sps_lsst/HSC/v3.3/astro_VK_with_mean/')
+
+    dic = pickle.load(open('shot_noise.pkl', 'rb'))
+
+    
+    plt.figure()
+    plt.scatter(dic['n_train'], dic['delta_var_e_mode_normed'], s=5, alpha=0.1, c='b')
+    m = gastrometry.meanify1D_wrms(bin_spacing=500)
+    mask = np.isfinite(dic['n_train']) & np.isfinite(dic['delta_var_e_mode_normed'])
+    m.add_data(dic['n_train'][mask], dic['delta_var_e_mode_normed'][mask], params_err=None)
+    m.meanify(x_min=0, x_max=9000)     
+    plt.scatter(m.x0, m.average, marker='x', c='r', s=70, lw=3)
+    plt.plot([np.min(dic['n_train']), np.max(dic['n_train'])], [1,1], 'k--', lw=2)
+    plt.ylim(0,1.5)
+    plt.xlabel('# training sources', fontsize=14)
+    plt.ylabel('(Var E obs - Var E corr) / Var E obs', fontsize=14)
+
+
+    ratio = dic['var_e_end'] / dic['var_e_start']
+    plt.figure()
+    plt.scatter(dic['n_train'], ratio, s=5, alpha=0.1, c='b')
+    m = gastrometry.meanify1D_wrms(bin_spacing=500)
+    mask = np.isfinite(dic['n_train']) & np.isfinite(ratio)
+    m.add_data(dic['n_train'][mask], ratio[mask], params_err=None)
+    m.meanify(x_min=0, x_max=9000)
+    plt.scatter(m.x0, m.average, marker='x', c='r', s=70, lw=3)
+    plt.plot([np.min(dic['n_train']), np.max(dic['n_train'])], [0,0], 'k--', lw=2)
+    #plt.ylim(0,1.5)
+    plt.xlabel('# training sources', fontsize=14)
+    plt.ylabel('Var E corr / Var E obs', fontsize=14)
+
+    
+    #plt.figure()
+    #plt.scatter(dic['n_valid'], dic['delta_var_e_mode_normed'], s=10, alpha=0.5, c='b')
+    #plt.ylim(0,1)
+
+    #plt.figure()
+    #plt.scatter(dic['n_train'], dic['delta_var_e_mode'], s=10, alpha=0.5, c='r')
 
