@@ -78,15 +78,15 @@ def plot_fov_mean(file_tp, rep_fig=''):
     for comp in ['du', 'dv']:
         plt.figure(figsize=(13, 9))
         plt.subplots_adjust(left=0.1, bottom=0.1, top=0.97, right=0.95)
-        plt.scatter(dic[comp]['u0'], dic[comp]['v0'], c=dic[comp]['y0'],
+        plt.scatter(dic[comp]['u0']*60, dic[comp]['v0']*60, c=dic[comp]['y0'],
                     vmin=-2, vmax=2, s=1, cmap=plt.cm.inferno)
         cb = plt.colorbar()
         cb.set_label(comp+' (mas)', fontsize=20)
         cb.ax.tick_params(labelsize=20)
         plt.xticks(fontsize=20)
-        plt.xlabel('u (degree)', fontsize=20)
+        plt.xlabel('u (arcmin)', fontsize=20)
         plt.yticks(fontsize=20)
-        plt.ylabel('v (degree)', fontsize=20)
+        plt.ylabel('v (arcmin)', fontsize=20)
         plt.axis('equal')
         plt.savefig(os.path.join(rep_fig, comp+'_mean.png'))
         plt.close()
@@ -147,22 +147,20 @@ if __name__ == '__main__':
 
     #dic = build_mean_in_tp(rep_mean='~/sps_lsst/HSC/v3.3/astro_VK/mean_function/all/')
 
-    #plot_fov_mean('../../../hsc_outputs/v3.3/astro_VK/mean_tp.pkl',
-    #              rep_fig='')
+    #plot_fov_mean('../../../hsc_outputs/v3.3/astro_VK/mean_function/mean_tp.pkl',
+    #              rep_fig='/Users/leget/Desktop')
 
-    print('start 1')
-    plot_fov_mean('../../../hsc_outputs/v4/astro_VK_shoot3_chip4/mean_function/mean_tp.pkl',
-                  rep_fig='../../../hsc_outputs/v4/astro_VK_shoot3_chip4/mean_function/')
+    #print('start 1')
+    #plot_fov_mean('../../../hsc_outputs/v4/astro_VK_shoot3_chip4/mean_function/mean_tp.pkl',
+    #              rep_fig='/Users/leget/Desktop')
 
-    print('start 2')
-    plot_fov_mean('../../../hsc_outputs/v4/astro_VK_shoot4_chip3/mean_function/mean_tp.pkl',
-                  rep_fig='../../../hsc_outputs/v4/astro_VK_shoot4_chip3/mean_function/')
+    #print('start 2')
+    #plot_fov_mean('../../../hsc_outputs/v4/astro_VK_shoot4_chip3/mean_function/mean_tp.pkl',
+    #              rep_fig='../../../hsc_outputs/v4/astro_VK_shoot4_chip3/mean_function/')
 
     print('start 3')
-    plot_fov_mean('../../../hsc_outputs/v4/astro_VK_shoot4_chip4/mean_function/mean_tp.pkl',
-                  rep_fig='../../../hsc_outputs/v4/astro_VK_shoot4_chip4/mean_function/')
-
-
+    plot_fov_mean('../../../hsc_outputs/v4/astro_VK_shoot4_chip5/mean_tp.pkl',
+                  rep_fig='/Users/leget/Desktop')
 
 
     #for i in [7, 14, 42]:

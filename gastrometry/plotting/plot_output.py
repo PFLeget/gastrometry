@@ -373,22 +373,22 @@ class plot_outputeb(object):
                                                                                                   np.mean(mean_b[Filtre0]),
                                                                                                   np.mean(std_b[Filtre0])))
         plt.figure(figsize=(12,8))
-        plt.subplots_adjust(bottom=0.12, top=0.88, right=0.99)
+        plt.subplots_adjust(bottom=0.12, top=0.98, right=0.99, left=0.105)
  
-        plt.plot(np.exp(self.logr[0]), mean_e,'b', lw=3, label='mean E-mode')
-        plt.fill_between(np.exp(self.logr[0]), mean_e-std_e, mean_e+std_e, color='b', alpha=0.4, label='$\pm 1 \sigma$ E-mode')
-        plt.plot(np.exp(self.logr[0]), mean_b,'r', lw=3, label='mean B-mode')
-        plt.fill_between(np.exp(self.logr[0]), mean_b-std_b, mean_b+std_b, color='r', alpha=0.4, label='$\pm 1 \sigma$ B-mode')
+        plt.plot(np.exp(self.logr[0]) * 60, mean_e,'b', lw=3, label='mean E-mode')
+        plt.fill_between(np.exp(self.logr[0]) * 60, mean_e-std_e, mean_e+std_e, color='b', alpha=0.4, label='$\pm 1 \sigma$ E-mode')
+        plt.plot(np.exp(self.logr[0])* 60, mean_b,'r', lw=3, label='mean B-mode')
+        plt.fill_between(np.exp(self.logr[0]) * 60, mean_b-std_b, mean_b+std_b, color='r', alpha=0.4, label='$\pm 1 \sigma$ B-mode')
 
-        plt.plot(np.exp(self.logr[0]), np.zeros_like(self.logr[0]), 'k--', lw=3)
+        plt.plot(np.exp(self.logr[0])* 60, np.zeros_like(self.logr[0]), 'k--', lw=3)
         plt.ylim(YLIM[0], YLIM[1])
-        plt.xlim(0.005, 1.5)
+        plt.xlim(0.005* 60, 1.5* 60)
         plt.xscale('log')
-        plt.xticks(size=16)
-        plt.yticks(size=16)
-        plt.xlabel('$\Delta \\theta$ (degree)', fontsize=18)
-        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=18)
-        plt.legend(fontsize=16)
+        plt.xticks(size=22)
+        plt.yticks(size=22)
+        plt.xlabel('$\Delta \\theta$ (arcmin)', fontsize=28)
+        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=28)
+        plt.legend(fontsize=22)
         if add_title is not None:
             plt.title(add_title + '\n \n' + Title, fontsize=18)
         #else:
@@ -405,27 +405,27 @@ class plot_outputeb(object):
 
         Filtre0 = ((np.exp(self.logr[0])>6e-3) & (np.exp(self.logr[0])<1e-2))
         
-        Title = '$\\xi_E(0) = (%.1f \pm %.1f)$ mas$^2$ | $\\xi_B(0) = (%.1f \pm %.1f)$ mas$^2$'%((np.mean(mean_e[Filtre0]),
+        Title = '$\\xi_E(0) = (%.0f \pm %.0f)$ mas$^2$ | $\\xi_B(0) = (%.0f \pm %.0f)$ mas$^2$'%((np.mean(mean_e[Filtre0]),
                                                                                                   np.mean(std_e[Filtre0]),
                                                                                                   np.mean(mean_b[Filtre0]),
                                                                                                   np.mean(std_b[Filtre0])))
 
-        plt.plot(np.exp(self.logr[0]), mean_e,'b', lw=3, label='mean E-mode (test)')
-        plt.fill_between(np.exp(self.logr[0]), mean_e-std_e, mean_e+std_e, color='b', alpha=0.4, label='$\pm 1 \sigma$ E-mode')
-        plt.plot(np.exp(self.logr[0]), mean_b,'r', lw=3, label='mean B-mode (test)')
-        plt.fill_between(np.exp(self.logr[0]), mean_b-std_b, mean_b+std_b, color='r', alpha=0.4, label='$\pm 1 \sigma$ B-mode')
+        plt.plot(np.exp(self.logr[0]) * 60, mean_e,'b', lw=3, label='mean E-mode (test)')
+        plt.fill_between(np.exp(self.logr[0]) * 60, mean_e-std_e, mean_e+std_e, color='b', alpha=0.4, label='$\pm 1 \sigma$ E-mode')
+        plt.plot(np.exp(self.logr[0]) * 60, mean_b,'r', lw=3, label='mean B-mode (test)')
+        plt.fill_between(np.exp(self.logr[0]) * 60, mean_b-std_b, mean_b+std_b, color='r', alpha=0.4, label='$\pm 1 \sigma$ B-mode')
 
-        plt.plot(np.exp(self.logr[0]), np.zeros_like(self.logr[0]), 'k--', lw=3)
+        plt.plot(np.exp(self.logr[0]) * 60, np.zeros_like(self.logr[0]), 'k--', lw=3)
         plt.ylim(YLIM[0], YLIM[1])
-        plt.xlim(0.005, 1.5)
+        plt.xlim(0.005 * 60, 1.5 * 60)
         plt.xscale('log')
-        plt.xticks(size=16)
-        plt.yticks(size=16)
-        plt.xlabel('$\Delta \\theta$ (degree)', fontsize=18)
-        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=18)
-        plt.legend(fontsize=16)
+        plt.xticks(size=20)
+        plt.yticks(size=20)
+        plt.xlabel('$\Delta \\theta$ (arcmin)', fontsize=24)
+        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=24)
+        plt.legend(fontsize=20)
         if add_title is not None:
-            plt.title(add_title + '\n \n' + Title, fontsize=18)
+            plt.title(add_title + '\n' + Title, fontsize=24)
         else:
             plt.title(Title, fontsize=16)
 
@@ -441,27 +441,27 @@ class plot_outputeb(object):
 
         Filtre0 = ((np.exp(self.logr[0])>6e-3) & (np.exp(self.logr[0])<1e-2))
 
-        Title = '$\\xi_E(0) = (%.1f \pm %.1f)$ mas$^2$ | $\\xi_B(0) = (%.1f \pm %.1f)$ mas$^2$'%((np.mean(mean_e[Filtre0]),
+        Title = '$\\xi_E(0) = (%.0f \pm %.0f)$ mas$^2$ | $\\xi_B(0) = (%.0f \pm %.0f)$ mas$^2$'%((np.mean(mean_e[Filtre0]),
                                                                                                   np.mean(std_e[Filtre0]),
                                                                                                   np.mean(mean_b[Filtre0]),
                                                                                                   np.mean(std_b[Filtre0])))
 
-        plt.plot(np.exp(self.logr[0]), mean_e,'b', lw=3, label='mean E-mode (test, after GP)')
-        plt.fill_between(np.exp(self.logr[0]), mean_e-std_e, mean_e+std_e, color='b', alpha=0.4, label='$\pm 1 \sigma$ E-mode')
-        plt.plot(np.exp(self.logr[0]), mean_b,'r', lw=3, label='mean B-mode (test, after GP)')
-        plt.fill_between(np.exp(self.logr[0]), mean_b-std_b, mean_b+std_b, color='r', alpha=0.4, label='$\pm 1 \sigma$ B-mode')
+        plt.plot(np.exp(self.logr[0]) * 60., mean_e,'b', lw=3, label='mean E-mode (test, after GP)')
+        plt.fill_between(np.exp(self.logr[0]) * 60., mean_e-std_e, mean_e+std_e, color='b', alpha=0.4, label='$\pm 1 \sigma$ E-mode')
+        plt.plot(np.exp(self.logr[0]) * 60., mean_b,'r', lw=3, label='mean B-mode (test, after GP)')
+        plt.fill_between(np.exp(self.logr[0]) * 60., mean_b-std_b, mean_b+std_b, color='r', alpha=0.4, label='$\pm 1 \sigma$ B-mode')
 
-        plt.plot(np.exp(self.logr[0]), np.zeros_like(self.logr[0]), 'k--', lw=3)
+        plt.plot(np.exp(self.logr[0]) * 60., np.zeros_like(self.logr[0]), 'k--', lw=3)
         plt.ylim(YLIM[0], YLIM[1])
-        plt.xlim(0.005, 1.5)
+        plt.xlim(0.005*60., 1.5*60.)
         plt.xscale('log')
-        plt.xticks(size=16)
-        plt.yticks(size=16)
-        plt.xlabel('$\Delta \\theta$ (degree)', fontsize=18)
-        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=18)
-        plt.legend(fontsize=16)
+        plt.xticks(size=20)
+        plt.yticks(size=20)
+        plt.xlabel('$\Delta \\theta$ (arcmin)', fontsize=24)
+        plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=24)
+        plt.legend(fontsize=20)
         if add_title is not None:
-            plt.title(add_title + '\n \n' + Title, fontsize=18)
+            plt.title(add_title + '\n' + Title, fontsize=24)
         else:
             plt.title(Title, fontsize=16)
 
@@ -512,25 +512,26 @@ class plot_outputeb(object):
 if __name__ == '__main__':
 
     po = plot_outputeb('../../../hsc_outputs/v3.3/astro_VK/outputs/final_gp_outputs_all.pkl')
-    po.plot_eb_mode(YLIM=[-10,60], add_title='No correction')
-    po.plot_eb_mode_test(YLIM=[-10,60], add_title='No correction (validation sample)')
-    plt.savefig('0_eb_mode_test_no_correction.pdf')
-    po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Von Karman kernel (validation sample)')
-    plt.savefig('2_eb_mode_test_gp_corrected_vk.pdf')
+    #po.plot_eb_mode(YLIM=[-10,60], add_title=None)
+    #plt.savefig('/Users/leget/Desktop/eb_mean_all_ssp_vk_v3.pdf') 
+    po.plot_eb_mode_test(YLIM=[-10,60], add_title='No correction')
+    plt.savefig('/Users/leget/Desktop/0_eb_mode_test_no_correction.pdf')
+    po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with von Kármán kernel')
+    plt.savefig('/Users/leget/Desktop/2_eb_mode_test_gp_corrected_vk.pdf')
     
-    #po = plot_outputeb('../../../hsc_outputs/v3.3/astro_GAUSS/outputs/final_gp_outputs_all.pkl')
-    #po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Gaussian kernel (validation sample)')
-    #plt.savefig('1_eb_mode_test_gp_corrected_gauss.pdf')
+    po = plot_outputeb('../../../hsc_outputs/v3.3/astro_GAUSS/outputs/final_gp_outputs_all.pkl')
+    po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Gaussian kernel')
+    plt.savefig('/Users/leget/Desktop/1_eb_mode_test_gp_corrected_gauss.pdf')
 
     #po = plot_output('../../../hsc_outputs/v3.3/astro_VK_with_mean/outputs/final_gp_outputs_all.pkl')
     #po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Von Karman kernel and mean function (validation sample)')
     #plt.savefig('3_eb_mode_test_gp_corrected_vk_and_mean.pdf')
 
-    I = 1
-    for shoot, chip in zip([3, 4, 4], [4, 3, 4]):
-        po = plot_outputeb('../../../hsc_outputs/v4/astro_VK_shoot%i_chip%i/outputs/final_gp_outputs_all.pkl'%((shoot, chip)))
-        po.plot_eb_mode_test(YLIM=[-10,60], add_title='No correction (shoot=%i, chip=%i) (validation sample)'%((shoot, chip)))
-        plt.savefig('%i_eb_mode_test_shoot%i_chip%i.pdf'%((I, shoot, chip)))
-        po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Von Karman (shoot=%i, chip=%i) (validation sample)'%((shoot, chip)))
-        plt.savefig('%i_eb_mode_test_gp_corrected_vk_shoot%i_chip%i.pdf'%((I, shoot, chip)))
-        I+=1
+    #I = 1
+    #for shoot, chip in zip([3, 4, 4], [4, 3, 4]):
+    #    po = plot_outputeb('../../../hsc_outputs/v4/astro_VK_shoot%i_chip%i/outputs/final_gp_outputs_all.pkl'%((shoot, chip)))
+    #    po.plot_eb_mode_test(YLIM=[-10,60], add_title='No correction (shoot=%i, chip=%i) (validation sample)'%((shoot, chip)))
+    #    plt.savefig('%i_eb_mode_test_shoot%i_chip%i.pdf'%((I, shoot, chip)))
+    #    po.plot_eb_mode_test_residuals(YLIM=[-10,60], add_title='GP corrected with Von Karman (shoot=%i, chip=%i) (validation sample)'%((shoot, chip)))
+    #    plt.savefig('%i_eb_mode_test_gp_corrected_vk_shoot%i_chip%i.pdf'%((I, shoot, chip)))
+    #    I+=1

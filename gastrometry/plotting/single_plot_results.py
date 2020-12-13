@@ -48,7 +48,7 @@ def plot_correlation_function(interp, comp='u', Title=None):
     cbar.update_ticks()
     cbar.set_label('$\\xi - \\xi\'$ (mas$^2$)',fontsize=16)
     plt.xlabel('$\Delta u$ (arcmin)',fontsize=16)
-    plt.title('Residuals',fontsize=16)
+    plt.title('Difference',fontsize=16)
     
     MAX = 15
     plt.subplot(2,3,4)
@@ -66,16 +66,16 @@ def plot_correlation_function(interp, comp='u', Title=None):
     plt.scatter(interp._u/60., interp._v/60., c=interp._y_predict,
                 s=10, cmap=plt.cm.seismic, vmin=-MAX, vmax=MAX)
     cbar = plt.colorbar()
-    cbar.set_label('d'+comp+' predict (mas)',fontsize=16)
+    cbar.set_label('d'+comp+' prediction (mas)',fontsize=16)
     plt.axis('equal')
-    plt.title('GP predict',fontsize=16)
+    plt.title('GP prediction',fontsize=16)
     plt.xlabel('u (arcmin)', fontsize=16)
 
     plt.subplot(2,3,6)
     plt.scatter(interp._u/60., interp._v/60., c=interp._y_meas - interp._y_predict,
                 s=10, cmap=plt.cm.seismic, vmin=-MAX, vmax=MAX)
     cbar = plt.colorbar()
-    cbar.set_label('d'+comp+' measured - d'+comp+' predict (mas)',fontsize=16)
+    cbar.set_label('d'+comp+' measured - d'+comp+' prediction (mas)',fontsize=16)
     plt.axis('equal')
     plt.title('Residuals',fontsize=16)
     plt.xlabel('u (arcmin)', fontsize=16)
@@ -104,29 +104,29 @@ def plot_eb_mode_improvment(dic_out='../../../hsc_outputs/v3.3/astro_VK_with_mea
 
     plt.figure(figsize=(10,7))
     plt.subplots_adjust(top=0.95, right=0.99)
-    plt.title('exp: %s'%(exp_id), fontsize=16)
-    plt.scatter(np.exp(dic['2pcf_stat']['logr_test']), dic['2pcf_stat']['xie_test'], c='b', s=80, alpha=0.5, label='E-mode on validation sample (no gp correction)')
-    plt.scatter(np.exp(dic['2pcf_stat']['logr_test']), dic['2pcf_stat']['xie_residuals'], c='b', marker='x', lw=3, s=80, label='E-mode on validation sample (gp corrected)')
-    plt.scatter(np.exp(dic['2pcf_stat']['logr_test']), dic['2pcf_stat']['xib_test'], c='r', s=80, alpha=0.5, label='B-mode on validation sample (no gp correction)')
-    plt.scatter(np.exp(dic['2pcf_stat']['logr_test']), dic['2pcf_stat']['xib_residuals'], c='r', marker='x', s=80, lw=3, label='B-mode on validation sample (gp corrected)')
-    plt.plot(np.exp(dic['2pcf_stat']['logr_test']), np.zeros_like(np.exp(dic['2pcf_stat']['logr_test'])), 'k--', zorder=0)
+    plt.title('exp: %s'%(exp_id), fontsize=24)
+    plt.scatter(np.exp(dic['2pcf_stat']['logr_test']) * 60., dic['2pcf_stat']['xie_test'], c='b', s=80, alpha=0.5, label='E-mode (no GP correction)')
+    plt.scatter(np.exp(dic['2pcf_stat']['logr_test']) * 60., dic['2pcf_stat']['xie_residuals'], c='b', marker='x', lw=3, s=80, label='E-mode (GP corrected)')
+    plt.scatter(np.exp(dic['2pcf_stat']['logr_test']) * 60., dic['2pcf_stat']['xib_test'], c='r', s=80, alpha=0.5, label='B-mode (no GP correction)')
+    plt.scatter(np.exp(dic['2pcf_stat']['logr_test']) * 60., dic['2pcf_stat']['xib_residuals'], c='r', marker='x', s=80, lw=3, label='B-mode (GP corrected)')
+    plt.plot(np.exp(dic['2pcf_stat']['logr_test']) * 60., np.zeros_like(np.exp(dic['2pcf_stat']['logr_test'])), 'k--', zorder=0)
     plt.ylim(-40,70)
-    plt.xlim(0.005, 1.5)
+    plt.xlim(0.005*60., 1.5*60.)
     plt.xscale('log')
-    plt.xticks(size=16)
-    plt.yticks(size=16)
-    plt.xlabel('$\Delta \\theta$ (degree)', fontsize=22)
-    plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=22)
-    plt.legend(loc=4, fontsize=13)
+    plt.xticks(size=20)
+    plt.yticks(size=20)
+    plt.xlabel('$\Delta \\theta$ (arcmin)', fontsize=26)
+    plt.ylabel('$\\xi_{E/B}$ (mas$^2$)', fontsize=26)
+    plt.legend(loc=4, fontsize=18)
 
 def plot_gpfit(dic_out, rep_out='', exp_id=''):
     interp = interp_gp(dic_out, comp = 'u')
-    plot_correlation_function(interp, comp='u', Title='du gp modeling (exp: %s)'%(exp_id))
+    plot_correlation_function(interp, comp='u', Title='du GP modeling (exp: %s)'%(exp_id))
     plt.savefig(os.path.join(rep_out,'%s_du_gp.png'%(exp_id)))
     plt.close()
     
     interp = interp_gp(dic_out, comp = 'v')
-    plot_correlation_function(interp, comp='v', Title='dv gp modeling (exp: %s)'%(exp_id))
+    plot_correlation_function(interp, comp='v', Title='dv GP modeling (exp: %s)'%(exp_id))
     plt.savefig(os.path.join(rep_out, '%s_dv_gp.png'%(exp_id)))
     plt.close()
 
@@ -136,15 +136,17 @@ def plot_gpfit(dic_out, rep_out='', exp_id=''):
 
 if __name__ == "__main__":
 
-    plot_gpfit('../../../hsc_outputs/v3.3/astro_VK_with_mean/137108_z/gp_output_137108.pkl',
-               rep_out='', exp_id='137108')
-    
-    #interp = interp_gp('../../../hsc_outputs/v3.3/astro_VK_with_mean/137108_z/gp_output_137108.pkl', comp = 'u')
-    #plot_correlation_function(interp, comp='u', Title='du gp modeling (exp: 137108)')
-    #plt.savefig('137108_du_gp.png')
-    #interp = interp_gp('../../../hsc_outputs/v3.3/astro_VK_with_mean/137108_z/gp_output_137108.pkl', comp = 'v')
-    #plot_correlation_function(interp, comp='v', Title='dv gp modeling (exp: 137108)')
-    #plt.savefig('137108_dv_gp.png')
+    #plot_gpfit('../../../hsc_outputs/v3.3/astro_VK_with_mean/137108_z/gp_output_137108.pkl',
+    #           rep_out='/Users/leget/Desktop', exp_id='137108')
 
-    #plot_eb_mode_improvment(dic_out='../../../hsc_outputs/v3.3/astro_VK_with_mean/137108_z/gp_output_137108.pkl')
-    #plt.savefig('137108_z_eb_mode_gp_corrected.pdf')
+    
+    interp = interp_gp('../../../hsc_outputs/v3.3/astro_VK_with_mean/137108_z/gp_output_137108.pkl', comp = 'u')
+    plot_correlation_function(interp, comp='u', Title='du GP modeling (exp: 137108)')
+    plt.savefig('/Users/leget/Desktop/137108_du_gp.png')
+    interp = interp_gp('../../../hsc_outputs/v3.3/astro_VK_with_mean/137108_z/gp_output_137108.pkl', comp = 'v')
+    plot_correlation_function(interp, comp='v', Title='dv GP modeling (exp: 137108)')
+    plt.savefig('/Users/leget/Desktop/137108_dv_gp.png')
+
+    #plot_eb_mode_improvment(dic_out='../../../hsc_outputs/v3.3/astro_VK_with_mean/137108_z/gp_output_137108.pkl',
+    #                        exp_id='137108')
+    #plt.savefig('/Users/leget/Desktop/137108_z_eb_mode_gp_corrected.pdf')
