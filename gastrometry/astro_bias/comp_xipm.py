@@ -4,11 +4,11 @@ import pyccl as ccl
 import copy
 from astropy.io import fits
 import warnings
-import shear_subaru
+# import shear_subaru
 import os
 import pickle
 from scipy.stats import binned_statistic
-path = os.path.dirname(shear_subaru.__file__)
+# path = os.path.dirname(shear_subaru.__file__)
 
 class comp_shear_cl(object):
 
@@ -285,32 +285,35 @@ class comp_shear_cl(object):
 
 
 
-def plots_hsc_paper(theta, xip, xip_s8p, xip_s8m):
+def plots_hsc_paper(theta, xip, xip_s8p, xip_s8m, xip_theta_atmo):
     
     # plot xiplus, ximoins
-    shear_color = 'k'
+    shear_color = 'r'
     atmo_color = 'b'
-    non_linear_color = 'r'
+    non_linear_color = 'k'
 
-    xip_dic = pickle.load(open('xip_30_sec.pkl', 'rb'))
-    #print(xip_dic['xip_atm'])
+    # Claire-Alice sim #
+    ##xip_dic = pickle.load(open('xip_30_sec.pkl', 'rb'))
+    # HSC rescaling #
+    xip_dic = pickle.load(open('e_mode_mean_hsc.pkl', 'rb'))
+
     g = 0.2 * 1e3
-    theta_atm = xip_dic['r'] * 60.
-    #xip_atmo = (1./8.) * (xip_dic['xip_atm']**2 / g**4)
-    xip_atmo = (1./8.) * (xip_dic['xip_atm_squared'] / g**4)
-    #plt.plot(theta_atm, xip_atmo * theta_atm * 1e4, )
-    #plt.show()
 
-    #francis = (xip_dic['xip_atm']  / (200 * 200) )**2 /16
-
-    #print(francis - xip_atmo)
+    # Claire-Alice sim #
+    ##theta_atm = xip_dic['r'] * 60.
+    # HSC rescaling #
+    theta_atm = xip_dic['theta'] * 60.
     
-    #plt.plot(theta_atm, theta_atm * francis * 1e4)
-    #plt.xscale('log')
-    #plt.show() 
-
+    # Claire-Alice sim #
+    ##xip_atmo = (1./8.) * (xip_dic['xip_atm_squared'] / g**4)
+    # HSC rescaling #
+    Filtre0 = ((xip_dic['theta']>6e-3) & (xip_dic['theta']<1e-2))
+    cst_rescale = (270. / np.mean(xip_dic['e_mode'][Filtre0]))
+    xip_squared = (xip_dic['e_mode'] * cst_rescale)**2
+    xip_atmo = (1./8.) * (xip_squared / g**4)
+    
     plt.figure(figsize=(12,7))
-    plt.subplots_adjust(wspace=0.0, hspace=0., top=0.99, left=0.05, right=0.99)
+    plt.subplots_adjust(wspace=0.0, hspace=0., top=0.99, left=0.07, right=0.99)
 
     XLIM = [2, 300]
     
@@ -322,14 +325,16 @@ def plots_hsc_paper(theta, xip, xip_s8p, xip_s8m):
     
     HMAX = 4.5
     HMIN = -0.1
-    #YLIM = [[-0.49, 2.5], [-0.49, 2.5], [-0.49, 2.5], [-0.49, 2.5],
-    #        [-0.49, 2.8], [-0.49, 2.8], [-0.49, 2.8],
-    #        [-0.49, 4.9], [-0.49, 4.9],
-    #        [-0.49, 5.4]]
-    YLIM = [[HMIN, HMAX], [HMIN, HMAX], [HMIN, HMAX], [HMIN, HMAX],
-            [HMIN, HMAX], [HMIN, HMAX], [HMIN, HMAX],
-            [HMIN, HMAX], [HMIN, HMAX],
+
+    YLIM = [[HMIN, 1.1], [HMIN, 1.1], [HMIN, 1.1], [HMIN, 1.1],
+            [HMIN, 1.8], [HMIN, 1.8], [HMIN, 1.8],
+            [HMIN, 3.5], [HMIN, 3.5],
             [HMIN, HMAX]]
+    
+    YT = [0.93, 0.93, 0.93, 0.93,
+          1.53, 1.53, 1.53,
+          3., 3.,
+          3.8]
 
     LEGEND = ['1,4', '1,3', '1,2', '1,1', '2,4', 
               '2,3', '2,2', '3,4', '3,3', '4,4']
@@ -337,32 +342,20 @@ def plots_hsc_paper(theta, xip, xip_s8p, xip_s8m):
     for i in range(len(SUBPLOTS_plus)):
         key = KEY_plus[i]
         plt.subplot(4, 4, SUBPLOTS_plus[i])
-        if i == 1:
-            LABEL = 'Contribution from astrometric residuals (simulation LSST like)'
-        else:
-            LABEL = None
-        plt.plot(theta_atm, xip_atmo * theta_atm * 1e4, atmo_color, lw=2, label=LABEL)
-        plt.text(165, 3.8, LEGEND[i], color='black', 
+
+        plt.text(165, YT[i], LEGEND[i], color='black', 
                  bbox=dict(facecolor='none', edgecolor='black', boxstyle='round'), fontsize=10)
         if i == 1:
             LABEL = 'Cosmic shear signal with DES Y1 cosmology'
         else:
             LABEL = None
-        plt.plot(theta*60., theta * 60. * xip[key] * 1e4, shear_color, label=LABEL)
+        plt.plot(theta*60., theta * 60. * xip[key] * 1e4, 'k--', label=LABEL)
         if i == 1:
             LABEL = '$\pm$ 1$\sigma$ on $S_8$ from cosmic shear DES Y1 analysis'
         else:
             LABEL = None
         plt.fill_between(theta*60, theta * 60. * xip_s8m[key] * 1e4,
-                         theta * 60. * xip_s8p[key] * 1e4, alpha=0.5, color=shear_color, label=LABEL)
-                    
-        
-        #shear_bias_xipm = 1e-5
-        #shear_bias_xipm_des = 1e-5 / 25.
-        #plt.plot(theta*60.,
-        #         theta * 60. * shear_bias_xipm * 1e4, atmo_color+'--')
-        #plt.plot(theta*60.,
-        #         theta * 60. * shear_bias_xipm_des * 1e4, atmo_color+'-.')
+                        theta * 60. * xip_s8p[key] * 1e4, alpha=0.3, color=shear_color, label=LABEL)
 
         # non linear scale
         dic = pickle.load(open('xip_xim_real.pkl', 'rb'))
@@ -370,14 +363,20 @@ def plots_hsc_paper(theta, xip, xip_s8p, xip_s8m):
         mask = dic['xip'][(dic['xip']['BIN1'] == int(key[0])) & (dic['xip']['BIN2'] == int(key[1]))]['USED']
         nlscale = ang[~mask]
         if i == 1:
-            LABEL = 'Scale removed from DES Y1 cosmic shear analysis'
+            LABEL = 'Angular scales ignored in DES Y1 cosmic shear analysis'
         else:
             LABEL = None
         plt.fill_betweenx(YLIM[i], [0,0], [nlscale[-1], nlscale[-1]], color=non_linear_color, alpha=0.2, label=LABEL)
-            
 
-        #atmo scale:
-        #plt.fill_betweenx(YLIM[i], [nlscale[-1],nlscale[-1]], [50, 50], color=atmo_color, alpha=0.2)
+        if i == 1:
+            LABEL = 'Contribution from astrometric residuals (HSC rescaled to 30 s)'
+        else:
+            LABEL = None
+        #plt.plot(theta_atm, xip_atmo * theta_atm * 1e4, atmo_color, lw=2, label=LABEL)
+        plt.fill_between(theta_atm,
+                         (xip_theta_atmo[key]) * theta_atm * 1e4,
+                         (xip_theta_atmo[key] + xip_atmo) * theta_atm * 1e4,
+                         color=atmo_color, label=LABEL)
         
         if HMIN<=0:
             plt.plot(XLIM, np.zeros(2), 'k', alpha=0.5)
@@ -393,10 +392,6 @@ def plots_hsc_paper(theta, xip, xip_s8p, xip_s8m):
         else:
             plt.ylabel('$\\theta \\xi_{+}$ / $10^{-4}$', fontsize=12)
 
-        #leg = plt.legend(handlelength=0, handletextpad=0,
-        #                 loc=1, fancybox=True, fontsize=8)
-        #for item in leg.legendHandles:
-        #    item.set_visible(False)
         if i == 1:
             plt.legend(bbox_to_anchor=(0.9, -2.3), loc=2, borderaxespad=0.,fontsize=12)
        
@@ -414,11 +409,21 @@ if __name__ == '__main__':
         theta = np.linspace(1./60, 5., 500)
         csc.comp_xipm(theta)
 
+        csc_theta_atm = comp_shear_cl(Omega_ch2=0.1195, Omega_bh2=0.0267, AS=None, S8=0.782,
+                                      Omega_nu_h2=4.5*1e-3, H0=75., ns=0.99, w0=-1, alpha=0.5,
+                                      matter_power_spectrum = 'halofit', A0=1.0, eta=2.8,
+                                      delta_m = 0., delta_z=[0., 0., 0., 0.],
+                                      ell=np.arange(20, 6000))
+        xip_dic = pickle.load(open('e_mode_mean_hsc.pkl', 'rb'))
+        theta = xip_dic['theta']
+        csc_theta_atm.comp_xipm(theta)
+
         cscp = comp_shear_cl(Omega_ch2=0.1195, Omega_bh2=0.0267, AS=None, S8=0.782 + 0.027,
                              Omega_nu_h2=4.5*1e-3, H0=75., ns=0.99, w0=-1, alpha=0.5,
                              matter_power_spectrum = 'halofit', A0=1.0, eta=2.8,
                              delta_m = 0., delta_z=[0., 0., 0., 0.],
                              ell=np.arange(20, 6000))
+        theta = np.linspace(1./60, 5., 500)
         cscp.comp_xipm(theta)
 
         cscm = comp_shear_cl(Omega_ch2=0.1195, Omega_bh2=0.0267, AS=None, S8=0.782 - 0.027,
@@ -426,10 +431,12 @@ if __name__ == '__main__':
                              matter_power_spectrum = 'halofit', A0=1.0, eta=2.8,
                              delta_m = 0., delta_z=[0., 0., 0., 0.],
                              ell=np.arange(20, 6000))
+        theta = np.linspace(1./60, 5., 500)
         cscm.comp_xipm(theta)
 
         dic = {'theta':theta,
                'xip':csc.xip,
+               'xip_theta_atmo': csc_theta_atm.xip,
                'xim':csc.xim,
                'xip_s8p':cscp.xip,
                'xip_s8m':cscm.xip}
@@ -438,6 +445,7 @@ if __name__ == '__main__':
         f.close
     
     dic = pickle.load(open('out_cos_cs.pkl', 'rb'))
-    plots_hsc_paper(dic['theta'], dic['xip'], dic['xip_s8p'], dic['xip_s8m'])
-    plt.savefig('../../../../../Dropbox/hsc_astro/figures/xipm_effects.pdf')
+    plots_hsc_paper(dic['theta'], dic['xip'], dic['xip_s8p'], dic['xip_s8m'], dic['xip_theta_atmo'])
+    #plt.savefig('../../../../../Dropbox/hsc_astro/figures/xipm_effects.pdf')
+    #plt.savefig('../../../../../Desktop/xipm_effects_4.pdf')
     plt.show()
